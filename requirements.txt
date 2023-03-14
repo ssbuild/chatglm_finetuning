@@ -1,0 +1,4 @@
+deep_training >= 0.0.18
+cpm_kernels
+icetk
+transformers>=4.26.1
