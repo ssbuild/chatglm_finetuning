@@ -4,7 +4,7 @@
 - pip install -U deep_training >= 0.0.18 cpm_kernels icetk transformers>=4.26.1
 - 最小版本要求 deep_training>=0.0.18.post3
 - 
-## 状态测试中......................
+## 状态测试中      ......................
 
 
 ## 更新详情
@@ -18,8 +18,8 @@
 
 
 
-## LLaMA finetuning 权重下载
-    预训练模型下载 https://huggingface.co/THUDM/chatglm-6b
+## ChatGLM 预训练权重
+    https://huggingface.co/THUDM/chatglm-6b
 
 
 
