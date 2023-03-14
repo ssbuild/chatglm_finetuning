@@ -93,11 +93,14 @@ class NN_DataHelper(DataHelper):
 
             input_ids_all += [tokenizer.eos_token_id]
 
-        stoken = tokenizer.encode(text="",add_special_tokens=True)[-2:]
+        if not hasattr(self,'sptoken'):
+            sptoken = tokenizer.encode(text="",add_special_tokens=True)[-2:]
+            self.sptoken = sptoken
+
         pos = 0
         ds = []
         while pos < len(input_ids_all):
-            input_ids_ = input_ids_all[pos: pos + max_seq_length - 2] + stoken
+            input_ids_ = input_ids_all[pos: pos + max_seq_length - 2] + self.sptoken
 
             pos += stride
             if len(input_ids_) <= 5:
@@ -107,16 +110,13 @@ class NN_DataHelper(DataHelper):
             seqlen = np.asarray(len(input_ids_), dtype=np.int32)
             pad_len = max_seq_length - seqlen
             input_ids_ = np.asarray(input_ids_, dtype=np.int32)
-            attention_mask = np.ones_like(input_ids_, dtype=np.int32)
             labels = np.asarray(labels, dtype=np.int32)
             if pad_len:
                 pad_val = tokenizer.pad_token_id
                 input_ids_ = np.pad(input_ids_, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
-                attention_mask = np.pad(attention_mask, (0, pad_len), 'constant', constant_values=(0, 0))
                 labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
             d = {
                 'input_ids': input_ids_,
-                'attention_mask': attention_mask,
                 'labels': labels,
                 'seqlen': seqlen
             }
