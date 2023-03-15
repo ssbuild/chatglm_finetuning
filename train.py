@@ -35,11 +35,11 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
     def generate_text(pl_module: MyTransformer, prompt_text, tokenizer: ChatGLMTokenizer, max_target_length, device=0):
         device = torch.device('cuda:{}'.format(device))
         # 简易测试生成
-        input_ids = tokenizer.encode(prompt_text)
+        input_ids_ = tokenizer.encode(prompt_text)
         gen_ids, gen_tokens = [], []
 
-        input_ids = input_ids[:-2]
-        gen_ids = input_ids[-2:]
+        input_ids = input_ids_[:-2]
+        gen_ids = input_ids_[-2:]
 
         batch = {}
         for i in range(max_target_length):
@@ -78,6 +78,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         prefixs = [
             "帮我写一个请假条，我因为新冠不舒服，需要请假3天，请领导批准",
             "你能干什么",
+            "晚上睡不着应该怎么办",
         ]
 
         device = trainer.global_rank
