@@ -99,6 +99,9 @@
 
 
 
+## 是否开启deepspeed
+    启动则将train.py  注释掉 deepspeed_config = None
+
 
 
 ## Reference

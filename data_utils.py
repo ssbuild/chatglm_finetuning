@@ -8,6 +8,7 @@ import json
 import os
 import random
 import typing
+from enum import Enum
 
 import numpy as np
 import torch
@@ -50,10 +51,14 @@ train_info_args = {
 }
 
 
+class MaskAlign(Enum):
+    left = 0
+    right = 1
 
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
+    'algin': MaskAlign.right # 默认右对齐
 }
 
 
@@ -110,8 +115,10 @@ class NN_DataHelper(DataHelper):
             labels = np.asarray(labels, dtype=np.int32)
             if pad_len:
                 pad_val = tokenizer.pad_token_id
-                input_ids_ = np.pad(input_ids_, (pad_len, 0), 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, (pad_len,0), 'constant', constant_values=(-100, -100))
+                pad_width = (pad_len, 0) if data_conf['algin'] == MaskAlign.right else (0,pad_len)
+                input_ids_ = np.pad(input_ids_, pad_width, 'constant', constant_values=(pad_val, pad_val))
+                labels = np.pad(labels, pad_width, 'constant', constant_values=(-100, -100))
+
             d = {
                 'input_ids': input_ids_,
                 'labels': labels,
@@ -186,9 +193,14 @@ class NN_DataHelper(DataHelper):
             o[k] = torch.stack(o[k])
 
         max_len = torch.max(o.pop('seqlen'))
-        s = o['input_ids'].size(1) - max_len
-        o['input_ids'] = o['input_ids'][:, s:]
-        o['labels'] = o['labels'][:, s:].long()
+
+        if data_conf['algin'] == MaskAlign.right:
+            s = o['input_ids'].size(1) - max_len
+            o['input_ids'] = o['input_ids'][:, s:]
+            o['labels'] = o['labels'][:, s:].long()
+        else:
+            o['input_ids'] = o['input_ids'][:, :max_len]
+            o['labels'] = o['labels'][:, :max_len].long()
         return o
 
 
