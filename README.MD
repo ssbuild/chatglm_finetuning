@@ -84,7 +84,7 @@
 
 ## 训练
     完整参数为 config.json
-    若显卡容留不足 ， 可以修改 config_small.json num_layers 层数
+    若显存不足 ， 可以修改 config_small.json num_layers 层数
 
     python train.py
 
