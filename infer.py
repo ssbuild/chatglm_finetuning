@@ -42,16 +42,16 @@ if __name__ == '__main__':
 
     model.eval()
 
-    base_model = model.backbone.model
+    base_model: ChatGLMForConditionalGeneration = model.backbone.model
     # 按需修改，目前只支持 4/8 bit 量化
-    model_: ChatGLMForConditionalGeneration = base_model.half().quantize(4).to(torch.device('cuda:0'))
+    base_model.half().quantize(4).to(torch.device('cuda:0'))
     gen_kwards = {
         "bos_token_id": tokenizer.bos_token_id,
         "eos_token_id": tokenizer.eos_token_id,
     }
     with torch.inference_mode():
-        response, history = model_.chat(tokenizer, "你好", history=[],max_length=1024,**gen_kwards)
+        response, history = base_model.chat(tokenizer, "你好", history=[],max_length=1024,**gen_kwards)
         print('你好',' ',response)
 
-        response, history = model_.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=1024,**gen_kwards)
+        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=1024,**gen_kwards)
         print('晚上睡不着应该怎么办',' ',response)
