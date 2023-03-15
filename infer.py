@@ -27,7 +27,7 @@ if __name__ == '__main__':
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    config.precision = torch.bfloat16
+
     #加载新训练权重
     train_weight = './best_ckpt/best.pt'
     if os.path.exists(train_weight):
