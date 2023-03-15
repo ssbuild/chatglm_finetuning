@@ -36,15 +36,15 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         device = torch.device('cuda:{}'.format(device))
         # 简易测试生成
         input_ids_ = tokenizer.encode(prompt_text)
-        gen_ids, gen_tokens = [], []
-
+        gen_tokens = []
         input_ids = input_ids_[:-2]
-        gen_ids = input_ids_[-2:]
+        gen_ids = []
+        tail_ids = input_ids_[-2:]
 
         batch = {}
         for i in range(max_target_length):
             batch.clear()
-            batch['input_ids'] = [input_ids + gen_ids]
+            batch['input_ids'] = [input_ids + gen_ids + tail_ids]
             for k in batch:
                 batch[k] = torch.tensor(batch[k], dtype=torch.int32,device=device)
 
@@ -87,7 +87,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
 
         print('*' * 30, 'generate_text...')
         for text in prefixs:
-            input_text = text
+            input_text = '问：{}\n答：'.format(text)
             input_text = preprocess(input_text)
             output = MySimpleModelCheckpoint.generate_text(pl_module, input_text, tokenizer,
                                                            data_args.max_target_length, device=device)
