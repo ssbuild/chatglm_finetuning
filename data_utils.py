@@ -36,7 +36,7 @@ train_info_args = {
     'train_batch_size': 4,
     'eval_batch_size': 2,
     'test_batch_size': 2,
-    'learning_rate': 1e-4,
+    'learning_rate': 5e-5,
     'adam_epsilon': 1e-8,
     'gradient_accumulation_steps': 1,
     'max_grad_norm': 1.0,
