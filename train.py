@@ -76,9 +76,8 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             config.save_pretrained(self.output_dir)
 
         prefixs = [
-            "帮我写一个请假条，我因为新冠不舒服，需要请假3天，请领导批准",
-            "你能干什么",
-            "晚上睡不着应该怎么办",
+            "写一个诗歌，关于冬天",
+            "从南京到上海的路线",
         ]
 
         device = trainer.global_rank
@@ -121,7 +120,7 @@ if __name__ == '__main__':
         accumulate_grad_batches=training_args.gradient_accumulation_steps,
         num_sanity_val_steps=0,
         strategy='ddp' if torch.cuda.device_count() > 1 else None,
-        precision=16,#半精度
+        # precision=16,#半精度
     )
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
