@@ -94,7 +94,7 @@
 ## 训练
     完整参数为 config.json
     若显存不足 ， 可以修改 config_small.json num_layers 层数
-
+    训练精度 可以修改 config_small.json precision 16 32
     python train.py
 
 

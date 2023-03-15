@@ -27,10 +27,11 @@ if __name__ == '__main__':
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-
+    config.precision = torch.bfloat16
     #加载新训练权重
     train_weight = './best_ckpt/best.pt'
     if os.path.exists(train_weight):
+        config.num_layers = 1
         config = ChatGLMConfig.from_pretrained('./best_ckpt')
         model = MyTransformer.load_from_checkpoint(train_weight, config=config,
                                                    model_args=model_args,
@@ -45,13 +46,14 @@ if __name__ == '__main__':
     base_model: ChatGLMForConditionalGeneration = model.backbone.model
     # 按需修改，目前只支持 4/8 bit 量化
     base_model.half().quantize(4).to(torch.device('cuda:0'))
-    gen_kwards = {
-        "bos_token_id": tokenizer.bos_token_id,
-        "eos_token_id": tokenizer.eos_token_id,
-    }
+
     with torch.inference_mode():
-        response, history = base_model.chat(tokenizer, "你好", history=[],max_length=1024,**gen_kwards)
+        response, history = base_model.chat(tokenizer, "你好", history=[],max_length=1024)
         print('你好',' ',response)
 
-        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=1024,**gen_kwards)
+        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=1024)
         print('晚上睡不着应该怎么办',' ',response)
+
+        # response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)
+        # print('写一个诗歌，关于冬天',' ',response)
+
