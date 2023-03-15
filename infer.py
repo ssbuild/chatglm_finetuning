@@ -31,7 +31,6 @@ if __name__ == '__main__':
     #加载新训练权重
     train_weight = './best_ckpt/best.pt'
     if os.path.exists(train_weight):
-        config.num_layers = 1
         config = ChatGLMConfig.from_pretrained('./best_ckpt')
         model = MyTransformer.load_from_checkpoint(train_weight, config=config,
                                                    model_args=model_args,
