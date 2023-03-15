@@ -4,7 +4,8 @@
 - pip install -U deep_training >= 0.0.18 cpm_kernels icetk transformers>=4.26.1
 - 最小版本要求 deep_training>=0.0.18.post3
 
-## 状态测试中 （尚未测试完成）     ......................
+## 状态 ########### 测试中 ###########
+    当前初步测试完成 
 
 
 ## 更新详情
