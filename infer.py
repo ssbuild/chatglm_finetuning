@@ -34,7 +34,7 @@ if __name__ == '__main__':
     def modify_config(config):
         # 小参数
         config.inference = True
-        config.max_sequence_length = 512
+        config.max_sequence_length = 1024
 
 
     #加载新训练权重
@@ -79,8 +79,8 @@ if __name__ == '__main__':
         "eos_token_id": tokenizer.eos_token_id,
     }
     with torch.inference_mode():
-        response, history = model_.chat(tokenizer, "你好", history=[],max_length=512,**gen_kwards)
+        response, history = model_.chat(tokenizer, "你好", history=[],max_length=1024,**gen_kwards)
         print('你好',' ',response)
 
-        response, history = model_.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=512,**gen_kwards)
+        response, history = model_.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=1024,**gen_kwards)
         print('晚上睡不着应该怎么办',' ',response)
