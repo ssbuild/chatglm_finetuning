@@ -39,14 +39,16 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         # 简易测试生成
         input_ids_ = tokenizer.encode(prompt_text)
         gen_tokens = []
+        tail_ids = input_ids_[-2:]
+
         input_ids = input_ids_[:-2]
         gen_ids = []
-        tail_ids = input_ids_[-2:]
+
 
         batch = {}
         for i in range(max_target_length):
             batch.clear()
-            batch['input_ids'] = [input_ids + gen_ids + tail_ids]
+            batch['input_ids'] = [ input_ids + gen_ids + tail_ids]
             for k in batch:
                 batch[k] = torch.tensor(batch[k], dtype=torch.int32,device=device)
 
@@ -54,10 +56,8 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             logits = out['outputs'][0]
             logits = np.argmax(logits[:, -1], axis=-1)
             logits = logits[0].tolist()
-
-            if 15001 == logits:
+            if logits in tail_ids:
                 continue
-
 
             gen_ids.append(logits)
             token = tokenizer.decode([logits])
@@ -85,6 +85,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         prefixs = [
             "写一个诗歌，关于冬天",
             "从南京到上海的路线",
+            "晚上睡不着应该怎么办",
         ]
 
         device = trainer.global_rank
@@ -148,7 +149,8 @@ if __name__ == '__main__':
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
 
-    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
+    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
+                                                                                 config_class_name=ChatGLMConfig)
 
     config.precision = 16
     # 额外参数

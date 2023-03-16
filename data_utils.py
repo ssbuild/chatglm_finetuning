@@ -31,7 +31,7 @@ train_info_args = {
     'convert_onnx': False, # 转换onnx模型
     'do_train': True,
     'train_file':  [ './data/finetune_train_examples.json'],
-    'max_epochs': 3,
+    'max_epochs': 20,
     'max_steps': -1,
     'optimizer': 'lion', # one of adamw,adam,lamb,lion
     'train_batch_size': 4,
@@ -58,7 +58,7 @@ class MaskAlign(Enum):
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
-    'algin': MaskAlign.right # 默认右对齐
+    'algin': MaskAlign.right # 默认左对齐
 }
 
 
@@ -95,6 +95,8 @@ class NN_DataHelper(DataHelper):
                 if len(input_ids) <= 3:
                     continue
                 input_ids_all += input_ids
+
+            input_ids_all += [tokenizer.eos_token_id]
 
         if not hasattr(self,'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
@@ -170,7 +172,7 @@ class NN_DataHelper(DataHelper):
                     answers = ''
                     for a in answers_list:
                         answers += preprocess(a + '\n')
-                    qa.append("[Round {}]\n问：{}\n答：{}".format(sid, q,answers))
+                    qa.append("[Round {}]\n问：{}\n答：{}".format(sid,q,answers))
                 qa_batch.append(qa)
                 if len(qa_batch) >= COUNT_PER_GROUP:
                     D.append(copy.deepcopy(qa_batch))
@@ -209,7 +211,8 @@ if __name__ == '__main__':
     model_args, training_args, data_args = parser.parse_dict(train_info_args)
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
-    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
+    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
+                                                                                 config_class_name=ChatGLMConfig)
 
     # 缓存数据集
     # 检测是否存在 output/dataset_0-train.record ，不存在则制作数据集
