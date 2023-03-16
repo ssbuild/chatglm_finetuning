@@ -24,15 +24,15 @@ train_info_args = {
     'data_backend': 'record',
     'model_type': 'chatglm',
     # 预训练模型路径 , 从0训练，则置空
-    'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
+    'model_name_or_path': '/data/text2music/ChatGLM-6B/local',
     'config_name': './config/config_small.json',
-    'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
-    'convert_onnx': False, # 转换onnx模型
+    'tokenizer_name': '/data/text2music/ChatGLM-6B/local',
+    'convert_onnx': False,  # 转换onnx模型
     'do_train': True,
-    'train_file':  [ './data/finetune_train_examples.json'],
+    'train_file': ['./data/finetune_train_examples.json'],
     'max_epochs': 3,
     'max_steps': -1,
-    'optimizer': 'lion', # one of adamw,adam,lamb,lion
+    'optimizer': 'lion',  # one of adamw,adam,lamb,lion
     'train_batch_size': 4,
     'eval_batch_size': 2,
     'test_batch_size': 2,
@@ -49,8 +49,6 @@ train_info_args = {
     'do_lower_case': False,
 }
 
-
-
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
@@ -58,12 +56,13 @@ data_conf = {
 
 
 def preprocess(text):
-  #text = text.replace("\n", "\\n").replace("\t", "\\t")
-  return text
+    # text = text.replace("\n", "\\n").replace("\t", "\\t")
+    return text
+
 
 def postprocess(text):
-  # return text.replace("\\n", "\n").replace("\\t", "\t")
-  return text
+    # return text.replace("\\n", "\n").replace("\\t", "\t")
+    return text
 
 
 class NN_DataHelper(DataHelper):
@@ -86,12 +85,12 @@ class NN_DataHelper(DataHelper):
         input_ids_all = []
         for examples in examples_batch:
             for idx, text in enumerate(examples):
-                input_ids = tokenizer.encode(text=text,add_special_tokens=False)
+                input_ids = tokenizer.encode(text=text, add_special_tokens=False)
                 if len(input_ids) <= 3:
                     continue
                 input_ids_all += input_ids
 
-        if not hasattr(self,'sptoken'):
+        if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
 
         pos = 0
@@ -111,7 +110,7 @@ class NN_DataHelper(DataHelper):
             if pad_len:
                 pad_val = tokenizer.pad_token_id
                 input_ids_ = np.pad(input_ids_, (pad_len, 0), 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, (pad_len,0), 'constant', constant_values=(-100, -100))
+                labels = np.pad(labels, (pad_len, 0), 'constant', constant_values=(-100, -100))
             d = {
                 'input_ids': input_ids_,
                 'labels': labels,
@@ -156,14 +155,14 @@ class NN_DataHelper(DataHelper):
                 if i < 10:
                     print(paragraph)
                 qa = []
-                for sid,session in enumerate(paragraph):
+                for sid, session in enumerate(paragraph):
                     q = session['q']
                     answers_list = session['a']
                     q = preprocess(q)
                     answers = ''
                     for a in answers_list:
                         answers += preprocess(a + '\n')
-                    qa.append("[Round {}]\n问：{}\n答：{}".format(sid, q,answers))
+                    qa.append("[Round {}]\n问：{}\n答：{}".format(sid, q, answers))
                 qa_batch.append(qa)
                 if len(qa_batch) >= COUNT_PER_GROUP:
                     D.append(copy.deepcopy(qa_batch))
@@ -173,7 +172,7 @@ class NN_DataHelper(DataHelper):
             qa_batch.clear()
         return D
 
-    def collate_fn(self,batch):
+    def collate_fn(self, batch):
         o = {}
         for i, b in enumerate(batch):
             if i == 0:
@@ -197,17 +196,17 @@ if __name__ == '__main__':
     model_args, training_args, data_args = parser.parse_dict(train_info_args)
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
-    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
+    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
+                                                                                 config_class_name=ChatGLMConfig)
 
     # 缓存数据集
     # 检测是否存在 output/dataset_0-train.record ，不存在则制作数据集
     if data_args.do_train:
-        dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False,shuffle=True,mode='train')
+        dataHelper.make_dataset_with_args(data_args.train_file, mixed_data=False, shuffle=True, mode='train')
     if data_args.do_eval:
-        dataHelper.make_dataset_with_args(data_args.eval_file, shuffle=False,mode='eval')
+        dataHelper.make_dataset_with_args(data_args.eval_file, shuffle=False, mode='eval')
     if data_args.do_test:
-        dataHelper.make_dataset_with_args(data_args.test_file, shuffle=False,mode='test')
-
+        dataHelper.make_dataset_with_args(data_args.test_file, shuffle=False, mode='test')
 
     # def shuffle_records(record_filenames, outfile, compression_type='GZIP'):
     #     print('shuffle_records record...')

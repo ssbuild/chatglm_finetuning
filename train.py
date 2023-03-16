@@ -19,7 +19,6 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
         super(MyTransformer, self).__init__(*args, **kwargs)
 
 
-
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
     def __init__(self, *args, **kwargs):
         super(MySimpleModelCheckpoint, self).__init__(*args, **kwargs)
@@ -27,7 +26,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         self.output_dir = './best_ckpt'
         if not os.path.exists(self.output_dir):
             os.mkdir(self.output_dir)
-        self.weight_file = os.path.join(self.output_dir ,'best.pt')
+        self.weight_file = os.path.join(self.output_dir, 'best.pt')
 
         self.save_flag = False
 
@@ -46,7 +45,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             batch.clear()
             batch['input_ids'] = [input_ids + gen_ids + tail_ids]
             for k in batch:
-                batch[k] = torch.tensor(batch[k], dtype=torch.int32,device=device)
+                batch[k] = torch.tensor(batch[k], dtype=torch.int32, device=device)
 
             out = pl_module.test_step(batch, 0)
             logits = out['outputs'][0]
@@ -60,9 +59,6 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         out_text = postprocess(out_text)
         return out_text
 
-
-
-
     def on_save_model(
             self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"
     ) -> None:
@@ -71,7 +67,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
 
         if not self.save_flag:
             self.save_flag = True
-            config : ChatGLMConfig = pl_module.config
+            config: ChatGLMConfig = pl_module.config
             config = copy.deepcopy(config)
             config.save_pretrained(self.output_dir)
 
@@ -96,6 +92,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             print('output', output)
             print()
 
+
 if __name__ == '__main__':
 
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments))
@@ -107,12 +104,12 @@ if __name__ == '__main__':
     checkpoint_callback = MySimpleModelCheckpoint(
         # monitor="loss",
         every_n_epochs=1,
-                                                  every_n_train_steps=2000 // training_args.gradient_accumulation_steps)
+        every_n_train_steps=2000 // training_args.gradient_accumulation_steps)
     trainer = Trainer(
         callbacks=[checkpoint_callback],
         max_epochs=training_args.max_epochs,
         max_steps=training_args.max_steps,
-        accelerator="gpu",replace_sampler_ddp=False,
+        accelerator="gpu", replace_sampler_ddp=False,
         devices=data_args.devices,
         enable_progress_bar=True,
         default_root_dir=data_args.output_dir,
@@ -125,7 +122,8 @@ if __name__ == '__main__':
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
 
-    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
+    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
+                                                                                 config_class_name=ChatGLMConfig)
 
     config.precision = 16
     # 额外参数
@@ -134,12 +132,11 @@ if __name__ == '__main__':
 
     # 缓存数据集
     if data_args.do_train:
-        dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False,shuffle=True,mode='train')
+        dataHelper.make_dataset_with_args(data_args.train_file, mixed_data=False, shuffle=True, mode='train')
     if data_args.do_eval:
         dataHelper.make_dataset_with_args(data_args.eval_file, mode='eval')
     if data_args.do_test:
-        dataHelper.make_dataset_with_args(data_args.test_file,mode='test')
-
+        dataHelper.make_dataset_with_args(data_args.test_file, mode='test')
 
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
 
@@ -155,7 +152,8 @@ if __name__ == '__main__':
                                                         with_load_memory=True,
                                                         collate_fn=dataHelper.collate_fn,
                                                         batch_size=training_args.train_batch_size,
-                                                        shuffle=True,infinite=True,num_processes=trainer.world_size,process_index=trainer.global_rank)
+                                                        shuffle=True, infinite=True, num_processes=trainer.world_size,
+                                                        process_index=trainer.global_rank)
 
         if train_datasets is not None:
             trainer.fit(model, train_dataloaders=train_datasets)
@@ -163,8 +161,8 @@ if __name__ == '__main__':
     else:
         # 加载权重
         model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
-                                                       model_args=model_args,
-                                                       training_args=training_args)
+                                                   model_args=model_args,
+                                                   training_args=training_args)
         input_sample = (
             ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
         )

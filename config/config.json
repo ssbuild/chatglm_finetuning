@@ -21,5 +21,6 @@
   "transformers_version": "4.23.1",
   "use_cache": true,
   "vocab_size": 150528,
-  "precision": 16
+  "precision": 16,
+
 }
