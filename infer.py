@@ -27,8 +27,8 @@ if __name__ == '__main__':
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-
-    #加载新训练权重
+    ###################### 注意 选最新权重
+    #选择最新的权重 ， 根据时间排序 选最新的
     if get_deepspeed_config is None:
         train_weight = './best_ckpt/last.ckpt'
     else:
