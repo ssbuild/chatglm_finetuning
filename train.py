@@ -36,7 +36,8 @@ if __name__ == '__main__':
                                           save_weights_only=False,
                                           save_last=True,
                                           save_top_k=1,
-                                          every_n_train_steps=2000)
+                                          # every_n_train_steps=1000,
+                                          every_n_epochs=1)
 
     deepspeed_config = get_deepspeed_config()
     strategy = 'ddp' if torch.cuda.device_count() > 1 else None
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
                                                                                  config_class_name=ChatGLMConfig)
-
+    ChatGLMConfig.save_pretrained('best_ckpt')
 
     config.precision = 16
 
