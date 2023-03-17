@@ -30,11 +30,20 @@ if __name__ == '__main__':
 
     #加载新训练权重
     train_weight = './best_ckpt/best.pt'
+
+    #deepspeed权重
+    #train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
     if os.path.exists(train_weight):
         config = ChatGLMConfig.from_pretrained('./best_ckpt')
-        model = MyTransformer.load_from_checkpoint(train_weight, config=config,
-                                                   model_args=model_args,
-                                                   training_args=training_args)
+        try:
+            model = MyTransformer.load_from_checkpoint(train_weight, config=config,
+                                                       model_args=model_args,
+                                                       training_args=training_args,
+                                                       strict=False)
+        except:
+            model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+            model.load_state_dict(state_dict=None,strict=False)
+        print(model)
     else:
         # 官方28层
         config.num_layers = 28

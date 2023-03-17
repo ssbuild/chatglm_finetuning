@@ -3,8 +3,8 @@
 
 ## 安装
 
-- pip install -U deep_training >= 0.0.18 cpm_kernels icetk transformers>=4.26.1
-- 最小版本要求 deep_training>=0.0.18.post4
+- pip install -U deep_training >= 0.0.18 cpm_kernels icetk transformers>=4.26.1 deepspeed
+- 最小版本要求 deep_training>=0.0.18.post5
 
 
 

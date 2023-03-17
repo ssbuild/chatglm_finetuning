@@ -51,16 +51,17 @@ train_info_args = {
 }
 
 
-class MaskAlign(Enum):
-    left = 0
-    right = 1
-
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
-    'algin': MaskAlign.right # 默认左对齐
 }
 
+def get_deepspeed_config():
+    with open('./deepspeed.json', mode='r', encoding='utf-8') as f:
+        deepspeed_config = json.loads(f.read())
+    # 是否开启deepspeed
+    deepspeed_config = None
+    return deepspeed_config
 
 def preprocess(text):
   #text = text.replace("\n", "\\n").replace("\t", "\\t")
@@ -104,25 +105,26 @@ class NN_DataHelper(DataHelper):
         pos = 0
         ds = []
         while pos < len(input_ids_all):
-            input_ids_ = input_ids_all[pos: pos + max_seq_length - len(self.sptoken)] + self.sptoken
+            input_ids_ = input_ids_all[pos: pos + max_seq_length - 2] + self.sptoken
 
             pos += stride
             if len(input_ids_) <= 5:
                 continue
 
+            input_ids = input_ids_
             labels = copy.deepcopy(input_ids_)
-            seqlen = np.asarray(len(input_ids_), dtype=np.int32)
+            seqlen = np.asarray(len(input_ids), dtype=np.int32)
             pad_len = max_seq_length - seqlen
-            input_ids_ = np.asarray(input_ids_, dtype=np.int32)
+            input_ids = np.asarray(input_ids, dtype=np.int32)
             labels = np.asarray(labels, dtype=np.int32)
             if pad_len:
                 pad_val = tokenizer.pad_token_id
-                pad_width = (pad_len, 0) if data_conf['algin'] == MaskAlign.right else (0,pad_len)
-                input_ids_ = np.pad(input_ids_, pad_width, 'constant', constant_values=(pad_val, pad_val))
+                pad_width = (pad_len, 0)
+                input_ids = np.pad(input_ids, pad_width, 'constant', constant_values=(pad_val, pad_val))
                 labels = np.pad(labels, pad_width, 'constant', constant_values=(-100, -100))
 
             d = {
-                'input_ids': input_ids_,
+                'input_ids': input_ids,
                 'labels': labels,
                 'seqlen': seqlen
             }
@@ -196,13 +198,9 @@ class NN_DataHelper(DataHelper):
 
         max_len = torch.max(o.pop('seqlen'))
 
-        if data_conf['algin'] == MaskAlign.right:
-            s = o['input_ids'].size(1) - max_len
-            o['input_ids'] = o['input_ids'][:, s:]
-            o['labels'] = o['labels'][:, s:].long()
-        else:
-            o['input_ids'] = o['input_ids'][:, :max_len]
-            o['labels'] = o['labels'][:, :max_len].long()
+        s = o['input_ids'].size(1) - max_len
+        o['input_ids'] = o['input_ids'][:, s:].long()
+        o['labels'] = o['labels'][:, s:].long()
         return o
 
 
@@ -213,6 +211,9 @@ if __name__ == '__main__':
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
                                                                                  config_class_name=ChatGLMConfig)
+
+
+
 
     # 缓存数据集
     # 检测是否存在 output/dataset_0-train.record ，不存在则制作数据集
