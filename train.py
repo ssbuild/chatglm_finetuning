@@ -72,8 +72,8 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             config.save_pretrained(self.output_dir)
 
         prefixs = [
-            "写一个诗歌，关于冬天",
-            "从南京到上海的路线",
+            "我想听一首开心的歌曲",
+            "周五下班了但工作没做完，不太开心",
         ]
 
         device = trainer.global_rank
