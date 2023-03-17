@@ -33,7 +33,7 @@ train_info_args = {
     'max_epochs': 3,
     'max_steps': -1,
     'optimizer': 'lion',  # one of adamw,adam,lamb,lion
-    'train_batch_size': 2,
+    'train_batch_size': 1,
     'eval_batch_size': 2,
     'test_batch_size': 2,
     'learning_rate': 5e-5,
