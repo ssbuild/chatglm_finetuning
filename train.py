@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
                                                                                  config_class_name=ChatGLMConfig)
-    ChatGLMConfig.save_pretrained('best_ckpt')
+    config.save_pretrained('best_ckpt')
 
     config.precision = 16
 
