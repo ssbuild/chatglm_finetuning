@@ -15,7 +15,7 @@
   "max_sequence_length": 2048,
   "model_type": "chatglm",
   "num_attention_heads": 32,
-  "num_layers": 16,
+  "num_layers": 12,
   "position_encoding_2d": true,
   "torch_dtype": "float16",
   "transformers_version": "4.23.1",
