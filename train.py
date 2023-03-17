@@ -36,7 +36,7 @@ if __name__ == '__main__':
                                           save_weights_only=False,
                                           save_last=True,
                                           save_top_k=1,
-                                          every_n_train_steps=10)
+                                          every_n_train_steps=2000)
 
     deepspeed_config = get_deepspeed_config()
     strategy = 'ddp' if torch.cuda.device_count() > 1 else None
