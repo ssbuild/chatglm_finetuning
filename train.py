@@ -74,6 +74,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         prefixs = [
             "我想听一首开心的歌曲",
             "周五下班了但工作没做完，不太开心",
+            "我想听听一首风格的西方通俗歌曲，希望它是国语，我希望它是原唱。"
         ]
 
         device = trainer.global_rank
@@ -103,7 +104,7 @@ if __name__ == '__main__':
     # 保存最小loss模型
     checkpoint_callback = MySimpleModelCheckpoint(
         # monitor="loss",
-        every_n_epochs=1,
+        every_n_epochs=3,
         every_n_train_steps=2000 // training_args.gradient_accumulation_steps)
     trainer = Trainer(
         callbacks=[checkpoint_callback],

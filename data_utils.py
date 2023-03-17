@@ -25,7 +25,7 @@ train_info_args = {
     'model_type': 'chatglm',
     # 预训练模型路径 , 从0训练，则置空
     'model_name_or_path': '/data/text2music/ChatGLM-6B/local',
-    'config_name': './config/config_small.json',
+    'config_name': './config/config.json',
     'tokenizer_name': '/data/text2music/ChatGLM-6B/local',
     'convert_onnx': False,  # 转换onnx模型
     'do_train': True,
@@ -33,7 +33,7 @@ train_info_args = {
     'max_epochs': 3,
     'max_steps': -1,
     'optimizer': 'lion',  # one of adamw,adam,lamb,lion
-    'train_batch_size': 4,
+    'train_batch_size': 32,
     'eval_batch_size': 2,
     'test_batch_size': 2,
     'learning_rate': 5e-5,
