@@ -96,6 +96,8 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
 
 if __name__ == '__main__':
 
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
+
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments))
     model_args, training_args, data_args = parser.parse_dict(train_info_args)
 
@@ -143,11 +145,11 @@ if __name__ == '__main__':
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
-        # if os.path.exists(ckpt_path):
-        #     # 加载权重继续训练
-        #     model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
-        #                                                model_args=model_args,
-        #                                                training_args=training_args)
+        if os.path.exists(ckpt_path):
+            # 加载权重继续训练
+            model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
+                                                       model_args=model_args,
+                                                       training_args=training_args)
 
         train_datasets = dataHelper.load_random_sampler(dataHelper.train_files,
                                                         with_load_memory=True,
@@ -159,20 +161,20 @@ if __name__ == '__main__':
         if train_datasets is not None:
             trainer.fit(model, train_dataloaders=train_datasets)
 
-    else:
-        # 加载权重
-        model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
-                                                   model_args=model_args,
-                                                   training_args=training_args)
-        input_sample = (
-            ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
-        )
-        input_names = ("input_ids",)
-        output_names = ("pred_ids",)
-        dynamic_axes = None or {"input_ids": [0, 1],
-                                "pred_ids": [0, 1]}
-        model.convert_to_onnx('./best_ckpt/best.onnx',
-                              input_sample=input_sample,
-                              input_names=input_names,
-                              output_names=output_names,
-                              dynamic_axes=dynamic_axes)
+    # else:
+    #     # 加载权重
+    #     model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
+    #                                                model_args=model_args,
+    #                                                training_args=training_args)
+    #     input_sample = (
+    #         ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
+    #     )
+    #     input_names = ("input_ids",)
+    #     output_names = ("pred_ids",)
+    #     dynamic_axes = None or {"input_ids": [0, 1],
+    #                             "pred_ids": [0, 1]}
+    #     model.convert_to_onnx('./best_ckpt/best.onnx',
+    #                           input_sample=input_sample,
+    #                           input_names=input_names,
+    #                           output_names=output_names,
+    #                           dynamic_axes=dynamic_axes)
