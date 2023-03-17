@@ -29,7 +29,7 @@ train_info_args = {
     'tokenizer_name': '/data/text2music/ChatGLM-6B/local',
     'convert_onnx': False,  # 转换onnx模型
     'do_train': True,
-    'train_file': ['./data/LLM_top2w_tag.json.json'],
+    'train_file': ['./data/LLM_top2w_tag.json'],
     'max_epochs': 3,
     'max_steps': -1,
     'optimizer': 'lion',  # one of adamw,adam,lamb,lion
