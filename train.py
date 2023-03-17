@@ -75,6 +75,9 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             "我想听一首开心的歌曲",
             "周五下班了但工作没做完，不太开心",
             "我想听听一首风格的西方通俗歌曲，希望它是国语，我希望它是原唱。"
+            "我想听听一首风格的西方通俗歌曲，希望它是中国话，它应该是一首演绎水平的歌曲，我希望听到爱情的感觉，我希望它是抖音。"
+            "上山打老虎的人应该听什么歌？"
+            "谈恋爱了，我应该听什么歌？"
         ]
 
         device = trainer.global_rank
@@ -96,7 +99,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
 
 if __name__ == '__main__':
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments))
     model_args, training_args, data_args = parser.parse_dict(train_info_args)
@@ -142,6 +145,7 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file, mode='test')
 
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+    print(model)
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
