@@ -30,7 +30,7 @@ train_info_args = {
     'convert_onnx': False,  # 转换onnx模型
     'do_train': True,
     'train_file': ['./data/LLM_top2w_tag.json'],
-    'max_epochs': 3,
+    'max_epochs': 8,
     'max_steps': -1,
     'optimizer': 'lion',  # one of adamw,adam,lamb,lion
     'train_batch_size': 1,
