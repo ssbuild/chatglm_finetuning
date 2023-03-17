@@ -43,7 +43,6 @@ if __name__ == '__main__':
         except:
             model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
             model.load_state_dict(state_dict=None,strict=False)
-        print(model)
     else:
         # 官方28层
         config.num_layers = 28
