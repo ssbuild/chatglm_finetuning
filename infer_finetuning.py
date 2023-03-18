@@ -27,9 +27,26 @@ if __name__ == '__main__':
     tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    # 官方28层
-    config.num_layers = 28
-    model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+    ###################### 注意 选最新权重
+    #选择最新的权重 ， 根据时间排序 选最新的
+    config = ChatGLMConfig.from_pretrained('./best_ckpt')
+
+    if get_deepspeed_config() is None:
+        train_weight = './best_ckpt/last-v3.ckpt'
+        assert os.path.exists(train_weight)
+        model = MyTransformer.load_from_checkpoint(train_weight, config=config,
+                                                   model_args=model_args,
+                                                   training_args=training_args,
+                                                   strict=False)
+    else:
+        #deepspeed权重
+        train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
+        assert os.path.exists(train_weight)
+        model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+        model.load_state_dict(state_dict={}, strict=False)
+
+
+
 
     model.eval()
 
@@ -38,12 +55,11 @@ if __name__ == '__main__':
     base_model.half().quantize(4).to(torch.device('cuda:0'))
 
     with torch.inference_mode():
-        response, history = base_model.chat(tokenizer, "你好", history=[],max_length=1024)
-        print('你好',' ',response)
+        response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)
+        print('写一个诗歌，关于冬天',' ',response)
 
-        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=1024)
+        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=30)
         print('晚上睡不着应该怎么办',' ',response)
 
-        # response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)
-        # print('写一个诗歌，关于冬天',' ',response)
+
 

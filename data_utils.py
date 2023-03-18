@@ -105,27 +105,21 @@ class NN_DataHelper(DataHelper):
         pos = 0
         ds = []
         while pos < len(input_ids_all):
-            input_ids_ = input_ids_all[pos: pos + max_seq_length - 2] + self.sptoken
-
+            input_ids_ = input_ids_all[pos: pos + max_seq_length]
             pos += stride
             if len(input_ids_) <= 5:
                 continue
 
             input_ids = input_ids_
-            labels = copy.deepcopy(input_ids_)
             seqlen = np.asarray(len(input_ids), dtype=np.int32)
             pad_len = max_seq_length - seqlen
             input_ids = np.asarray(input_ids, dtype=np.int32)
-            labels = np.asarray(labels, dtype=np.int32)
             if pad_len:
                 pad_val = tokenizer.pad_token_id
-                pad_width = (pad_len, 0)
-                input_ids = np.pad(input_ids, pad_width, 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, pad_width, 'constant', constant_values=(-100, -100))
+                input_ids = np.pad(input_ids,  (0,pad_len), 'constant', constant_values=(pad_val, pad_val))
 
             d = {
                 'input_ids': input_ids,
-                'labels': labels,
                 'seqlen': seqlen
             }
             ds.append(d)
@@ -185,6 +179,9 @@ class NN_DataHelper(DataHelper):
         return D
 
     def collate_fn(self,batch):
+        if not hasattr(self,'sptoken'):
+            self.sptoken = self.tokenizer.encode(text="")[-2:]
+            
         o = {}
         for i, b in enumerate(batch):
             if i == 0:
@@ -197,10 +194,18 @@ class NN_DataHelper(DataHelper):
             o[k] = torch.stack(o[k])
 
         max_len = torch.max(o.pop('seqlen'))
+        input_ids = o['input_ids']
 
-        s = o['input_ids'].size(1) - max_len
-        o['input_ids'] = o['input_ids'][:, s:].long()
-        o['labels'] = o['labels'][:, s:].long()
+
+        p = np.random.randint(1, max_len-1, dtype=np.int64).tolist()
+        da = torch.tensor(self.sptoken,dtype=input_ids.dtype)
+        da = da.unsqueeze(0).expand(input_ids.size(0),da.size(0))
+
+        input_ids = torch.cat([input_ids[:,:p],da,input_ids[:,p:]],dim=1)
+        labels = torch.clone(input_ids)
+        labels[:,:p+1]= -100
+        o['input_ids'] = input_ids[:, :max_len].long()
+        o['labels'] = labels[:, :max_len].long()
         return o
 
 

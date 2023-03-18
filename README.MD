@@ -1,11 +1,13 @@
-# 状态 - 测试中
-
+# 状态 - 测试 deep_training>=0.0.18.post6 
+   
+    之前制作标签错误，导致效果不佳
+    
     
 
 ## 安装
 
 - pip install -U deep_training >= 0.0.18 cpm_kernels icetk transformers>=4.26.1 deepspeed
-- 最小版本要求 deep_training>=0.0.18.post5
+- 最小版本要求 deep_training>=0.0.18.post6
 
 
 
@@ -79,6 +81,8 @@
 
 
 ## 推理
+    # infer.py 推理预训练模型
+    # infer_finetuning.py 推理微调模型
      python infer.py
 
 ### 硬件需求
