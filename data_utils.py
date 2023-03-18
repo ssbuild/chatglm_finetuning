@@ -193,17 +193,16 @@ class NN_DataHelper(DataHelper):
         for k in o:
             o[k] = torch.stack(o[k])
 
-        max_len = torch.max(o.pop('seqlen'))
+        seqlens = o.pop('seqlen')
         input_ids = o['input_ids']
-
-
-        p = np.random.randint(1, max_len-1, dtype=np.int64).tolist()
+        p = np.random.randint(1, torch.min(seqlens)-1, dtype=np.int64).tolist()
         da = torch.tensor(self.sptoken,dtype=input_ids.dtype)
         da = da.unsqueeze(0).expand(input_ids.size(0),da.size(0))
 
         input_ids = torch.cat([input_ids[:,:p],da,input_ids[:,p:]],dim=1)
         labels = torch.clone(input_ids)
         labels[:,:p+1]= -100
+        max_len = torch.max(seqlens) + len(self.sptoken)
         o['input_ids'] = input_ids[:, :max_len].long()
         o['labels'] = labels[:, :max_len].long()
         return o
