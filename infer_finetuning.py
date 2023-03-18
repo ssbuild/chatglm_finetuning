@@ -43,7 +43,7 @@ if __name__ == '__main__':
         train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
         assert os.path.exists(train_weight)
         model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-        model.load_state_dict(state_dict={}, strict=False)
+        model.load_state_dict(state_dict= torch.load(train_weight), strict=False)
 
 
 
