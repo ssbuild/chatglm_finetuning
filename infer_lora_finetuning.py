@@ -26,7 +26,7 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
 
 if __name__ == '__main__':
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
-    model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
+    model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
 
     setup_model_profile()
 
@@ -38,6 +38,8 @@ if __name__ == '__main__':
 
 
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
+
+    lora_args = LoraArguments.from_pretrained('./best_ckpt')
 
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
     # 加载lora权重
