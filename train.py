@@ -1,48 +1,119 @@
 # -*- coding: utf-8 -*-
-import copy
-import json
-import os
-from typing import Any
-import numpy as np
+import logging
+from typing import Dict, Any, Optional
+
 import torch
 from deep_training.data_helper import ModelArguments, DataArguments, TrainingArguments
-from deep_training.nlp.models.chatglm import TransformerChatGlmLMHeadModel, ChatGLMConfig, setup_model_profile
-from deep_training.utils.trainer import SimpleModelCheckpoint,ModelCheckpoint,Callback
-from pytorch_lightning  import Trainer
+from deep_training.nlp.models.chatglm import TransformerChatGlmLMHeadModel, ChatGLMConfig, setup_model_profile, \
+    ChatGLMForConditionalGeneration
+from deep_training.nlp.models.lora import LoraArguments, LoraModel
+from deep_training.utils.trainer import ModelCheckpoint, SimpleModelCheckpoint
+
+
+from pytorch_lightning import Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
-from data_utils import NN_DataHelper, train_info_args, preprocess, postprocess,get_deepspeed_config
+from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, preprocess, postprocess
 from tokenization_chatglm import ChatGLMTokenizer
 
 
 class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
     def __init__(self, *args, **kwargs):
+        lora_args: LoraArguments = kwargs.pop('lora_args')
         super(MyTransformer, self).__init__(*args, **kwargs)
+        self.lora_args = lora_args
+        if lora_args.with_lora:
+            model = LoraModel(self.backbone, lora_args)
+            print('*' * 30,'lora info')
+            model.print_trainable_parameters()
+            self.set_model(model, copy_attr=False)
 
 
 
 
+class MySimpleModelCheckpoint(SimpleModelCheckpoint):
+    def __init__(self, *args, **kwargs):
+        super(MySimpleModelCheckpoint, self).__init__(*args, **kwargs)
+        lora_args: LoraArguments = self.external_kwargs['lora_args']
+        if lora_args.with_lora:
+            self.weight_file = './best_ckpt'
+            self.last_weight_file = './last_ckpt'
+
+    def load_model_from_ckpt(self):
+        model_args = self.external_kwargs['model_args']
+        training_args = self.external_kwargs['training_args']
+        lora_args = LoraArguments.from_pretrained(self.last_weight_file)
+        pl_module = MyTransformer(lora_args=lora_args,
+                              config=config,
+                              model_args=model_args,
+                              training_args=training_args)
+
+
+        pl_module.backbone.from_pretrained(pl_module.backbone.model,self.last_weight_file)
+        return pl_module
+
+
+    def on_save_model(
+            self, trainer: "pl.Trainer", pl_module: "pl.LightningModule"
+    ) -> None:
+
+        lora_args : LoraArguments =  self.external_kwargs['lora_args']
+        # 保存权重
+        if not lora_args.with_lora:
+            super(MySimpleModelCheckpoint, self).on_save_model(trainer, pl_module)
+        else:
+            monitor_candidates = self._monitor_candidates(trainer)
+            monitor_candidates.update(self.on_get_metric(trainer, pl_module))
+            val = monitor_candidates.get(self.monitor, None)
+
+            #保存loss最小权重
+            if self.update_best(val):
+                logging.info('epoch {} ,step {} , save best {}, {}\n'.format(monitor_candidates['epoch'],
+                                                                             monitor_candidates['step'],
+                                                                             self.best[self.monitor],
+                                                                             self.weight_file))
+                pl_module.backbone.save_pretrained(self.weight_file)
+            #保存最新权重
+            pl_module.backbone.save_pretrained(self.last_weight_file)
+            # 从最新权重加载模型
+            pl_module = self.load_model_from_ckpt()
+
+
+
+            
 if __name__ == '__main__':
-
-
-    parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments))
-    model_args, training_args, data_args = parser.parse_dict(train_info_args)
+    parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
+    model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
 
     # 并行
     setup_model_profile()
-    # 保存最小loss模型
-    checkpoint_callback = ModelCheckpoint('./best_ckpt',monitor='loss',
-                                          save_weights_only=False,
-                                          save_last=True,
-                                          save_top_k=1,
-                                          # every_n_train_steps=1000,
-                                          every_n_epochs=1)
-
     deepspeed_config = get_deepspeed_config()
+
+    # 保存最小loss模型
+    if lora_args.with_lora:
+        assert deepspeed_config is None,ValueError('lora mode does not support deepspeed')
+        checkpoint_callback = MySimpleModelCheckpoint(monitor="loss",
+                              every_n_epochs = 1,
+                              every_n_train_steps=2000 // training_args.gradient_accumulation_steps,
+                              #模型参数
+                              model_args=model_args,
+                              training_args=training_args,
+                              lora_args=lora_args,)
+    else:
+        checkpoint_callback = ModelCheckpoint('./best_ckpt', monitor='loss',
+                                              save_weights_only=False,
+                                              save_last=True,
+                                              save_top_k=1,
+                                              # every_n_train_steps=1000,
+                                              every_n_epochs=1)
+
+
     strategy = 'ddp' if torch.cuda.device_count() > 1 else None
     if deepspeed_config is not None and len(deepspeed_config):
-        strategy = DeepSpeedStrategy(config=deepspeed_config)
+        strategy = DeepSpeedStrategy(config=deepspeed_config,)
+
+
 
     trainer = Trainer(
         callbacks=[checkpoint_callback],
@@ -61,12 +132,13 @@ if __name__ == '__main__':
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
 
-    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
-                                                                                 config_class_name=ChatGLMConfig)
+    tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
+
+    # 额外参数
+    checkpoint_callback.tokenizer = tokenizer
+    checkpoint_callback.data_args = data_args
+
     config.save_pretrained('best_ckpt')
-
-    config.precision = 16
-
 
     # 缓存数据集
     if data_args.do_train:
@@ -77,7 +149,7 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file,mode='test')
 
 
-    model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+    model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
@@ -85,31 +157,48 @@ if __name__ == '__main__':
         #     # 加载权重继续训练
         #     model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
         #                                                model_args=model_args,
-        #                                                training_args=training_args)
+        #                                                training_args=training_args,lora_args=lora_args)
 
         train_datasets = dataHelper.load_random_sampler(dataHelper.train_files,
                                                         with_load_memory=True,
                                                         collate_fn=dataHelper.collate_fn,
                                                         batch_size=training_args.train_batch_size,
-                                                        shuffle=True,infinite=True,num_processes=trainer.world_size,process_index=trainer.global_rank)
+                                                        drop_last=True,#多卡建议扔掉
+                                                        shuffle=True,infinite=True,
+                                                        num_processes=trainer.world_size,
+                                                        process_index=trainer.global_rank)
 
         if train_datasets is not None:
             trainer.fit(model, train_dataloaders=train_datasets)
 
     else:
-        # 加载权重
-        model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
+        if not lora_args.with_lora:
+            # 加载权重
+            model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
                                                        model_args=model_args,
-                                                       training_args=training_args)
-        input_sample = (
-            ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
-        )
-        input_names = ("input_ids",)
-        output_names = ("pred_ids",)
-        dynamic_axes = None or {"input_ids": [0, 1],
-                                "pred_ids": [0, 1]}
-        model.convert_to_onnx('./best_ckpt/best.onnx',
-                              input_sample=input_sample,
-                              input_names=input_names,
-                              output_names=output_names,
-                              dynamic_axes=dynamic_axes)
+                                                       training_args=training_args,
+                                                       lora_args=lora_args)
+            input_sample = (
+                ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
+            )
+            input_names = ("input_ids",)
+            output_names = ("pred_ids",)
+            dynamic_axes = None or {"input_ids": [0, 1],
+                                    "pred_ids": [0, 1]}
+            model.convert_to_onnx('./best_ckpt/best.onnx',
+                                  input_sample=input_sample,
+                                  input_names=input_names,
+                                  output_names=output_names,
+                                  dynamic_axes=dynamic_axes)
+        else:
+            # 加载权重
+            lora_args = LoraArguments.from_pretrained('./best_ckpt')
+            pl_module = MyTransformer(lora_args=lora_args,
+                                      config=config,
+                                      model_args=model_args,
+                                      training_args=training_args)
+            # 二次加载权重
+            pl_module.backbone.from_pretrained(pl_module.backbone.model, './best_ckpt')
+
+            model_: ChatGLMForConditionalGeneration
+            model_ = pl_module.backbone.model.model

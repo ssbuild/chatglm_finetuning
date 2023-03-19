@@ -1,6 +1,7 @@
-# 状态 - 测试 deep_training>=0.0.18.post6 
+# 状态 - 测试 deep_training>=0.0.18.post7
    
     之前制作标签错误，导致效果不佳
+    支持lora finetuning
     
     
 
@@ -104,9 +105,13 @@
     python train.py
 
 
+## 是否开启lora finetuning
+
+    with_lora
 
 ## 是否开启deepspeed
-    启动则将train.py  注释掉 deepspeed_config = None
+    启动则将data_utils.py  修改 enable_deepspeed 
+    lora 模式暂时不支持deepspeed
 
 
 

@@ -14,6 +14,7 @@ import numpy as np
 import torch
 from deep_training.data_helper import DataHelper, ModelArguments, TrainingArguments, DataArguments
 from deep_training.nlp.models.chatglm import ChatGLMConfig
+from deep_training.nlp.models.lora import LoraArguments
 from deep_training.utils.func import is_chinese_char
 from fastdatasets.record import load_dataset as Loader, RECORD, WriterObject, gfile
 from tqdm import tqdm
@@ -48,19 +49,36 @@ train_info_args = {
     'max_target_length': 100,  # 预测最大长度
     'use_fast_tokenizer': False,
     'do_lower_case': False,
+
+    ##############  lora模块
+    'with_lora': False,  # 是否启用lora模块
+    'inference_mode': False,
+    'r': 8,
+    'target_modules': ['query_key_value'],
+    'target_dtype': '16',
+    'lora_alpha': 32,
+    # 'enable_lora': [True],
+    'enable_lora': None,
+    'lora_dropout': 0.1,
+    'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
 }
 
+#lora 模式暂时不支持deepspeed
+enable_deepspeed = False
 
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
 }
 
+assert data_conf['stride'] > 0
+
 def get_deepspeed_config():
+    # 是否开启deepspeed
+    if not enable_deepspeed:
+        return None
     with open('./deepspeed.json', mode='r', encoding='utf-8') as f:
         deepspeed_config = json.loads(f.read())
-    # 是否开启deepspeed
-    deepspeed_config = None
     return deepspeed_config
 
 def preprocess(text):
@@ -75,8 +93,10 @@ def postprocess(text):
 class NN_DataHelper(DataHelper):
     index = 1
 
+
     def on_data_ready(self):
         self.index = -1
+
 
     # 切分词
     def on_data_process(self, data: typing.Any, mode: str):
@@ -91,21 +111,22 @@ class NN_DataHelper(DataHelper):
 
         input_ids_all = []
         for examples in examples_batch:
-            for idx, text in enumerate(examples):
-                input_ids = tokenizer.encode(text=text,add_special_tokens=False)
+            for idx, (sid, q, a) in enumerate(examples):
+                text = "[Round {}]\n问：{}\n答：{}".format(sid, q, a)
+                input_ids = tokenizer.encode(text=text, add_special_tokens=False)
                 if len(input_ids) <= 3:
                     continue
                 input_ids_all += input_ids
 
             input_ids_all += [tokenizer.eos_token_id]
 
-        if not hasattr(self,'sptoken'):
+        if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
 
         pos = 0
         ds = []
         while pos < len(input_ids_all):
-            input_ids_ = input_ids_all[pos: pos + max_seq_length]
+            input_ids_ = input_ids_all[pos: pos + max_seq_length - len(self.sptoken)]
             pos += stride
             if len(input_ids_) <= 5:
                 continue
@@ -116,13 +137,15 @@ class NN_DataHelper(DataHelper):
             input_ids = np.asarray(input_ids, dtype=np.int32)
             if pad_len:
                 pad_val = tokenizer.pad_token_id
-                input_ids = np.pad(input_ids,  (0,pad_len), 'constant', constant_values=(pad_val, pad_val))
+                input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
 
             d = {
                 'input_ids': input_ids,
                 'seqlen': seqlen
             }
             ds.append(d)
+
+
         if self.index < 3:
             print(ds[0])
         return ds
@@ -168,7 +191,7 @@ class NN_DataHelper(DataHelper):
                     answers = ''
                     for a in answers_list:
                         answers += preprocess(a + '\n')
-                    qa.append("[Round {}]\n问：{}\n答：{}".format(sid,q,answers))
+                    qa.append((sid,q,answers))
                 qa_batch.append(qa)
                 if len(qa_batch) >= COUNT_PER_GROUP:
                     D.append(copy.deepcopy(qa_batch))
@@ -193,28 +216,27 @@ class NN_DataHelper(DataHelper):
         for k in o:
             o[k] = torch.stack(o[k])
 
-        max_len = torch.max(o.pop('seqlen'))
+        seqlens = o.pop('seqlen')
         input_ids = o['input_ids']
-
-
-        p = np.random.randint(1, max_len-1, dtype=np.int64).tolist()
+        p = np.random.randint(1, torch.min(seqlens)-1, dtype=np.int64).tolist()
         da = torch.tensor(self.sptoken,dtype=input_ids.dtype)
         da = da.unsqueeze(0).expand(input_ids.size(0),da.size(0))
 
         input_ids = torch.cat([input_ids[:,:p],da,input_ids[:,p:]],dim=1)
         labels = torch.clone(input_ids)
         labels[:,:p+1]= -100
+        max_len = torch.max(seqlens) + len(self.sptoken)
         o['input_ids'] = input_ids[:, :max_len].long()
         o['labels'] = labels[:, :max_len].long()
         return o
 
 
 if __name__ == '__main__':
-    parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments))
-    model_args, training_args, data_args = parser.parse_dict(train_info_args)
+    parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
+    model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
-    tokenizer, config, label2id, id2label = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
+    tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
                                                                                  config_class_name=ChatGLMConfig)
 
 
