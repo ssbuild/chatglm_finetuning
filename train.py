@@ -159,6 +159,14 @@ if __name__ == '__main__':
         #                                                model_args=model_args,
         #                                                training_args=training_args,lora_args=lora_args)
 
+        #deepspeed 保证整批次
+        def dataset_loader_filter_fn(dataset):
+            host_num = 1
+            limit_count = len(dataset)
+            limit_count = int(limit_count // (data_args.devices * training_args.train_batch_size * host_num)) * (data_args.devices * training_args.train_batch_size * host_num)
+            return dataset.limit(int(limit_count))
+
+        with_record_iterable_dataset = False
         train_datasets = dataHelper.load_random_sampler(dataHelper.train_files,
                                                         with_load_memory=True,
                                                         collate_fn=dataHelper.collate_fn,
@@ -166,7 +174,9 @@ if __name__ == '__main__':
                                                         drop_last=True,#多卡建议扔掉
                                                         shuffle=True,infinite=True,
                                                         num_processes=trainer.world_size,
-                                                        process_index=trainer.global_rank)
+                                                        process_index=trainer.global_rank,
+                                                        with_record_iterable_dataset=with_record_iterable_dataset,
+                                                        dataset_loader_filter_fn=dataset_loader_filter_fn if not with_record_iterable_dataset else None)
 
         if train_datasets is not None:
             trainer.fit(model, train_dataloaders=train_datasets)
