@@ -2,7 +2,7 @@
    
     之前标签错误，导致效果不佳
     支持lora finetuning
-    建议安装deep_training>=0.0.18.post8 效果基本得到验证 ， 另外解决数据deepspeed 各个进程数据不均等情况
+    deep_training>=0.0.18.post7 效果得到验证 ，建议安装deep_training>=0.0.18.post8 解决数据deepspeed 各个进程数据不均等情况
     
 
 ## 安装
