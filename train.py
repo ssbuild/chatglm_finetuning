@@ -170,7 +170,7 @@ if __name__ == '__main__':
                 break
     # print(model)
     print_trainable_parameters(model)
-    exit()
+    # exit()
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
