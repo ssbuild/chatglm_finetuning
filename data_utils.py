@@ -38,7 +38,7 @@ train_info_args = {
     'train_batch_size': 4,
     'eval_batch_size': 2,
     'test_batch_size': 2,
-    'learning_rate': 5e-5,
+    'learning_rate': 5e-5,  # lora 建议学习率2e-3
     'adam_epsilon': 1e-8,
     'gradient_accumulation_steps': 1,
     'max_grad_norm': 1.0,
@@ -52,7 +52,7 @@ train_info_args = {
 
     ##############  lora模块
     'with_lora': False,  # 是否启用lora模块
-    'inference_mode': False,
+    'inference_mode': False, # 推理模型, 不需要手动设置
     'r': 8,
     'target_modules': ['query_key_value'],
     'target_dtype': '16',
@@ -118,7 +118,7 @@ class NN_DataHelper(DataHelper):
                     continue
                 input_ids_all += input_ids
 
-            input_ids_all += [tokenizer.eos_token_id]
+            input_ids_all += [tokenizer.eos_token_id] * 2
 
         if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
