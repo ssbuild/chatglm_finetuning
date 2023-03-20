@@ -160,12 +160,15 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file, mode='test')
 
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+    frozen_layers = 14
     for name, param in model.named_parameters():
-        # if name.startswith("..."):  # choose whatever you like here
-        #     param.requires_grad = False
-        print(name)
-
-    print(model)
+        for i in range(frozen_layers):
+            layer_name = f'layers.{i}'
+            # if name contain layer_name, then freeze the layer
+            if layer_name in name:
+                param.requires_grad = False
+                break
+    # print(model)
     print_trainable_parameters(model)
     exit()
 
