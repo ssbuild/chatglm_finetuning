@@ -206,7 +206,7 @@ if __name__ == '__main__':
             "上山打老虎的人应该听什么歌？"
             "谈恋爱了，我应该听什么歌？"
         ]:
-            response, history = model.backbone.model.chat(tokenizer, q, history=[], max_length=1024)
+            response, history = model.backbone.model.half().chat(tokenizer, q, history=[], max_length=1024)
             print(q, response)
         # if train_datasets is not None:
         #     trainer.fit(model, train_dataloaders=train_datasets)
