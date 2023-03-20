@@ -20,12 +20,12 @@ from transformers import HfArgumentParser
 from tokenization_chatglm import ChatGLMTokenizer
 
 train_info_args = {
-    'devices': 4,
+    'devices': 3,
     'data_backend': 'record',
     'model_type': 'chatglm',
     # 预训练模型路径 , 从0训练，则置空
     'model_name_or_path': '/data/text2music/ChatGLM-6B/local',
-    'config_name': './config/config_small.json',
+    'config_name': './config/config.json',
     'tokenizer_name': '/data/text2music/ChatGLM-6B/local',
     'convert_onnx': False,  # 转换onnx模型
     'do_train': True,
