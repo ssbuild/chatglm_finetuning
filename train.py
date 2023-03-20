@@ -97,6 +97,21 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             print()
 
 
+def print_trainable_parameters(model):
+    """
+    Prints the number of trainable parameters in the model.
+    """
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        all_param += param.numel()
+        if param.requires_grad:
+            trainable_params += param.numel()
+    print(
+        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
+    )
+
+
 if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
@@ -145,7 +160,14 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file, mode='test')
 
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+    for name, param in model.named_parameters():
+        # if name.startswith("..."):  # choose whatever you like here
+        #     param.requires_grad = False
+        print(name)
+
     print(model)
+    print_trainable_parameters(model)
+    exit()
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
