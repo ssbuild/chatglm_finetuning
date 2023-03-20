@@ -125,7 +125,7 @@ if __name__ == '__main__':
     checkpoint_callback = MySimpleModelCheckpoint(
         # monitor="loss",
         every_n_epochs=3,
-        every_n_train_steps=2000 // training_args.gradient_accumulation_steps)
+        every_n_train_steps=100 // training_args.gradient_accumulation_steps)
     trainer = Trainer(
         callbacks=[checkpoint_callback],
         max_epochs=training_args.max_epochs,
@@ -186,6 +186,17 @@ if __name__ == '__main__':
                                                         batch_size=training_args.train_batch_size,
                                                         shuffle=True, infinite=True, num_processes=trainer.world_size,
                                                         process_index=trainer.global_rank)
+
+        # eval_datasets = dataHelper.load_random_sampler(dataHelper.eval_files,
+        #                                                with_load_memory=True,
+        #                                                collate_fn=dataHelper.collate_fn,
+        #                                                batch_size=training_args.eval_batch_size,
+        #                                                shuffle=False, infinite=False, num_processes=trainer.world_size,
+        #                                                process_index=trainer.global_rank)
+        #
+        # if eval_datasets is not None:
+        #     model.eval()
+        #     model.backbone.model
 
         if train_datasets is not None:
             trainer.fit(model, train_dataloaders=train_datasets)
