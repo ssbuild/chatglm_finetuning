@@ -6,12 +6,12 @@
 
 ## 更新详情
    - 2023年3月20 deep_training>=0.0.18.post9 简化chat函数，增加流式输出接口stream_chat
-   - 2023年3月19 deep_training>=0.0.18.post8 解决数据deepspeed 各个进程数据不均等情况
+   - 2023年3月19 deep_training>=0.0.18.post8 解决数据deepspeed 各个进程数据不均等情况（在deepspeed 会遇到卡等问题）
    - 2023年3月18 deep_training>=0.0.18.post7 效果得到验证
 ## 安装
 
 - pip install -U deep_training >= 0.0.18 cpm_kernels icetk transformers>=4.26.1 deepspeed
-- 最小版本要求 deep_training>=0.0.18.post8    （deep_training>=0.0.18.post7 在deepspeed 会遇到卡等问题）
+- 最小版本要求 deep_training>=0.0.18.post8
 
 
 
