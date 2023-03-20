@@ -5,7 +5,7 @@
     推荐 deep_training>=0.0.18.post9
 
 ## 更新详情
-   - 2023年3月20 deep_training>=0.0.18.post9 增加流式输出接口stream_chat
+   - 2023年3月20 deep_training>=0.0.18.post9 简化chat函数，增加流式输出接口stream_chat
    - 2023年3月19 deep_training>=0.0.18.post8 解决数据deepspeed 各个进程数据不均等情况
    - 2023年3月18 deep_training>=0.0.18.post7 效果得到验证
 ## 安装
