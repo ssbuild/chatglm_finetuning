@@ -160,7 +160,7 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file, mode='test')
 
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-    frozen_layers = (8, 28)
+    frozen_layers = (6, 28)
     for name, param in model.named_parameters():
         for i in range(frozen_layers[0], frozen_layers[1]):
             layer_name = f'layers.{i}.'
