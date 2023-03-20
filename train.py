@@ -125,7 +125,7 @@ if __name__ == '__main__':
     checkpoint_callback = MySimpleModelCheckpoint(
         # monitor="loss",
         every_n_epochs=3,
-        every_n_train_steps=100 // training_args.gradient_accumulation_steps)
+        every_n_train_steps=1 // training_args.gradient_accumulation_steps)
     trainer = Trainer(
         callbacks=[checkpoint_callback],
         max_epochs=training_args.max_epochs,
@@ -197,19 +197,19 @@ if __name__ == '__main__':
         # if eval_datasets is not None:
         #     model.eval()
         #     model.backbone.model
-        model.eval()
-        for q in [
-            "我想听一首开心的歌曲",
-            "周五下班了但工作没做完，不太开心",
-            "我想听听一首风格的西方通俗歌曲，希望它是国语，我希望它是原唱。"
-            "我想听听一首风格的西方通俗歌曲，希望它是中国话，它应该是一首演绎水平的歌曲，我希望听到爱情的感觉，我希望它是抖音。"
-            "上山打老虎的人应该听什么歌？"
-            "谈恋爱了，我应该听什么歌？"
-        ]:
-            response, history = model.backbone.model.half().chat(tokenizer, q, history=[], max_length=1024)
-            print(q, response)
-        # if train_datasets is not None:
-        #     trainer.fit(model, train_dataloaders=train_datasets)
+        # model.eval()
+        # for q in [
+        #     "我想听一首开心的歌曲",
+        #     "周五下班了但工作没做完，不太开心",
+        #     "我想听听一首风格的西方通俗歌曲，希望它是国语，我希望它是原唱。"
+        #     "我想听听一首风格的西方通俗歌曲，希望它是中国话，它应该是一首演绎水平的歌曲，我希望听到爱情的感觉，我希望它是抖音。"
+        #     "上山打老虎的人应该听什么歌？"
+        #     "谈恋爱了，我应该听什么歌？"
+        # ]:
+        #     response, history = model.backbone.model.half().chat(tokenizer, q, history=[], max_length=1024)
+        #     print(q, response)
+        if train_datasets is not None:
+            trainer.fit(model, train_dataloaders=train_datasets)
 
     # else:
     #     # 加载权重
