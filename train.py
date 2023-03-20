@@ -163,7 +163,7 @@ if __name__ == '__main__':
     frozen_layers = 14
     for name, param in model.named_parameters():
         for i in range(frozen_layers):
-            layer_name = f'layers.{i}'
+            layer_name = f'layers.{i}.'
             # if name contain layer_name, then freeze the layer
             if layer_name in name:
                 param.requires_grad = False
