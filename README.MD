@@ -1,6 +1,5 @@
-# 状态 - 测试通过
+# 状态
    
-    之前标签错误，导致效果不佳
     支持lora finetuning
     推荐 deep_training>=0.0.19
 
