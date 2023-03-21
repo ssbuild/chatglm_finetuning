@@ -29,6 +29,7 @@ if __name__ == '__main__':
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
     # 官方28层
+    config.precision = None
     config.num_layers = 28
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
 
