@@ -1,6 +1,6 @@
 # 状态
    
-    支持lora finetuning
+    支持 lora finetuning
     推荐 deep_training>=0.0.19
 
 
