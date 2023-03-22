@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 from typing import Dict, Any, Optional
 
 import torch
@@ -154,10 +155,12 @@ if __name__ == '__main__':
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
         # if os.path.exists(ckpt_path):
-        #     # 加载权重继续训练
-        #     model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
-        #                                                model_args=model_args,
-        #                                                training_args=training_args,lora_args=lora_args)
+        #     if not lora_args.with_lora:
+        #         # 加载权重继续训练
+        #         model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args)
+        #     else:
+        #         # 加载lora权重 继续训练
+        #         model.backbone.from_pretrained(model.backbone.model, ckpt_path)
 
         #deepspeed 保证整批次
         def dataset_loader_filter_fn(dataset):
