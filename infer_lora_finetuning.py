@@ -25,6 +25,7 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
 
 
 if __name__ == '__main__':
+    train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
 
@@ -41,9 +42,11 @@ if __name__ == '__main__':
 
     lora_args = LoraArguments.from_pretrained('./best_ckpt')
 
+    assert lora_args.inference_mode == True
+
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
     # 加载lora权重
-    model.backbone.from_pretrained(model.backbone.model, './best_ckpt')
+    model.backbone.from_pretrained(model.backbone.model, pretrained_model_name_or_path = './best_ckpt', lora_config = lora_args)
 
 
     model.eval()
@@ -53,10 +56,10 @@ if __name__ == '__main__':
     base_model.half().to(torch.device('cuda:0'))
 
     with torch.inference_mode():
-        response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)
+        response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=1024)
         print('写一个诗歌，关于冬天',' ',response)
 
-        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=30)
+        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=1024)
         print('晚上睡不着应该怎么办',' ',response)
 
 

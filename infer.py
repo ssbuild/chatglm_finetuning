@@ -18,6 +18,7 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
 
 
 if __name__ == '__main__':
+    train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
 

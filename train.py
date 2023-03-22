@@ -10,7 +10,7 @@ from deep_training.nlp.models.chatglm import TransformerChatGlmLMHeadModel, Chat
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.utils.trainer import ModelCheckpoint, SimpleModelCheckpoint
 
-
+from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 from pytorch_lightning import Trainer
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
 
     trainer = Trainer(
-        callbacks=[checkpoint_callback],
+        callbacks=[checkpoint_callback,LearningRateMonitor(logging_interval='step')],
         max_epochs=training_args.max_epochs,
         max_steps=training_args.max_steps,
         accelerator="gpu",replace_sampler_ddp=False,
@@ -154,13 +154,15 @@ if __name__ == '__main__':
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
+        #  只恢复权重 ， 不恢复步数和优化器 ，
+        #  如果想恢复步数， 修改 trainer.fit(model, train_dataloaders=train_datasets，ckpt=ckpt_path)  注lora 当前不支持恢复步数。
         # if os.path.exists(ckpt_path):
         #     if not lora_args.with_lora:
         #         # 加载权重继续训练
         #         model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args)
         #     else:
         #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
-        #         model.backbone.from_pretrained(model.backbone.model, ckpt_path)
+        #         model.backbone.from_pretrained(model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args)
 
         #deepspeed 保证整批次
         def dataset_loader_filter_fn(dataset):
@@ -211,7 +213,7 @@ if __name__ == '__main__':
                                       model_args=model_args,
                                       training_args=training_args)
             # 二次加载权重
-            pl_module.backbone.from_pretrained(pl_module.backbone.model, './best_ckpt')
+            pl_module.backbone.from_pretrained(pl_module.backbone.model, pretrained_model_name_or_path='./best_ckpt',lora_config=lora_args)
 
             model_: ChatGLMForConditionalGeneration
             model_ = pl_module.backbone.model.model

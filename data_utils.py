@@ -38,7 +38,7 @@ train_info_args = {
     'train_batch_size': 4,
     'eval_batch_size': 2,
     'test_batch_size': 2,
-    'learning_rate': 5e-5,  # lora 建议学习率2e-3
+    'learning_rate': 2e-5,  #
     'adam_epsilon': 1e-8,
     'gradient_accumulation_steps': 1,
     'max_grad_norm': 1.0,
@@ -218,7 +218,8 @@ class NN_DataHelper(DataHelper):
 
         seqlens = o.pop('seqlen')
         input_ids = o['input_ids']
-        p = np.random.randint(1, torch.min(seqlens)-1, dtype=np.int64).tolist()
+        # p = np.random.randint(1, torch.min(seqlens)-1, dtype=np.int64).tolist()
+        p = 0
         da = torch.tensor(self.sptoken,dtype=input_ids.dtype)
         da = da.unsqueeze(0).expand(input_ids.size(0),da.size(0))
 

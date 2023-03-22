@@ -19,6 +19,7 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
 
 
 if __name__ == '__main__':
+    train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
 
@@ -65,10 +66,10 @@ if __name__ == '__main__':
     base_model.half().quantize(4).to(torch.device('cuda:0'))
 
     with torch.inference_mode():
-        response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)
+        response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=1024)
         print('写一个诗歌，关于冬天',' ',response)
 
-        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=30)
+        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=1024)
         print('晚上睡不着应该怎么办',' ',response)
 
 
