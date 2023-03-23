@@ -88,8 +88,8 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
                 pl_module.backbone.save_pretrained(self.weight_file)
             #保存最新权重
             pl_module.backbone.save_pretrained(self.last_weight_file)
-            # 从最新权重加载模型
-            pl_module = self.load_model_from_ckpt()
+            # # 从最新权重加载模型
+            # pl_module = self.load_model_from_ckpt()
 
 
 
