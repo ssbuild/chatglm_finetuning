@@ -66,9 +66,6 @@ train_info_args = {
 #lora 模式暂时不支持deepspeed
 enable_deepspeed = False
 
-data_conf = {
-    'random_prompt': False
-}
 
 
 def get_deepspeed_config():
