@@ -48,18 +48,16 @@ if __name__ == '__main__':
     # 加载lora权重
     model.backbone.from_pretrained(model.backbone.model, pretrained_model_name_or_path = './best_ckpt', lora_config = lora_args)
 
-    model.eval()
-
     base_model: ChatGLMForConditionalGeneration = model.backbone.model.model
     # 按需修改
     base_model.half().to(torch.device('cuda:0'))
+    base_model = base_model.eval()
 
-    with torch.inference_mode():
-        response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=1024)
-        print('写一个诗歌，关于冬天',' ',response)
+    response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=1024)
+    print('写一个诗歌，关于冬天',' ',response)
 
-        response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=1024)
-        print('晚上睡不着应该怎么办',' ',response)
+    response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=1024)
+    print('晚上睡不着应该怎么办',' ',response)
 
 
 
