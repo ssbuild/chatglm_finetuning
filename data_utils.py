@@ -124,24 +124,13 @@ class NN_DataHelper(DataHelper):
                 input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -2] if pos > q_length else input_ids_qa[pos:max_seq_length -2] +self.sptoken
                 pos += max_seq_length - 2
 
-
             seq_length = input_ids.index(self.sptoken[-1])
             mask_position = seq_length - 1
-            position_ids = list(range(seq_length)) + [mask_position] * (max_seq_length - seq_length)
-            block_position_ids = [0] * seq_length + list(range(1,max_seq_length - seq_length + 1))
-
-            attention_mask = np.ones((1, max_seq_length,max_seq_length))
-            attention_mask = np.tril(attention_mask)
-            attention_mask[..., :seq_length] = 1
-            attention_mask = (attention_mask < 0.5)
             labels = [-100] * seq_length + input_ids[mask_position+1:]
 
             seqlen = np.asarray(len(input_ids), dtype=np.int32)
             pad_len = max_seq_length - seqlen
             input_ids = np.asarray(input_ids, dtype=np.int32)
-            attention_mask = np.asarray(attention_mask, dtype=np.int32)
-            position_ids = np.asarray(position_ids, dtype=np.int32)
-            block_position_ids = np.asarray(block_position_ids, dtype=np.int32)
             labels = np.asarray(labels, dtype=np.int32)
 
             if pad_len:
@@ -151,8 +140,6 @@ class NN_DataHelper(DataHelper):
 
             d = {
                 'input_ids': input_ids,
-                "attention_mask": attention_mask,
-                "position_ids": np.stack([position_ids,block_position_ids],axis=0),
                 'labels': labels,
                 'seqlen': seqlen
             }
@@ -224,11 +211,31 @@ class NN_DataHelper(DataHelper):
         for k in o:
             o[k] = torch.stack(o[k])
 
-        seqlens = o.pop('seqlen')
-        max_len = torch.max(seqlens)
-        o['input_ids'] = o['input_ids'][:, :max_len].long()
-        o['attention_mask'] = o['attention_mask'][:,:, :max_len,:max_len].bool()
-        o['position_ids'] = o['position_ids'][:,:, :max_len].long()
+
+        max_len = torch.max( o.pop('seqlen')).tolist()
+        b_input_ids = o['input_ids'][:, :max_len]
+        b_position_ids,b_attention_mask = [],[]
+        for input_ids in b_input_ids:
+            seq_length = input_ids.tolist().index(self.sptoken[-1])
+            mask_position = seq_length - 1
+            position_ids = list(range(seq_length)) + [mask_position] * (max_len - seq_length)
+            block_position_ids = [0] * seq_length + list(range(1, max_len - seq_length + 1))
+
+
+            attention_mask = torch.ones((1, max_len, max_len))
+            attention_mask = torch.tril(attention_mask)
+            attention_mask[..., :seq_length] = 1
+            attention_mask = (attention_mask < 0.5)
+
+            b_position_ids.append(torch.stack((torch.tensor(position_ids),torch.tensor(block_position_ids))))
+            b_attention_mask.append(attention_mask)
+
+        b_attention_mask = torch.stack(b_attention_mask, dim=0)
+        b_position_ids = torch.stack(b_position_ids,dim=0)
+
+        o['input_ids'] = b_input_ids.long()
+        o['attention_mask'] = b_attention_mask.bool()
+        o['position_ids'] = b_position_ids.long()
         o['labels'] = o['labels'][:, :max_len].long()
         return o
 
