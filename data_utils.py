@@ -111,16 +111,17 @@ class NN_DataHelper(DataHelper):
         b_ids = tokenizer.encode(text=answer, add_special_tokens=False)
 
         input_ids_qa = a_ids + self.sptoken + b_ids + [tokenizer.eos_token_id] * 2
+        q_length = input_ids_qa.index(self.sptoken[-1])
         pos = 0
         while pos < len(input_ids_qa):
             if self.sptoken[0] in input_ids_qa[pos:max_seq_length] and self.sptoken[1] in input_ids_qa[pos:max_seq_length]:
                 input_ids = input_ids_qa[pos:max_seq_length]
                 pos += max_seq_length
             elif self.sptoken[0] in input_ids_qa[pos:max_seq_length]:
-                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -1]
+                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -1] if pos < q_length else input_ids_qa[pos:max_seq_length -1] +self.sptoken
                 pos += max_seq_length - 1
             else:
-                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -2]
+                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -2] if pos < q_length else input_ids_qa[pos:max_seq_length -2] +self.sptoken
                 pos += max_seq_length - 2
 
 
