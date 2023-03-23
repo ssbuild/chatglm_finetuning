@@ -118,10 +118,10 @@ class NN_DataHelper(DataHelper):
                 input_ids = input_ids_qa[pos:max_seq_length]
                 pos += max_seq_length
             elif self.sptoken[0] in input_ids_qa[pos:max_seq_length]:
-                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -1] if pos < q_length else input_ids_qa[pos:max_seq_length -1] +self.sptoken
+                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -1] if pos > q_length else input_ids_qa[pos:max_seq_length -1] +self.sptoken
                 pos += max_seq_length - 1
             else:
-                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -2] if pos < q_length else input_ids_qa[pos:max_seq_length -2] +self.sptoken
+                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -2] if pos > q_length else input_ids_qa[pos:max_seq_length -2] +self.sptoken
                 pos += max_seq_length - 2
 
 
