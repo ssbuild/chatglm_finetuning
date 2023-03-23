@@ -216,9 +216,10 @@ class NN_DataHelper(DataHelper):
         b_input_ids = o['input_ids'][:, :max_len]
         b_position_ids,b_attention_mask = [],[]
         for input_ids in b_input_ids:
-            seq_length = input_ids.tolist().index(self.sptoken[-1])
+            context_length = input_ids.tolist().index(self.sptoken[-1]) + 1
+            seq_length = context_length - 1
             mask_position = seq_length - 1
-            position_ids = list(range(seq_length)) + [mask_position] * (max_len - seq_length)
+            position_ids = list(range(context_length)) + [mask_position] * (max_len - context_length)
             block_position_ids = [0] * seq_length + list(range(1, max_len - seq_length + 1))
 
 
