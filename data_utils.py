@@ -69,6 +69,7 @@ enable_deepspeed = False
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
+    'random_prompt': True
 }
 
 assert data_conf['stride'] > 0
@@ -112,7 +113,7 @@ class NN_DataHelper(DataHelper):
         input_ids_all = []
         for examples in examples_batch:
             for idx, (sid, q, a) in enumerate(examples):
-                text = "[Round {}]\n问：{}\n答：{}".format(sid, q, a)
+                text = "[Round {}]\n问：{}\n答：".format(sid, q, a)
                 input_ids = tokenizer.encode(text=text, add_special_tokens=False)
                 if len(input_ids) <= 3:
                     continue
@@ -204,7 +205,8 @@ class NN_DataHelper(DataHelper):
     def collate_fn(self,batch):
         if not hasattr(self,'sptoken'):
             self.sptoken = self.tokenizer.encode(text="")[-2:]
-            
+
+        random_prompt = data_conf['random_prompt']
         o = {}
         for i, b in enumerate(batch):
             if i == 0:
@@ -218,8 +220,11 @@ class NN_DataHelper(DataHelper):
 
         seqlens = o.pop('seqlen')
         input_ids = o['input_ids']
-        # p = np.random.randint(1, torch.min(seqlens)-1, dtype=np.int64).tolist()
-        p = 0
+
+        if random_prompt:
+            p = np.random.randint(0, torch.min(seqlens)-1, dtype=np.int64).tolist()
+        else:
+            p = 0
         da = torch.tensor(self.sptoken,dtype=input_ids.dtype)
         da = da.unsqueeze(0).expand(input_ids.size(0),da.size(0))
 
