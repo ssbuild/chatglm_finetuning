@@ -114,14 +114,14 @@ class NN_DataHelper(DataHelper):
         q_length = input_ids_qa.index(self.sptoken[-1])
         pos = 0
         while pos < len(input_ids_qa):
-            if self.sptoken[0] in input_ids_qa[pos:max_seq_length] and self.sptoken[1] in input_ids_qa[pos:max_seq_length]:
-                input_ids = input_ids_qa[pos:max_seq_length]
+            if self.sptoken[0] in input_ids_qa[pos:pos + max_seq_length] and self.sptoken[1] in input_ids_qa[pos:pos + max_seq_length]:
+                input_ids = input_ids_qa[pos:pos + max_seq_length]
                 pos += max_seq_length
-            elif self.sptoken[0] in input_ids_qa[pos:max_seq_length]:
-                input_ids = input_ids_qa[pos:max_seq_length -1] + [self.sptoken[-1]]
+            elif self.sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
+                input_ids = input_ids_qa[pos:pos + max_seq_length -1] + [self.sptoken[-1]]
                 pos += max_seq_length - 1
             else:
-                input_ids = self.sptoken + input_ids_qa[pos:max_seq_length -2] if pos > q_length else input_ids_qa[pos:max_seq_length -2] +self.sptoken
+                input_ids = self.sptoken + input_ids_qa[pos:pos + max_seq_length -2] if pos > q_length else input_ids_qa[pos:pos + max_seq_length -2] +self.sptoken
                 pos += max_seq_length - 2
 
             seq_length = input_ids.index(self.sptoken[-1])
