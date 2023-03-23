@@ -69,7 +69,7 @@ enable_deepspeed = False
 data_conf = {
     'stride': 50,
     'count_per_group': 1,
-    'random_prompt': True
+    'random_prompt': False
 }
 
 assert data_conf['stride'] > 0
