@@ -1,7 +1,7 @@
-# 状态  （重新制定数据策略，更新中........）
+# 状态  （已更新会话策略 ， 欢迎指正）
    
     支持 lora finetuning
-    推荐 deep_training>=0.0.19
+    推荐 deep_training>=0.0.20
 
 
 ## 安装
