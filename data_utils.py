@@ -204,7 +204,7 @@ class NN_DataHelper(DataHelper):
                                 prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
                             else:
                                 prompt_text += "[Round {}]\n问：{}\n答：{}".format(sid, paragraph[j][0], paragraph[j][1])
-                        D.append((prompt_text + q,a))
+                        D.append((prompt_text,a))
         return D
 
     def collate_fn(self,batch):
