@@ -38,6 +38,7 @@ if __name__ == '__main__':
 
 
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
+    config.initializer_weight = False
 
     lora_args = LoraArguments.from_pretrained('./best_ckpt')
 

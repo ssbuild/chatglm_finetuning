@@ -32,6 +32,7 @@ if __name__ == '__main__':
     # 官方28层
     config.precision = None
     config.num_layers = 28
+    config.initializer_weight = False
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
 
     model.eval()

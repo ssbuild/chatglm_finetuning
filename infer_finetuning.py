@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
 import os
+import re
+from collections import OrderedDict
+
 import torch
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
 from deep_training.nlp.models.chatglm import TransformerChatGlmLMHeadModel, setup_model_profile, ChatGLMConfig,ChatGLMForConditionalGeneration
@@ -33,6 +36,7 @@ if __name__ == '__main__':
     ###################### 注意 选最新权重
     #选择最新的权重 ， 根据时间排序 选最新的
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
+    config.initializer_weight = False
 
     if get_deepspeed_config() is None:
         train_weight = './best_ckpt/last-v3.ckpt'
@@ -40,7 +44,7 @@ if __name__ == '__main__':
         model = MyTransformer.load_from_checkpoint(train_weight, config=config,
                                                    model_args=model_args,
                                                    training_args=training_args,
-                                                   strict=False)
+                                                   strict=True)
     else:
         #deepspeed权重 两张方式加载权重
         # 1.权重转换
@@ -53,8 +57,12 @@ if __name__ == '__main__':
         #2. 直接加载权重
         train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
         assert os.path.exists(train_weight)
+        weights_dict = torch.load(train_weight)['module']
+        weights_dict_new = OrderedDict()
+        for k,v in weights_dict.items():
+            weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
         model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-        model.load_state_dict(state_dict= torch.load(train_weight), strict=False)
+        model.load_state_dict(state_dict= weights_dict_new, strict=True)
 
 
 
