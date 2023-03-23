@@ -142,6 +142,7 @@ class NN_DataHelper(DataHelper):
             attention_mask = np.asarray(attention_mask, dtype=np.int32)
             position_ids = np.asarray(position_ids, dtype=np.int32)
             block_position_ids = np.asarray(block_position_ids, dtype=np.int32)
+            labels = np.asarray(labels, dtype=np.int32)
 
             if pad_len:
                 pad_val = tokenizer.pad_token_id
