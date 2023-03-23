@@ -29,12 +29,12 @@ PROMPT_DICT = {
     "prompt_input": (
         "下面是一个指令,描述了一个任务,搭配一个输入,提供进一步的上下文。"
         "编写适当完成请求的响应。\n\n"
-        "### 指令:\n{instruction}\n\n### 输入:\n{input}\n\n### 输出:"
+        "### 指令:\n{instruction}\n\n### 输入:\n{input}\n\n### 响应:"
     ),
     "prompt_no_input": (
         "下面是一个指令,描述了一个任务。"
         "编写适当完成请求的响应。\n\n"
-        "### 指令:\n{instruction}\n\n### 输出:"
+        "### 指令:\n{instruction}\n\n### 响应:"
     ),
 }
 
