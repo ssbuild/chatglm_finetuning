@@ -131,6 +131,7 @@ class SPTokenizer:
 
     def decode(self, text_ids: List[int], special_tokens=False) -> str:
         ids = [int(_id) - self.num_image_tokens for _id in text_ids]
+        ids = [_id for _id in ids if _id >= 0]
         text = self._get_text_tokenizer(encode_special_tokens=special_tokens).decode(ids)
         text = text.replace("<n>", "\n")
         text = text.replace(SPTokenizer.get_tab_token(), "\t")
