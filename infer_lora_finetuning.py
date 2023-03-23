@@ -37,7 +37,6 @@ if __name__ == '__main__':
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
 
-
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
 
     lora_args = LoraArguments.from_pretrained('./best_ckpt')
@@ -47,7 +46,6 @@ if __name__ == '__main__':
     model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
     # 加载lora权重
     model.backbone.from_pretrained(model.backbone.model, pretrained_model_name_or_path = './best_ckpt', lora_config = lora_args)
-
 
     model.eval()
 

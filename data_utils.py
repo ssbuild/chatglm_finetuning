@@ -67,12 +67,9 @@ train_info_args = {
 enable_deepspeed = False
 
 data_conf = {
-    'stride': 50,
-    'count_per_group': 1,
     'random_prompt': False
 }
 
-assert data_conf['stride'] > 0
 
 def get_deepspeed_config():
     # 是否开启deepspeed
@@ -102,50 +99,68 @@ class NN_DataHelper(DataHelper):
     # 切分词
     def on_data_process(self, data: typing.Any, mode: str):
         self.index += 1
+        prompt = data[0]
+        answer = data[1]
 
         tokenizer: ChatGLMTokenizer
         max_seq_length = self.max_seq_length_dict[mode]
         tokenizer = self.tokenizer
 
-        stride = data_conf['stride']
-        examples_batch = data
-
-        input_ids_all = []
-        for examples in examples_batch:
-            for idx, (sid, q, a) in enumerate(examples):
-                text = "[Round {}]\n问：{}\n答：".format(sid, q, a)
-                input_ids = tokenizer.encode(text=text, add_special_tokens=False)
-                if len(input_ids) <= 3:
-                    continue
-                input_ids_all += input_ids
-
-            input_ids_all += [tokenizer.eos_token_id] * 2
-
         if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
 
-        pos = 0
         ds = []
-        while pos < len(input_ids_all):
-            input_ids_ = input_ids_all[pos: pos + max_seq_length - len(self.sptoken)]
-            pos += stride
-            if len(input_ids_) <= 5:
-                continue
+        a_ids = tokenizer.encode(text=prompt, add_special_tokens=False)
+        b_ids = tokenizer.encode(text=answer, add_special_tokens=False)
 
-            input_ids = input_ids_
+        input_ids_qa = a_ids + self.sptoken + b_ids + [tokenizer.eos_token_id] * 2
+        pos = 0
+        while pos < len(input_ids_qa):
+            if self.sptoken[0] in input_ids_qa[pos:max_seq_length] and self.sptoken[1] in input_ids_qa[pos:max_seq_length]:
+                input_ids = input_ids_qa[pos:max_seq_length]
+                pos += max_seq_length
+            elif self.sptoken[0] in input_ids_qa[pos:max_seq_length]:
+                input_ids = input_ids_qa[pos:max_seq_length -1] + self.sptoken
+                pos += max_seq_length - 1
+            else:
+                input_ids = input_ids_qa[pos:max_seq_length -2] + self.sptoken
+                pos += max_seq_length - 2
+
+
+            seq_length = input_ids.index(self.sptoken[-1])
+            mask_position = seq_length - 1
+            position_ids = list(range(seq_length)) + [mask_position] * (max_seq_length - seq_length)
+            block_position_ids = [0] * seq_length + list(range(1,max_seq_length - seq_length + 1))
+
+            attention_mask = np.ones((1, max_seq_length,max_seq_length))
+            attention_mask = np.tril(attention_mask)
+            attention_mask[..., :seq_length] = 1
+            attention_mask = (attention_mask < 0.5)
+            labels = [-100] * seq_length + input_ids[mask_position+1:]
+
             seqlen = np.asarray(len(input_ids), dtype=np.int32)
             pad_len = max_seq_length - seqlen
             input_ids = np.asarray(input_ids, dtype=np.int32)
+            attention_mask = np.asarray(attention_mask, dtype=np.int32)
+            position_ids = np.asarray(position_ids, dtype=np.int32)
+            block_position_ids = np.asarray(block_position_ids, dtype=np.int32)
+
             if pad_len:
                 pad_val = tokenizer.pad_token_id
                 input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
+                labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
 
             d = {
                 'input_ids': input_ids,
+                "attention_mask": attention_mask,
+                "position_ids": np.stack([position_ids,block_position_ids],axis=0),
+                'labels': labels,
                 'seqlen': seqlen
             }
             ds.append(d)
 
+        if not ds:
+            return None
 
         if self.index < 3:
             print(ds[0])
@@ -166,47 +181,39 @@ class NN_DataHelper(DataHelper):
     #     # 二轮....
     # ]
     # }
+
     # 读取文件
-
     def on_get_corpus(self, files: typing.List, mode: str):
-
-        COUNT_PER_GROUP = data_conf['count_per_group']
         D = []
-        qa_batch = []
         for file in files:
             with open(file, mode='r', encoding='utf-8', newline='\n') as f:
                 lines = f.readlines()
 
-            for i, line in enumerate(lines):
+            for line_id, line in enumerate(lines):
                 jd = json.loads(line)
                 if not jd:
                     continue
                 paragraph = jd['paragraph']
-                if i < 10:
+                if line_id < 10:
                     print(paragraph)
-                qa = []
-                for sid,session in enumerate(paragraph):
-                    q = session['q']
-                    answers_list = session['a']
-                    q = preprocess(q)
-                    answers = ''
-                    for a in answers_list:
-                        answers += preprocess(a + '\n')
-                    qa.append((sid,q,answers))
-                qa_batch.append(qa)
-                if len(qa_batch) >= COUNT_PER_GROUP:
-                    D.append(copy.deepcopy(qa_batch))
-                    qa_batch.clear()
-        if len(qa_batch):
-            D.append(copy.deepcopy(qa_batch))
-            qa_batch.clear()
+                paragraph = [(preprocess(session['q']),preprocess('\n'.join(session['a']))) for session in paragraph]
+                for sid,(q,a) in enumerate(paragraph):
+                    if sid == 0:
+                        D.append((q, a))
+                    else:
+                        prompt_text = ''
+                        for j in range(sid + 1):
+                            if j == sid:
+                                prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
+                            else:
+                                prompt_text += "[Round {}]\n问：{}\n答：{}".format(sid, paragraph[j][0], paragraph[j][1])
+                        D.append((prompt_text + q,a))
         return D
 
     def collate_fn(self,batch):
         if not hasattr(self,'sptoken'):
             self.sptoken = self.tokenizer.encode(text="")[-2:]
 
-        random_prompt = data_conf['random_prompt']
         o = {}
         for i, b in enumerate(batch):
             if i == 0:
@@ -219,21 +226,11 @@ class NN_DataHelper(DataHelper):
             o[k] = torch.stack(o[k])
 
         seqlens = o.pop('seqlen')
-        input_ids = o['input_ids']
-
-        if random_prompt:
-            p = np.random.randint(0, torch.min(seqlens)-1, dtype=np.int64).tolist()
-        else:
-            p = 0
-        da = torch.tensor(self.sptoken,dtype=input_ids.dtype)
-        da = da.unsqueeze(0).expand(input_ids.size(0),da.size(0))
-
-        input_ids = torch.cat([input_ids[:,:p],da,input_ids[:,p:]],dim=1)
-        labels = torch.clone(input_ids)
-        labels[:,:p+1]= -100
-        max_len = torch.max(seqlens) + len(self.sptoken)
-        o['input_ids'] = input_ids[:, :max_len].long()
-        o['labels'] = labels[:, :max_len].long()
+        max_len = torch.max(seqlens)
+        o['input_ids'] = o['input_ids'][:, :max_len].long()
+        o['attention_mask'] = o['attention_mask'][:,:, :max_len,:max_len].bool()
+        o['position_ids'] = o['position_ids'][:,:, :max_len].long()
+        o['labels'] = o['labels'][:, :max_len].long()
         return o
 
 

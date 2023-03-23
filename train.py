@@ -17,6 +17,7 @@ from transformers import HfArgumentParser
 
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, preprocess, postprocess
 from tokenization_chatglm import ChatGLMTokenizer
+from torch import nn
 
 
 class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
@@ -24,6 +25,16 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
         lora_args: LoraArguments = kwargs.pop('lora_args')
         super(MyTransformer, self).__init__(*args, **kwargs)
         self.lora_args = lora_args
+
+
+        # 非 lora模式冻结示例
+        # assert lora_args.with_lora = False
+        # need_frozen_list = []
+        # M: nn.Module = self.backbone
+        # for param in M.named_parameters():
+        #     if param[0] in need_frozen_list:
+        #         param[1].requires_grad = False
+
         if lora_args.with_lora:
             model = LoraModel(self.backbone, lora_args)
             print('*' * 30,'lora info')
@@ -166,7 +177,7 @@ if __name__ == '__main__':
 
         #deepspeed 保证整批次
         def dataset_loader_filter_fn(dataset):
-            host_num = 1
+            host_num = 1 # 机器数量
             limit_count = len(dataset)
             limit_count = int(limit_count // (data_args.devices * training_args.train_batch_size * host_num)) * (data_args.devices * training_args.train_batch_size * host_num)
             return dataset.limit(int(limit_count))
@@ -195,10 +206,14 @@ if __name__ == '__main__':
                                                        lora_args=lora_args)
             input_sample = (
                 ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
+                ("attention_mask", torch.ones(size=(1, 1,128,128), dtype=torch.int32)),
+                ("position_ids", torch.ones(size=(1, 2, 128), dtype=torch.int32)),
             )
-            input_names = ("input_ids",)
+            input_names = ("input_ids",'attention_mask','position_ids')
             output_names = ("pred_ids",)
             dynamic_axes = None or {"input_ids": [0, 1],
+                                    "attention_mask": [0, 0,1,1],
+                                    "position_ids": [0, 0,1],
                                     "pred_ids": [0, 1]}
             model.convert_to_onnx('./best_ckpt/best.onnx',
                                   input_sample=input_sample,
