@@ -39,7 +39,7 @@ if __name__ == '__main__':
     config.initializer_weight = False
 
     deep_config = get_deepspeed_config()
-    if get_deepspeed_config() is None:
+    if deep_config is None:
         train_weight = './best_ckpt/last-v3.ckpt'
         assert os.path.exists(train_weight)
         model = MyTransformer.load_from_checkpoint(train_weight, config=config,
