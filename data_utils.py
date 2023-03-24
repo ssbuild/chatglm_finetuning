@@ -192,7 +192,7 @@ class NN_DataHelper(DataHelper):
                             if j == sid:
                                 prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
                             else:
-                                prompt_text += "[Round {}]\n问：{}\n答：{}".format(sid, paragraph[j][0], paragraph[j][1])
+                                prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
                         D.append((prompt_text,a))
         return D
 
