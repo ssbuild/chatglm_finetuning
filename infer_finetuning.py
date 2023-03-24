@@ -38,6 +38,7 @@ if __name__ == '__main__':
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
     config.initializer_weight = False
 
+    deep_config = get_deepspeed_config()
     if get_deepspeed_config() is None:
         train_weight = './best_ckpt/last-v3.ckpt'
         assert os.path.exists(train_weight)
@@ -46,23 +47,26 @@ if __name__ == '__main__':
                                                    training_args=training_args,
                                                    strict=True)
     else:
-        #deepspeed权重 两张方式加载权重
-        # 1.权重转换
-        # from lightning.pytorch.utilities.deepspeed import convert_zero_checkpoint_to_fp32_state_dict
-        # convert_zero_checkpoint_to_fp32_state_dict('./best_ckpt/last.ckpt/checkpoint','./best_ckpt/last.ckpt')
-        # assert os.path.exists('./best_ckpt/last.ckpt')
-        # model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-        # model.load_state_dict(state_dict=torch.load('./best_ckpt/last.ckpt'), strict=False)
-
-        #2. 直接加载权重
-        train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
-        assert os.path.exists(train_weight)
-        weights_dict = torch.load(train_weight)['module']
-        weights_dict_new = OrderedDict()
-        for k,v in weights_dict.items():
-            weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
-        model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-        model.load_state_dict(state_dict= weights_dict_new, strict=True)
+        if deep_config['zero_optimization']['stage'] == 3:
+            train_weight = './best_ckpt/last.ckpt/best.pt'
+            # deepspeed stage 0,1,2,3均可以
+            from lightning.pytorch.utilities.deepspeed import convert_zero_checkpoint_to_fp32_state_dict
+            convert_zero_checkpoint_to_fp32_state_dict('./best_ckpt/last.ckpt/',train_weight)
+            assert os.path.exists(train_weight)
+            model = MyTransformer.load_from_checkpoint(train_weight, config=config,
+                                                       model_args=model_args,
+                                                       training_args=training_args,
+                                                       strict=True)
+        else:
+            # deepspeed stage 0,1,2 简单 , 也可以用上面方法转换
+            train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
+            assert os.path.exists(train_weight)
+            weights_dict = torch.load(train_weight)['module']
+            weights_dict_new = OrderedDict()
+            for k,v in weights_dict.items():
+                weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
+            model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+            model.load_state_dict(state_dict= weights_dict_new, strict=True)
 
 
 
