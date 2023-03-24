@@ -35,6 +35,8 @@ train_info_args = {
     'max_epochs': 20,
     'max_steps': -1,
     'optimizer': 'lion', # one of adamw,adam,lamb,lion
+    'scheduler_type': 'linear',
+    'optimizer_betas': (0.9, 0.999),
     'train_batch_size': 4,
     'eval_batch_size': 2,
     'test_batch_size': 2,
@@ -45,8 +47,8 @@ train_info_args = {
     'weight_decay': 0,
     'warmup_steps': 0,
     'output_dir': './output',
-    'max_seq_length': 512,
-    'max_target_length': 100,  # 预测最大长度
+    'max_seq_length': 1024, # 如果资源充足，推荐长度2048 与官方保持一致
+    'max_target_length': 100,  # 预测最大长度, 保留字段
     'use_fast_tokenizer': False,
     'do_lower_case': False,
 

@@ -19,10 +19,14 @@ class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
         super(MyTransformer, self).__init__(*args, **kwargs)
 
 
+deep_config = get_deepspeed_config()
+
 
 
 if __name__ == '__main__':
     train_info_args['seed'] = None
+    train_info_args['model_name_or_path'] = None
+
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
 
@@ -38,50 +42,39 @@ if __name__ == '__main__':
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
     config.initializer_weight = False
 
-    deep_config = get_deepspeed_config()
+
     if deep_config is None:
         train_weight = './best_ckpt/last-v3.ckpt'
         assert os.path.exists(train_weight)
-        model = MyTransformer.load_from_checkpoint(train_weight, config=config,
-                                                   model_args=model_args,
-                                                   training_args=training_args,
-                                                   strict=True)
+        model = MyTransformer.load_from_checkpoint(train_weight, config=config,model_args=model_args,training_args=training_args)
     else:
-        if deep_config['zero_optimization']['stage'] == 3:
-            train_weight = './best_ckpt/last.ckpt/best.pt'
-            # deepspeed stage 0,1,2,3均可以
-            from lightning.pytorch.utilities.deepspeed import convert_zero_checkpoint_to_fp32_state_dict
-            convert_zero_checkpoint_to_fp32_state_dict('./best_ckpt/last.ckpt/',train_weight)
-            assert os.path.exists(train_weight)
-            model = MyTransformer.load_from_checkpoint(train_weight, config=config,
-                                                       model_args=model_args,
-                                                       training_args=training_args,
-                                                       strict=True)
-        else:
-            # deepspeed stage 0,1,2 简单 , 也可以用上面方法转换
-            train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
-            assert os.path.exists(train_weight)
-            weights_dict = torch.load(train_weight)['module']
-            weights_dict_new = OrderedDict()
-            for k,v in weights_dict.items():
-                weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
-            model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-            model.load_state_dict(state_dict= weights_dict_new, strict=True)
 
+        #建议直接使用转换脚本命令 支持 deepspeed stage 0,1,2,3， 生成 ./best_ckpt/last.ckpt/best.pt 权重文件
+        # cd best_ckpt/last.ckpt
+        # python zero_to_fp32.py . best.pt
+        train_weight = './best_ckpt/last.ckpt/best.pt'
 
+        #deepspeed stage 0,1,2 不必须执行上面命令
+        #train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
 
-
-
+        assert os.path.exists(train_weight)
+        weights_dict = torch.load(train_weight)['module']
+        weights_dict_new = OrderedDict()
+        for k,v in weights_dict.items():
+            weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
+        model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+        model.load_state_dict(state_dict= weights_dict_new, strict=True)
 
     base_model: ChatGLMForConditionalGeneration = model.backbone.model
     # 按需修改，目前只支持 4/8 bit 量化
-    base_model.half().quantize(4).to(torch.device('cuda:0'))
+    base_model.half().quantize(4).cuda()
     base_model = base_model.eval()
 
-    response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=1024)
+    #注意 长度不等于2048 会影响效果
+    response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,eos_token_id=config.eos_token_id)
     print('写一个诗歌，关于冬天',' ',response)
 
-    response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=1024)
+    response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=2048,eos_token_id=config.eos_token_id)
     print('晚上睡不着应该怎么办',' ',response)
 
 

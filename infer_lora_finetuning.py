@@ -50,13 +50,13 @@ if __name__ == '__main__':
 
     base_model: ChatGLMForConditionalGeneration = model.backbone.model.model
     # 按需修改
-    base_model.half().to(torch.device('cuda:0'))
+    base_model.half().cuda()
     base_model = base_model.eval()
 
-    response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=1024)
+    response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,eos_token_id=config.eos_token_id)
     print('写一个诗歌，关于冬天',' ',response)
 
-    response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=1024)
+    response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=2048,eos_token_id=config.eos_token_id)
     print('晚上睡不着应该怎么办',' ',response)
 
 

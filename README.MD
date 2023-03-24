@@ -1,35 +1,29 @@
-# 状态  （已更新会话策略 ， 欢迎指正）
-   
-    支持 lora finetuning
-    推荐 deep_training>=0.0.20
 
 
-## 安装
-  - pip install -U deep_training >= 0.0.20 cpm_kernels icetk transformers>=4.26.1 deepspeed
-  - 为了统一各种问题， deep_training 最低要求 0.0.20 
+## 1.安装
+  - pip install -U deep_training >= 0.0.21 cpm_kernels icetk transformers>=4.26.1 deepspeed
+  - 为了统一各种问题， deep_training 最低要求 0.0.21
 
 
-## 更新详情
-   - 2023年3月21 deep_training 0.0.20 lora 加载权重继续训练 , 修改会话编码 ，权重精度自适应
-   - 2023年3月20 deep_training 0.0.18.post9 简化chat函数，增加流式输出接口stream_chat
-   - 2023年3月19 deep_training 0.0.18.post8 解决数据deepspeed 各个进程数据不均等情况（在deepspeed 会遇到卡等问题）
-
+## 2.更新详情
 - [deep_training](https://github.com/ssbuild/deep_training)
 
-## 深度学习常规任务例子
+## 3.深度学习常规任务例子
 
 - [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
 - [tf-task-example](https://github.com/ssbuild/tf-task-example)
 
 
 
-## ChatGLM 预训练权重
-    https://huggingface.co/THUDM/chatglm-6b
+## 4.ChatGLM 预训练权重
+
+[chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+    
 
 
 
 
-## 数据示例
+## 5.数据示例
     给出一种qa 数据示例 , 如果想跟母模型保持一致，可以参考https://huggingface.co/THUDM/chatglm-6b 数据组织结构.
     单条数据示例1
     {
@@ -71,7 +65,7 @@
 
 
 
-## 生成训练record
+## 6.生成训练record
 
     python data_utils.py
     
@@ -80,7 +74,7 @@
     dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False, shuffle=True,mode='train',num_process_worker=0)
 
 
-## 推理
+## 7.推理
     # infer.py 推理预训练模型
     # infer_finetuning.py 推理微调模型
     # infer_lora_finetuning.py 推理微调模型
@@ -98,22 +92,22 @@
 
 ![inference](1.png)
 
-## 训练
+## 8.训练
     完整参数为 config.json
     若显存不足 ， 可以修改 config_small.json num_layers 层数
     训练精度 可以修改 config_small.json precision 16 32
     python train.py
 
 
-## 是否开启lora finetuning
+## 9.是否开启lora finetuning
 
     with_lora
 
-## 是否开启deepspeed
+## 10.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
     lora 模式暂时不支持deepspeed
 
 
 
-## Reference
+## 11. Reference
     https://github.com/THUDM/ChatGLM-6B
