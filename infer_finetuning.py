@@ -58,9 +58,9 @@ if __name__ == '__main__':
         #train_weight = './best_ckpt/last.ckpt/checkpoint/mp_rank_00_model_states.pt'
 
         assert os.path.exists(train_weight)
-        weights_dict = torch.load(train_weight)['module']
+        weights_dict = torch.load(train_weight)
         weights_dict_new = OrderedDict()
-        for k,v in weights_dict.items():
+        for k,v in (weights_dict['module'] if 'module' in weights_dict else weights_dict).items():
             weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
         model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
         model.load_state_dict(state_dict= weights_dict_new, strict=True)
