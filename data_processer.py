@@ -118,7 +118,7 @@ class TokenSingleSliding:
                 'seqlen': seqlen
             }
             ds.append(d)
-
+        return ds
 
 # 对prompt sliding
 class TokenDoubleSliding:
@@ -176,3 +176,4 @@ class TokenDoubleSliding:
                 'seqlen': seqlen
             }
             ds.append(d)
+        return ds
