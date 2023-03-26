@@ -78,11 +78,11 @@ data_conf = {
         'ensure_answer_min_length': 1,
     },
     DataStrategy.singlesliding: {
-        'sliding_size': 50, #prompt滑动窗口大学
+        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #prompt滑动窗口大学
         'p':1, # p < 0 , 随机选举prompt
     },
     DataStrategy.doublesliding: {
-        'sliding_size': 50, #双滑滑动窗口大学
+        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #双滑滑动窗口大学
         'p':1,# p < 0 , 随机选举prompt
     },
 }
