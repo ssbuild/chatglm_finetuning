@@ -131,12 +131,13 @@ class NN_DataHelper(DataHelper):
         a_ids = tokenizer.encode(text=prompt, add_special_tokens=False)
         b_ids = tokenizer.encode(text=answer, add_special_tokens=False)
 
-        if data_conf['strategy'] == DataStrategy.truncation:
-            ds = TokenTruncation.process(tokenizer,a_ids, b_ids, max_seq_length, self.sptoken ,**data_conf[DataStrategy.truncation])
-        elif data_conf['strategy'] == DataStrategy.singlesliding:
-            ds = TokenSingleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[DataStrategy.truncation])
-        elif data_conf['strategy'] == DataStrategy.doublesliding:
-            ds = TokenDoubleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[DataStrategy.truncation])
+        strategy = data_conf['strategy']
+        if strategy == DataStrategy.truncation:
+            ds = TokenTruncation.process(tokenizer,a_ids, b_ids, max_seq_length, self.sptoken ,**data_conf[strategy])
+        elif strategy == DataStrategy.singlesliding:
+            ds = TokenSingleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
+        elif strategy == DataStrategy.doublesliding:
+            ds = TokenDoubleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
         else:
             raise ValueError('Invlid strategy',data_conf['strategy'])
 
