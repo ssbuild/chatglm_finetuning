@@ -100,6 +100,9 @@
     完整参数为 config.json
     若显存不足 ， 可以修改 config_small.json num_layers 层数
     训练精度 可以修改 config_small.json precision 16 32
+
+    如果优化器不是lion ,可以尝试将config/config_small.json precision 改为32 ，然后修改 train.py Trainner 添加参数 precision=16 或者precision='bf16' 
+    
     python train.py
 
 
