@@ -19,6 +19,8 @@ from deep_training.utils.func import is_chinese_char
 from fastdatasets.record import load_dataset as Loader, RECORD, WriterObject, gfile
 from tqdm import tqdm
 from transformers import HfArgumentParser
+
+from data_processer import DataStrategy, TokenTruncation, TokenSingleSliding, TokenDoubleSliding
 from tokenization_chatglm import ChatGLMTokenizer
 
 train_info_args = {
@@ -70,6 +72,23 @@ enable_deepspeed = False
 
 
 
+data_conf = {
+    'strategy': DataStrategy.truncation, # 数据策略选项
+    DataStrategy.truncation: {
+        'ensure_answer_min_length': 1,
+    },
+    DataStrategy.singlesliding: {
+        'sliding_size': 50, #prompt滑动窗口大学
+        'p':1, # p < 0 , 随机选举prompt
+    },
+    DataStrategy.doublesliding: {
+        'sliding_size': 50, #双滑滑动窗口大学
+        'p':1,# p < 0 , 随机选举prompt
+    },
+}
+
+
+
 def get_deepspeed_config():
     # 是否开启deepspeed
     if not enable_deepspeed:
@@ -85,6 +104,7 @@ def preprocess(text):
 def postprocess(text):
   # return text.replace("\\n", "\n").replace("\\t", "\t")
   return text
+
 
 
 class NN_DataHelper(DataHelper):
@@ -108,44 +128,17 @@ class NN_DataHelper(DataHelper):
         if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
 
-        ds = []
         a_ids = tokenizer.encode(text=prompt, add_special_tokens=False)
         b_ids = tokenizer.encode(text=answer, add_special_tokens=False)
 
-        input_ids_qa = a_ids + self.sptoken + b_ids + [tokenizer.eos_token_id] * 2
-        q_length = input_ids_qa.index(self.sptoken[-1])
-        pos = 0
-        while pos < len(input_ids_qa):
-            if self.sptoken[0] in input_ids_qa[pos:pos + max_seq_length] and self.sptoken[1] in input_ids_qa[pos:pos + max_seq_length]:
-                input_ids = input_ids_qa[pos:pos + max_seq_length]
-                pos += max_seq_length
-            elif self.sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
-                input_ids = input_ids_qa[pos:pos + max_seq_length -3] + self.sptoken
-                pos += max_seq_length - 3
-            else:
-                input_ids = self.sptoken + input_ids_qa[pos:pos + max_seq_length -2] if pos > q_length else input_ids_qa[pos:pos + max_seq_length -2] +self.sptoken
-                pos += max_seq_length - 2
-
-            seq_length = input_ids.index(self.sptoken[-1])
-            mask_position = seq_length - 1
-            labels = [-100] * seq_length + input_ids[mask_position+1:]
-
-            seqlen = np.asarray(len(input_ids), dtype=np.int32)
-            pad_len = max_seq_length - seqlen
-            input_ids = np.asarray(input_ids, dtype=np.int32)
-            labels = np.asarray(labels, dtype=np.int32)
-
-            if pad_len:
-                pad_val = tokenizer.pad_token_id
-                input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
-
-            d = {
-                'input_ids': input_ids,
-                'labels': labels,
-                'seqlen': seqlen
-            }
-            ds.append(d)
+        if data_conf['strategy'] == DataStrategy.truncation:
+            ds = TokenTruncation.process(tokenizer,a_ids, b_ids, max_seq_length, self.sptoken ,**data_conf[DataStrategy.truncation])
+        elif data_conf['strategy'] == DataStrategy.singlesliding:
+            ds = TokenSingleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[DataStrategy.truncation])
+        elif data_conf['strategy'] == DataStrategy.doublesliding:
+            ds = TokenDoubleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[DataStrategy.truncation])
+        else:
+            raise ValueError('Invlid strategy',data_conf['strategy'])
 
         if not ds:
             return None

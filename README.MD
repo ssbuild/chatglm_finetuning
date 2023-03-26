@@ -2,7 +2,7 @@
 
 ## 1.安装
   - pip install -U deep_training >= 0.0.21 cpm_kernels icetk transformers>=4.26.1 deepspeed
-  - 为了统一各种问题， deep_training 最低要求 0.0.21
+  - 为了统一各种问题， deep_training 最低要求 0.0.21@post0
 
 
 ## 2.更新详情
