@@ -139,7 +139,7 @@ class NN_DataHelper(DataHelper):
         elif strategy == DataStrategy.doublesliding:
             ds = TokenDoubleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
         else:
-            raise ValueError('Invlid strategy',data_conf['strategy'])
+            raise ValueError('Invlid strategy',strategy)
 
         if not ds:
             return None
