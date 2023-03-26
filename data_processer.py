@@ -75,7 +75,7 @@ class TokenSingleSliding:
 
         assert sliding_size < max_seq_length - 2
         while pos < len(input_ids_qa):
-            if pos + max_seq_length < a_length:
+            if pos + max_seq_length <= a_length:
                 input_ids = input_ids_qa[pos:pos + max_seq_length-2]
                 if p > 0:
                     input_ids.insert(-p,sptoken)
@@ -132,7 +132,7 @@ class TokenDoubleSliding:
 
         assert sliding_size < max_seq_length - 2
         while pos < len(input_ids_qa):
-            if pos + max_seq_length < a_length:
+            if pos + max_seq_length <= a_length:
                 input_ids = input_ids_qa[pos:pos + max_seq_length - 2]
                 if p > 0:
                     input_ids.insert(-p, sptoken)
