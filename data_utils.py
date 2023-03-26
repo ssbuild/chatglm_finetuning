@@ -73,16 +73,16 @@ enable_deepspeed = False
 
 
 data_conf = {
-    'strategy': DataStrategy.truncation, # 数据策略选项
+   'strategy': DataStrategy.truncation, # 数据策略选项
     DataStrategy.truncation: {
         'ensure_answer_min_length': 1,
     },
     DataStrategy.singlesliding: {
-        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #prompt滑动窗口大学
+        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #prompt滑动窗口大小
         'p':1, # p < 0 , 随机选举prompt
     },
     DataStrategy.doublesliding: {
-        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #双滑滑动窗口大学
+        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #双滑滑动窗口大小
         'p':1,# p < 0 , 随机选举prompt
     },
 }
