@@ -23,7 +23,7 @@ class TokenTruncation:
         ds = []
 
         assert ensure_answer_min_length > 0
-        input_ids_qa = a_ids[:max_seq_length-len(sptoken)-2-ensure_answer_min_length] + sptoken + b_ids + [tokenizer.eos_token_id] * 2
+        input_ids_qa = a_ids[:max_seq_length-len(sptoken)-ensure_answer_min_length] + sptoken + b_ids + [tokenizer.eos_token_id] * 2
         pos = 0
         while pos < len(input_ids_qa):
             if sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
