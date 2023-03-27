@@ -37,7 +37,28 @@ train_info_args = {
     'max_epochs': 20,
     'max_steps': -1,
     'optimizer': 'lion', # one of adamw,adam,lamb,lion
-    'scheduler_type': 'linear',
+
+
+    'scheduler_type': 'linear',# one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau
+    'scheduler': None,
+
+    # 切换scheduler类型
+    # 'scheduler_type': 'WarmupCosine',
+    # 'scheduler': None,
+
+    # 'scheduler_type': 'ReduceLROnPlateau',
+    # 'scheduler': None,
+
+    # 'scheduler_type': 'Step',
+    # 'scheduler':{ 'decay_rate': 0.999,'decay_steps': 100,'verbose': True},
+
+    # 'scheduler_type': 'CAWR',
+    # 'scheduler':{'T_mult': 1, 'rewarm_epoch_num': 2, 'verbose': True},
+
+    # 'scheduler_type': 'CAL',
+    # 'scheduler': {'rewarm_epoch_num': 2,'verbose': True},
+
+
     'optimizer_betas': (0.9, 0.999),
     'train_batch_size': 4,
     'eval_batch_size': 2,
