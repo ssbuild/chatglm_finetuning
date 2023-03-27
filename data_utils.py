@@ -143,8 +143,10 @@ class NN_DataHelper(DataHelper):
         answer = data[1]
 
         tokenizer: ChatGLMTokenizer
+        config: ChatGLMConfig
         max_seq_length = self.max_seq_length_dict[mode]
         tokenizer = self.tokenizer
+        config = self.config
 
         if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
@@ -152,13 +154,14 @@ class NN_DataHelper(DataHelper):
         a_ids = tokenizer.encode(text=prompt, add_special_tokens=False)
         b_ids = tokenizer.encode(text=answer, add_special_tokens=False)
 
+
         strategy = data_conf['strategy']
         if strategy == DataStrategy.truncation:
-            ds = TokenTruncation.process(tokenizer,a_ids, b_ids, max_seq_length, self.sptoken ,**data_conf[strategy])
+            ds = TokenTruncation.process(tokenizer,config,a_ids, b_ids, max_seq_length, self.sptoken ,**data_conf[strategy])
         elif strategy == DataStrategy.singlesliding:
-            ds = TokenSingleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
+            ds = TokenSingleSliding.process(tokenizer,config, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
         elif strategy == DataStrategy.doublesliding:
-            ds = TokenDoubleSliding.process(tokenizer, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
+            ds = TokenDoubleSliding.process(tokenizer,config, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
         else:
             raise ValueError('Invlid strategy',strategy)
 
@@ -263,9 +266,8 @@ if __name__ == '__main__':
     model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
-    tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
-                                                                                 config_class_name=ChatGLMConfig)
-
+    tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
+    config.eos_token_id = 150005
 
 
 

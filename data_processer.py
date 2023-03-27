@@ -19,11 +19,11 @@ class DataStrategy(Enum):
 class TokenTruncation:
 
     @classmethod
-    def process(cls, tokenizer: ChatGLMTokenizer, a_ids, b_ids, max_seq_length, sptoken: typing.List,ensure_answer_min_length=1):
+    def process(cls, tokenizer: ChatGLMTokenizer,config, a_ids, b_ids, max_seq_length, sptoken: typing.List,ensure_answer_min_length=1):
         ds = []
 
         assert ensure_answer_min_length > 0
-        input_ids_qa = a_ids[:max_seq_length-len(sptoken)-ensure_answer_min_length] + sptoken + b_ids + [tokenizer.eos_token_id] * 2
+        input_ids_qa = a_ids[:max_seq_length-len(sptoken)-ensure_answer_min_length] + sptoken + b_ids + [config.eos_token_id] * 2
         pos = 0
         while pos < len(input_ids_qa):
             if sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
@@ -67,9 +67,9 @@ class TokenTruncation:
 class TokenSingleSliding:
 
     @classmethod
-    def process(cls,tokenizer: ChatGLMTokenizer,a_ids,b_ids,max_seq_length,sptoken: typing.List,sliding_size,p=1):
+    def process(cls,tokenizer: ChatGLMTokenizer,config,a_ids,b_ids,max_seq_length,sptoken: typing.List,sliding_size,p=1):
         ds = []
-        input_ids_qa = a_ids + sptoken + b_ids + [tokenizer.eos_token_id] * 2
+        input_ids_qa = a_ids + sptoken + b_ids + [config.eos_token_id] * 2
         a_length = len(a_ids)
         pos = 0
 
@@ -123,10 +123,10 @@ class TokenSingleSliding:
 # 对prompt sliding
 class TokenDoubleSliding:
     @classmethod
-    def process(cls, tokenizer: ChatGLMTokenizer, a_ids, b_ids, max_seq_length, sptoken: typing.List, sliding_size,
+    def process(cls, tokenizer: ChatGLMTokenizer,config, a_ids, b_ids, max_seq_length, sptoken: typing.List, sliding_size,
                 p=1):
         ds = []
-        input_ids_qa = a_ids + sptoken + b_ids + [tokenizer.eos_token_id] * 2
+        input_ids_qa = a_ids + sptoken + b_ids + [config.eos_token_id] * 2
         a_length = len(a_ids)
         pos = 0
 
