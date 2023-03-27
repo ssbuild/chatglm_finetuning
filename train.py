@@ -203,23 +203,23 @@ if __name__ == '__main__':
             pl_module = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
                                                        model_args=model_args,
                                                        training_args=training_args,
-                                                       lora_args=lora_args)
-            input_sample = (
-                ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
-                ("attention_mask", torch.ones(size=(1, 1,128,128), dtype=torch.int32)),
-                ("position_ids", torch.ones(size=(1, 2, 128), dtype=torch.int32)),
-            )
-            input_names = ("input_ids",'attention_mask','position_ids')
-            output_names = ("pred_ids",)
-            dynamic_axes = None or {"input_ids": [0, 1],
-                                    "attention_mask": [0, 0,1,1],
-                                    "position_ids": [0, 0,1],
-                                    "pred_ids": [0, 1]}
-            pl_module.convert_to_onnx('./best_ckpt/best.onnx',
-                                  input_sample=input_sample,
-                                  input_names=input_names,
-                                  output_names=output_names,
-                                  dynamic_axes=dynamic_axes)
+                                                       lora_args=lora_args,strict=False)
+            # input_sample = (
+            #     ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
+            #     ("attention_mask", torch.ones(size=(1, 1,128,128), dtype=torch.int32)),
+            #     ("position_ids", torch.ones(size=(1, 2, 128), dtype=torch.int32)),
+            # )
+            # input_names = ("input_ids",'attention_mask','position_ids')
+            # output_names = ("pred_ids",)
+            # dynamic_axes = None or {"input_ids": [0, 1],
+            #                         "attention_mask": [0, 0,1,1],
+            #                         "position_ids": [0, 0,1],
+            #                         "pred_ids": [0, 1]}
+            # pl_module.convert_to_onnx('./best_ckpt/best.onnx',
+            #                       input_sample=input_sample,
+            #                       input_names=input_names,
+            #                       output_names=output_names,
+            #                       dynamic_axes=dynamic_axes)
 
             model_: ChatGLMForConditionalGeneration
             model_ = pl_module.backbone.model
