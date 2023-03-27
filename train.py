@@ -200,26 +200,31 @@ if __name__ == '__main__':
     else:
         if not lora_args.with_lora:
             # 加载权重
-            model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
+            pl_module = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
                                                        model_args=model_args,
                                                        training_args=training_args,
                                                        lora_args=lora_args)
-            input_sample = (
-                ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
-                ("attention_mask", torch.ones(size=(1, 1,128,128), dtype=torch.int32)),
-                ("position_ids", torch.ones(size=(1, 2, 128), dtype=torch.int32)),
-            )
-            input_names = ("input_ids",'attention_mask','position_ids')
-            output_names = ("pred_ids",)
-            dynamic_axes = None or {"input_ids": [0, 1],
-                                    "attention_mask": [0, 0,1,1],
-                                    "position_ids": [0, 0,1],
-                                    "pred_ids": [0, 1]}
-            model.convert_to_onnx('./best_ckpt/best.onnx',
-                                  input_sample=input_sample,
-                                  input_names=input_names,
-                                  output_names=output_names,
-                                  dynamic_axes=dynamic_axes)
+            # input_sample = (
+            #     ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
+            #     ("attention_mask", torch.ones(size=(1, 1,128,128), dtype=torch.int32)),
+            #     ("position_ids", torch.ones(size=(1, 2, 128), dtype=torch.int32)),
+            # )
+            # input_names = ("input_ids",'attention_mask','position_ids')
+            # output_names = ("pred_ids",)
+            # dynamic_axes = None or {"input_ids": [0, 1],
+            #                         "attention_mask": [0, 0,1,1],
+            #                         "position_ids": [0, 0,1],
+            #                         "pred_ids": [0, 1]}
+            # pl_module.convert_to_onnx('./best_ckpt/best.onnx',
+            #                       input_sample=input_sample,
+            #                       input_names=input_names,
+            #                       output_names=output_names,
+            #                       dynamic_axes=dynamic_axes)
+
+            model_: ChatGLMForConditionalGeneration
+            model_ = pl_module.backbone.model.model
+            #保存huggingface model
+            model_.save_pretrained('huggingface_model',max_shard_size='10GB')
         else:
             # 加载权重
             lora_args = LoraArguments.from_pretrained('./best_ckpt')
