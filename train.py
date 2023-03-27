@@ -222,7 +222,7 @@ if __name__ == '__main__':
                                   dynamic_axes=dynamic_axes)
 
             model_: ChatGLMForConditionalGeneration
-            model_ = pl_module.backbone.model.model
+            model_ = pl_module.backbone.model
             #保存huggingface model
             model_.save_pretrained('huggingface_model',max_shard_size='10GB')
         else:
