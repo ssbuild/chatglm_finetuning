@@ -1,4 +1,6 @@
 ##
+    3月28日 增加支持加载chatglm-6b-int4权重 (修改 data_utils.py ignore_mismatched_sizes 字段)
+    3月27日 fix eos bugs
     3月26日 增加三种数据策略，欢迎指正
 
 ## 1.安装
@@ -22,6 +24,7 @@
 ## 4.ChatGLM 预训练权重
 
 [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+[chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)
     
 
 

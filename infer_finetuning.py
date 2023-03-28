@@ -6,21 +6,15 @@ from collections import OrderedDict
 
 import torch
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
-from deep_training.nlp.models.chatglm import TransformerChatGlmLMHeadModel, setup_model_profile, ChatGLMConfig,ChatGLMForConditionalGeneration
-from deep_training.nlp.models.lora import LoraArguments, LoraModel
+from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig, ChatGLMForConditionalGeneration
+from deep_training.nlp.models.lora import LoraArguments
 from transformers import HfArgumentParser
 
-from data_utils import train_info_args, NN_DataHelper,get_deepspeed_config
+from data_utils import train_info_args, NN_DataHelper, get_deepspeed_config
+from models import MyTransformer
 from tokenization_chatglm import ChatGLMTokenizer
 
-
-class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
-    def __init__(self, *args, **kwargs):
-        super(MyTransformer, self).__init__(*args, **kwargs)
-
-
 deep_config = get_deepspeed_config()
-
 
 
 if __name__ == '__main__':
@@ -46,7 +40,7 @@ if __name__ == '__main__':
     if deep_config is None:
         train_weight = './best_ckpt/last-v3.ckpt'
         assert os.path.exists(train_weight)
-        model = MyTransformer.load_from_checkpoint(train_weight, config=config,model_args=model_args,
+        pl_model = MyTransformer.load_from_checkpoint(train_weight, config=config,model_args=model_args,
                                                    training_args=training_args,strict=False)
     else:
 
@@ -63,24 +57,22 @@ if __name__ == '__main__':
         weights_dict_new = OrderedDict()
         for k,v in (weights_dict['module'] if 'module' in weights_dict else weights_dict).items():
             weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
-        model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
-        model.load_state_dict(state_dict= weights_dict_new, strict=False)
+        pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+        pl_model.load_state_dict(state_dict= weights_dict_new, strict=False)
 
-    base_model: ChatGLMForConditionalGeneration = model.backbone.model
+    model = pl_model.get_glm_model()
     # 按需修改，目前只支持 4/8 bit 量化
-    base_model.half().quantize(4).cuda()
-    base_model = base_model.eval()
+    model.half().quantize(4).cuda()
+    model = model.eval()
+
 
     #注意 长度不等于2048 会影响效果
-    response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,
+    response, history = model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,
                                         eos_token_id=config.eos_token_id,
                                         do_sample=True, top_p=0.7, temperature=0.95,)
     print('写一个诗歌，关于冬天',' ',response)
 
-    response, history = base_model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=2048,
+    response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=2048,
                                         eos_token_id=config.eos_token_id,
                                         do_sample=True, top_p=0.7, temperature=0.95,)
     print('晚上睡不着应该怎么办',' ',response)
-
-
-

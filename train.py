@@ -1,47 +1,20 @@
 # -*- coding: utf-8 -*-
 import logging
-import os
-from typing import Dict, Any, Optional
 
 import torch
 from deep_training.data_helper import ModelArguments, DataArguments, TrainingArguments
-from deep_training.nlp.models.chatglm import TransformerChatGlmLMHeadModel, ChatGLMConfig, setup_model_profile, \
+from deep_training.nlp.models.chatglm import ChatGLMConfig, setup_model_profile, \
     ChatGLMForConditionalGeneration
-from deep_training.nlp.models.lora import LoraArguments, LoraModel
+from deep_training.nlp.models.lora import LoraArguments
 from deep_training.utils.trainer import ModelCheckpoint, SimpleModelCheckpoint
-
-from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 from pytorch_lightning import Trainer
+from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
-from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, preprocess, postprocess
+from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
+from models import MyTransformer
 from tokenization_chatglm import ChatGLMTokenizer
-from torch import nn
-
-
-class MyTransformer(TransformerChatGlmLMHeadModel, with_pl=True):
-    def __init__(self, *args, **kwargs):
-        lora_args: LoraArguments = kwargs.pop('lora_args')
-        super(MyTransformer, self).__init__(*args, **kwargs)
-        self.lora_args = lora_args
-
-
-        # 非 lora模式冻结示例
-        # assert lora_args.with_lora = False
-        # need_frozen_list = []
-        # M: nn.Module = self.backbone
-        # for param in M.named_parameters():
-        #     if param[0] in need_frozen_list:
-        #         param[1].requires_grad = False
-
-        if lora_args.with_lora:
-            model = LoraModel(self.backbone, lora_args)
-            print('*' * 30,'lora info')
-            model.print_trainable_parameters()
-            self.set_model(model, copy_attr=False)
-
-
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
@@ -162,19 +135,19 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file,mode='test')
 
 
-    model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
+    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
         #  只恢复权重 ， 不恢复步数和优化器 ，
-        #  如果想恢复步数， 修改 trainer.fit(model, train_dataloaders=train_datasets，ckpt=ckpt_path)  注lora 当前不支持恢复步数。
+        #  如果想恢复步数， 修改 trainer.fit(pl_model, train_dataloaders=train_datasets，ckpt=ckpt_path)  注lora 当前不支持恢复步数。
         # if os.path.exists(ckpt_path):
         #     if not lora_args.with_lora:
         #         # 加载权重继续训练
-        #         model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,strict=False)
+        #         pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,strict=False)
         #     else:
         #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
-        #         model.backbone.from_pretrained(model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,strict=False)
+        #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,strict=False)
 
         #deepspeed 保证整批次
         def dataset_loader_filter_fn(dataset):
@@ -196,12 +169,12 @@ if __name__ == '__main__':
                                                         dataset_loader_filter_fn=dataset_loader_filter_fn if not with_record_iterable_dataset else None)
 
         if train_datasets is not None:
-            trainer.fit(model, train_dataloaders=train_datasets)
+            trainer.fit(pl_model, train_dataloaders=train_datasets)
 
     else:
         if not lora_args.with_lora:
             # 加载权重
-            pl_module = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
+            pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
                                                        model_args=model_args,
                                                        training_args=training_args,
                                                        lora_args=lora_args,strict=False)
@@ -222,10 +195,9 @@ if __name__ == '__main__':
             #                       output_names=output_names,
             #                       dynamic_axes=dynamic_axes)
 
-            model_: ChatGLMForConditionalGeneration
-            model_ = pl_module.backbone.model
+            model = pl_model.get_glm_model()
             #保存huggingface model
-            model_.save_pretrained('huggingface_model',max_shard_size='10GB')
+            model.save_pretrained('huggingface_model',max_shard_size='10GB')
         else:
             # 加载权重
             lora_args = LoraArguments.from_pretrained('./best_ckpt')
@@ -236,5 +208,4 @@ if __name__ == '__main__':
             # 二次加载权重
             pl_module.backbone.from_pretrained(pl_module.backbone.model, pretrained_model_name_or_path='./best_ckpt',lora_config=lora_args)
 
-            model_: ChatGLMForConditionalGeneration
-            model_ = pl_module.backbone.model.model
+            model = pl_model.get_glm_model()

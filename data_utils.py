@@ -91,6 +91,8 @@ train_info_args = {
 #lora 模式暂时不支持deepspeed
 enable_deepspeed = False
 
+#加载 int4 模型
+ignore_mismatched_sizes = False
 
 
 data_conf = {
@@ -130,11 +132,8 @@ def postprocess(text):
 
 class NN_DataHelper(DataHelper):
     index = 1
-
-
     def on_data_ready(self):
         self.index = -1
-
 
     # 切分词
     def on_data_process(self, data: typing.Any, mode: str):
