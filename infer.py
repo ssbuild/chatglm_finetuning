@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
-from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig, ChatGLMForConditionalGeneration
+from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
 from deep_training.nlp.models.lora import LoraArguments
 from transformers import HfArgumentParser
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
     # 官方28层
-    config.precision = None
+    config.precision = 16
     config.num_layers = 28
     config.initializer_weight = False
     config.eos_token_id = 150005
@@ -30,15 +30,25 @@ if __name__ == '__main__':
 
 
     model = pl_model.get_glm_model()
-    # 按需修改，目前只支持 4/8 bit 量化
-    model.half().quantize(4).cuda()
+    if not model.is_quantize_weight:
+        # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
+        model.half().quantize(4).cuda()
+    else:
+        # 已经量化
+        model.cuda()
     model = model.eval()
 
     # 注意 长度不等于2048 会影响效果
-    response, history = model.chat(tokenizer, "你好", history=[],max_length=2048)
+    response, history = model.chat(tokenizer, "你好", history=[],max_length=2048,
+                                   eos_token_id=config.eos_token_id,
+                                   do_sample=True, top_p=0.7, temperature=0.95,
+                                   )
     print('你好',' ',response)
 
-    response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=2048)
+    response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=2048,
+                                   eos_token_id=config.eos_token_id,
+                                   do_sample=True, top_p=0.7, temperature=0.95,
+                                   )
     print('晚上睡不着应该怎么办',' ',response)
 
     # response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)

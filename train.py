@@ -3,8 +3,7 @@ import logging
 
 import torch
 from deep_training.data_helper import ModelArguments, DataArguments, TrainingArguments
-from deep_training.nlp.models.chatglm import ChatGLMConfig, setup_model_profile, \
-    ChatGLMForConditionalGeneration
+from deep_training.nlp.models.chatglm import ChatGLMConfig, setup_model_profile
 from deep_training.nlp.models.lora import LoraArguments
 from deep_training.utils.trainer import ModelCheckpoint, SimpleModelCheckpoint
 from pytorch_lightning import Trainer
@@ -12,7 +11,7 @@ from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
-from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
+from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, load_infer_weight_int4
 from models import MyTransformer
 from tokenization_chatglm import ChatGLMTokenizer
 
@@ -71,7 +70,8 @@ if __name__ == '__main__':
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
 
-    # 并行
+    assert load_infer_weight_int4 == False, ValueError('int4 weight 只能推理')
+    #
     setup_model_profile()
     deepspeed_config = get_deepspeed_config()
 

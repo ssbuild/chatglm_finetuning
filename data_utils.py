@@ -91,8 +91,8 @@ train_info_args = {
 #lora 模式暂时不支持deepspeed
 enable_deepspeed = False
 
-#加载 int4 模型
-ignore_mismatched_sizes = False
+
+load_infer_weight_int4 = train_info_args['model_name_or_path'].count('int4') > 0 if  train_info_args['model_name_or_path'] is not None else False
 
 
 data_conf = {

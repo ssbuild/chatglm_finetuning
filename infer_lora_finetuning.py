@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
-from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig, ChatGLMForConditionalGeneration
+from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
 from deep_training.nlp.models.lora import LoraArguments
 from transformers import HfArgumentParser
 

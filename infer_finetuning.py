@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import torch
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
-from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig, ChatGLMForConditionalGeneration
+from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
 from deep_training.nlp.models.lora import LoraArguments
 from transformers import HfArgumentParser
 
@@ -61,8 +61,13 @@ if __name__ == '__main__':
         pl_model.load_state_dict(state_dict= weights_dict_new, strict=False)
 
     model = pl_model.get_glm_model()
-    # 按需修改，目前只支持 4/8 bit 量化
-    model.half().quantize(4).cuda()
+
+    if not model.is_quantize_weight:
+        # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
+        model.half().quantize(4).cuda()
+    else:
+        #已经量化
+        model.cuda()
     model = model.eval()
 
 
