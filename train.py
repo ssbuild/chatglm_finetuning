@@ -11,7 +11,7 @@ from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
-from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, load_infer_weight_int4
+from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, load_pretrain_weight_int4
 from models import MyTransformer
 from tokenization_chatglm import ChatGLMTokenizer
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
 
-    assert load_infer_weight_int4 == False, ValueError('int4 weight 只能推理')
+    assert load_pretrain_weight_int4 == False, ValueError('int4 weight 只能推理')
     #
     setup_model_profile()
     deepspeed_config = get_deepspeed_config()

@@ -5,7 +5,7 @@ from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, lo
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
 
-from data_utils import load_infer_weight_int4
+from data_utils import load_pretrain_weight_int4
 
 # 加载量化后的权重需调用此方法
 def quantize_variable_weight(self, bits: int, quantize_embeddings=False, use_quantization_cache=False, empty_init=False, **kwargs):
@@ -60,7 +60,7 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
 
         self.is_quantize_weight = False
         # 加载int权重 ， 推理模型
-        if load_infer_weight_int4:
+        if load_pretrain_weight_int4:
             self.is_quantize_weight = True
             self.quantized = False
 
