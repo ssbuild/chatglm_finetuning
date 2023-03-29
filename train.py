@@ -69,7 +69,7 @@ if __name__ == '__main__':
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
 
-    assert load_pretrain_weight_int4 == False, ValueError('int4 weight 只能推理')
+
     #
     setup_model_profile()
     deepspeed_config = get_deepspeed_config()
@@ -135,6 +135,13 @@ if __name__ == '__main__':
 
 
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
+
+    if load_pretrain_weight_int4:
+        #量化后模型训练
+        if str(config.precision) == '16':
+            pl_model.half()
+        elif str(config.precision) == '32':
+            pl_model.float().to(pl_model.device)
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:

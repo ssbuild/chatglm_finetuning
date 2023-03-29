@@ -5,8 +5,10 @@ import torch
 from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
-from ..data_utils import load_pretrain_weight_int4
+
 from tokenization_chatglm import ChatGLMTokenizer
+
+load_pretrain_weight_int4 = False
 
 # 加载量化后的权重需调用此方法
 def quantize_variable_weight(self, bits: int, quantize_embeddings=False, use_quantization_cache=False, empty_init=False, **kwargs):

@@ -92,7 +92,6 @@ train_info_args = {
 enable_deepspeed = False
 
 
-load_pretrain_weight_int4 = train_info_args['model_name_or_path'].count('int4') > 0 if  train_info_args['model_name_or_path'] is not None else False
 
 
 data_conf = {
