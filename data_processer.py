@@ -85,10 +85,11 @@ class TokenSingleSliding:
             if pos + max_seq_length <= a_length:
                 input_ids = input_ids_qa[pos:pos + max_seq_length-2]
                 if p > 0:
-                    input_ids.insert(-p,sptoken)
+                    input_ids = input_ids[0:-p] + sptoken + input_ids[-p:]
                 else:
                     p = random.randint(0,max_seq_length-2)
-                    input_ids.insert(p, sptoken)
+                    input_ids = input_ids[0:p] + sptoken + input_ids[p:]
+
                 pos += sliding_size
             elif sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
                 val = input_ids_qa[pos:pos + max_seq_length][-1]
@@ -124,10 +125,10 @@ class TokenDoubleSliding:
             if pos + max_seq_length <= a_length:
                 input_ids = input_ids_qa[pos:pos + max_seq_length - 2]
                 if p > 0:
-                    input_ids.insert(-p, sptoken)
+                    input_ids = input_ids[0:-p] + sptoken + input_ids[-p:]
                 else:
                     p = random.randint(0, max_seq_length - 2)
-                    input_ids.insert(p, sptoken)
+                    input_ids = input_ids[0:p] + sptoken + input_ids[p:]
                 pos += sliding_size
             elif sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
                 val = input_ids_qa[pos:pos + max_seq_length][-1]
