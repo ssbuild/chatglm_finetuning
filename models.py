@@ -1,11 +1,9 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
-
 import torch
 from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
-
 from tokenization_chatglm import ChatGLMTokenizer
 
 load_pretrain_weight_int4 = False
@@ -14,7 +12,7 @@ load_pretrain_weight_int4 = False
 def quantize_variable_weight(self, bits: int, quantize_embeddings=False, use_quantization_cache=False, empty_init=False, **kwargs):
     if bits == 0:
         return
-    from .chatglm_6b_int4.quantization import quantize, QuantizedEmbedding, QuantizedLinear, load_cpu_kernel
+    from chatglm_6b_int4.quantization import quantize, QuantizedEmbedding, QuantizedLinear, load_cpu_kernel
     if self.quantized:
         if self.device == torch.device("cpu"):
             logger.info("Already quantized, reloading cpu kernel.")
