@@ -137,6 +137,7 @@ if __name__ == '__main__':
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
 
     if load_pretrain_weight_int4:
+        raise Exception('量化模型不支持训练')
         #量化后模型训练
         if str(config.precision) == '16':
             pl_model.half()

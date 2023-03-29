@@ -14,7 +14,7 @@ load_pretrain_weight_int4 = False
 def quantize_variable_weight(self, bits: int, quantize_embeddings=False, use_quantization_cache=False, empty_init=False, **kwargs):
     if bits == 0:
         return
-    from chatglm_6b_int4.quantization import quantize, QuantizedEmbedding, QuantizedLinear, load_cpu_kernel
+    from .chatglm_6b_int4.quantization import quantize, QuantizedEmbedding, QuantizedLinear, load_cpu_kernel
     if self.quantized:
         if self.device == torch.device("cpu"):
             logger.info("Already quantized, reloading cpu kernel.")
