@@ -231,11 +231,16 @@ class NN_DataHelper(DataHelper):
             o[k] = torch.stack(o[k])
 
 
-        max_len = torch.max( o.pop('seqlen')).tolist()
+        max_len = torch.max(o.pop('seqlen')).tolist()
         b_input_ids = o['input_ids'][:, :max_len]
+        ctxlens = o.pop('ctxlen', None)  # 兼容旧版本数据
+        if ctxlens is None:
+            ctxlens = [None] * len(b_input_ids)
+
         b_position_ids,b_attention_mask = [],[]
-        for input_ids in b_input_ids:
-            context_length = input_ids.tolist().index(self.sptoken[-1]) + 1
+        for input_ids,context_length in zip(b_input_ids,ctxlens):
+            if context_length is None:
+                context_length = input_ids.tolist().index(self.sptoken[-1]) + 1
             seq_length = context_length - 1
             mask_position = seq_length - 1
             position_ids = list(range(context_length)) + [mask_position] * (max_len - context_length)

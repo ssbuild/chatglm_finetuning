@@ -38,6 +38,8 @@ if __name__ == '__main__':
         model.cuda()
     model = model.eval()
 
+    for n in model.named_parameters():
+        print(n)
     # 注意 长度不等于2048 会影响效果
     response, history = model.chat(tokenizer, "你好", history=[],max_length=2048,
                                    eos_token_id=config.eos_token_id,

@@ -65,12 +65,10 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
             self.quantized = False
 
             quantization_bit = 4
-            quantization_embeddings = False
-
             if quantization_bit:
                 quantize_variable_weight(self,
-                                        quantization_bit,
-                                        quantization_embeddings,
+                                        bits=4, # 4 or 8 bit
+                                        quantization_embeddings=False,
                                         use_quantization_cache=True,
                                         empty_init=True)
 

@@ -14,6 +14,31 @@ class DataStrategy(Enum):
 
 
 
+class TokenIdsFinal:
+    @classmethod
+    def process(cls,input_ids: typing.List,sptoken,max_seq_length,tokenizer):
+        seq_length = input_ids.index(sptoken[-1])
+        mask_position = seq_length - 1
+        labels = [-100] * seq_length + input_ids[mask_position + 1:]
+
+        seqlen = np.asarray(len(input_ids), dtype=np.int32)
+        pad_len = max_seq_length - seqlen
+        input_ids = np.asarray(input_ids, dtype=np.int32)
+        labels = np.asarray(labels, dtype=np.int32)
+        ctxlen = np.asarray(seq_length + 1, dtype=np.int32)
+        if pad_len:
+            pad_val = tokenizer.pad_token_id
+            input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
+            labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
+
+        d = {
+            'input_ids': input_ids,
+            'labels': labels,
+            'seqlen': seqlen,
+            'ctxlen': ctxlen
+        }
+        return d
+
 
 #对prompt 截断
 class TokenTruncation:
@@ -41,25 +66,7 @@ class TokenTruncation:
                 input_ids = sptoken + input_ids_qa[pos:pos + max_seq_length - 2]
                 pos += max_seq_length - 2
 
-            seq_length = input_ids.index(sptoken[-1])
-            mask_position = seq_length - 1
-            labels = [-100] * seq_length + input_ids[mask_position + 1:]
-
-            seqlen = np.asarray(len(input_ids), dtype=np.int32)
-            pad_len = max_seq_length - seqlen
-            input_ids = np.asarray(input_ids, dtype=np.int32)
-            labels = np.asarray(labels, dtype=np.int32)
-
-            if pad_len:
-                pad_val = tokenizer.pad_token_id
-                input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
-
-            d = {
-                'input_ids': input_ids,
-                'labels': labels,
-                'seqlen': seqlen
-            }
+            d = TokenIdsFinal.process(input_ids,sptoken,max_seq_length,tokenizer)
             ds.append(d)
         return ds
 
@@ -98,25 +105,7 @@ class TokenSingleSliding:
                 input_ids = sptoken + input_ids_qa[pos:pos + max_seq_length - 2]
                 pos += max_seq_length - 2
 
-            seq_length = input_ids.index(sptoken[-1])
-            mask_position = seq_length - 1
-            labels = [-100] * seq_length + input_ids[mask_position + 1:]
-
-            seqlen = np.asarray(len(input_ids), dtype=np.int32)
-            pad_len = max_seq_length - seqlen
-            input_ids = np.asarray(input_ids, dtype=np.int32)
-            labels = np.asarray(labels, dtype=np.int32)
-
-            if pad_len:
-                pad_val = tokenizer.pad_token_id
-                input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
-
-            d = {
-                'input_ids': input_ids,
-                'labels': labels,
-                'seqlen': seqlen
-            }
+            d = TokenIdsFinal.process(input_ids, sptoken, max_seq_length, tokenizer)
             ds.append(d)
         return ds
 
@@ -155,25 +144,6 @@ class TokenDoubleSliding:
                 input_ids = sptoken + input_ids_qa[pos:pos + max_seq_length - 2]
                 pos += sliding_size
 
-
-            seq_length = input_ids.index(sptoken[-1])
-            mask_position = seq_length - 1
-            labels = [-100] * seq_length + input_ids[mask_position + 1:]
-
-            seqlen = np.asarray(len(input_ids), dtype=np.int32)
-            pad_len = max_seq_length - seqlen
-            input_ids = np.asarray(input_ids, dtype=np.int32)
-            labels = np.asarray(labels, dtype=np.int32)
-
-            if pad_len:
-                pad_val = tokenizer.pad_token_id
-                input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
-                labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
-
-            d = {
-                'input_ids': input_ids,
-                'labels': labels,
-                'seqlen': seqlen
-            }
+            d = TokenIdsFinal.process(input_ids, sptoken, max_seq_length, tokenizer)
             ds.append(d)
         return ds

@@ -1,4 +1,5 @@
 ##
+    3月29日 缓存ctxlen , 使得GPU更充分利用，兼容旧数据缓存(旧数据缓存无法加速)
     3月28日 支持推理chatglm-6b-int4权重 (修改 data_utils.py load_pretrain_weight_int4 字段)
     3月27日 fix eos bugs
     3月26日 增加三种数据策略，欢迎指正
