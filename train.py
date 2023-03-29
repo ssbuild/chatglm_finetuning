@@ -11,8 +11,8 @@ from pytorch_lightning.callbacks.lr_monitor import LearningRateMonitor
 from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
-from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, load_pretrain_weight_int4
-from models import MyTransformer,ChatGLMTokenizer
+from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
+from models import MyTransformer,ChatGLMTokenizer,load_pretrain_weight_int4
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
