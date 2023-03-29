@@ -1,11 +1,12 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
+
 import torch
 from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
-
-from data_utils import load_pretrain_weight_int4
+from ..data_utils import load_pretrain_weight_int4
+from tokenization_chatglm import ChatGLMTokenizer
 
 # 加载量化后的权重需调用此方法
 def quantize_variable_weight(self, bits: int, quantize_embeddings=False, use_quantization_cache=False, empty_init=False, **kwargs):
@@ -67,7 +68,7 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
             quantization_bit = 4
             if quantization_bit:
                 quantize_variable_weight(self,
-                                        bits=4, # 4 or 8 bit
+                                        bits=quantization_bit, # 4 or 8 bit
                                         quantization_embeddings=False,
                                         use_quantization_cache=True,
                                         empty_init=True)
@@ -105,4 +106,3 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         if self.lora_args is not None and self.lora_args.with_lora:
             return self.backbone.model.model
         return self.backbone.model
-

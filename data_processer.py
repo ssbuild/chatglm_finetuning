@@ -4,7 +4,7 @@ import random
 import typing
 from enum import Enum
 import numpy as np
-from tokenization_chatglm import ChatGLMTokenizer
+from models import ChatGLMTokenizer
 
 
 class DataStrategy(Enum):

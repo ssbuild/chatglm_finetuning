@@ -21,7 +21,7 @@ from tqdm import tqdm
 from transformers import HfArgumentParser
 
 from data_processer import DataStrategy, TokenTruncation, TokenSingleSliding, TokenDoubleSliding
-from tokenization_chatglm import ChatGLMTokenizer
+from models import ChatGLMTokenizer
 
 train_info_args = {
     'devices': 1,

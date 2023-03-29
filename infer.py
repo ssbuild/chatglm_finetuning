@@ -6,8 +6,7 @@ from deep_training.nlp.models.lora import LoraArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer
-from tokenization_chatglm import ChatGLMTokenizer
+from models import MyTransformer,ChatGLMTokenizer
 
 if __name__ == '__main__':
     train_info_args['seed'] = None
@@ -35,7 +34,7 @@ if __name__ == '__main__':
         model.half().quantize(4).cuda()
     else:
         # 已经量化
-        model.cuda()
+        model.half().cuda()
     model = model.eval()
 
     # 注意 长度不等于2048 会影响效果

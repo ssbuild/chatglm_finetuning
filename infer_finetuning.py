@@ -11,8 +11,7 @@ from deep_training.nlp.models.lora import LoraArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper, get_deepspeed_config
-from models import MyTransformer
-from tokenization_chatglm import ChatGLMTokenizer
+from models import MyTransformer,ChatGLMTokenizer
 
 deep_config = get_deepspeed_config()
 
@@ -66,8 +65,8 @@ if __name__ == '__main__':
         # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
         model.half().quantize(4).cuda()
     else:
-        #已经量化
-        model.cuda()
+        #已经量化，已经保存微调后的量化模型可以 直接加载
+        model.half().cuda()
     model = model.eval()
 
 

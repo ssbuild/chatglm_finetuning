@@ -12,8 +12,7 @@ from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config, load_pretrain_weight_int4
-from models import MyTransformer
-from tokenization_chatglm import ChatGLMTokenizer
+from models import MyTransformer,ChatGLMTokenizer
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):

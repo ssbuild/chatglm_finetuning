@@ -64,7 +64,7 @@ x3 = {"id": 0, "paragraph": [
 
 x = [x1,x2,x3]
 
-with open('./data/finetune_train_examples.json',mode='w',encoding='utf-8',newline='\n') as f:
+with open('./finetune_train_examples.json',mode='w',encoding='utf-8',newline='\n') as f:
     index = 0
     for i in range(100):
         for j in range(len(x)):
