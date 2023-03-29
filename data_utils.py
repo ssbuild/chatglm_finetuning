@@ -241,6 +241,8 @@ class NN_DataHelper(DataHelper):
         for input_ids,context_length in zip(b_input_ids,ctxlens):
             if context_length is None:
                 context_length = input_ids.tolist().index(self.sptoken[-1]) + 1
+            else:
+                context_length = context_length.squeeze(dim=-1)
             seq_length = context_length - 1
             mask_position = seq_length - 1
             position_ids = list(range(context_length)) + [mask_position] * (max_len - context_length)
