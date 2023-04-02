@@ -12,70 +12,12 @@ from tokenization_chatglm import ChatGLMTokenizer
 
 load_pretrain_weight_int4 = False
 
-# 加载量化后的权重需调用此方法
-def quantize_variable_weight(self, bits: int, quantize_embeddings=False, use_quantization_cache=False, empty_init=False, **kwargs):
-    if bits == 0:
-        return
-    from chatglm_6b_int4.quantization import quantize, QuantizedEmbedding, QuantizedLinear, load_cpu_kernel
-    if self.quantized:
-        if self.device == torch.device("cpu"):
-            logger.info("Already quantized, reloading cpu kernel.")
-            load_cpu_kernel(**kwargs)
-        else:
-            logger.info("Already quantized.")
-        return self
-
-    self.quantized = True
-
-    self.config.quantization_bit = bits
-    self.config.quantization_embeddings = quantize_embeddings
-
-    self.transformer = quantize(self.transformer, bits, use_quantization_cache=use_quantization_cache,
-                                empty_init=empty_init, **kwargs)
-
-    if quantize_embeddings:
-        logger.info("Applying quantization to embeddings")
-        self.transformer.word_embeddings = QuantizedEmbedding(
-            weight_bit_width=bits,
-            weight_tensor=self.transformer.word_embeddings.weight.to(self.device),
-            num_embeddings=self.transformer.word_embeddings.num_embeddings,
-            embedding_dim=self.transformer.word_embeddings.embedding_dim,
-            dtype=torch.half,
-            device=self.transformer.word_embeddings.weight.device,
-        )
-        self.lm_head = QuantizedLinear(
-            weight_bit_width=bits,
-            weight_tensor=self.lm_head.weight.to(self.device),
-            bias_tensor=None,
-            in_features=self.lm_head.in_features,
-            out_features=self.lm_head.out_features,
-            bias=False,
-            quantized_weight=self.transformer.word_embeddings.weight,
-            quantized_weight_scale=self.transformer.word_embeddings.weight_scale,
-            dtype=torch.half,
-            device=self.lm_head.weight.device,
-        )
-
-    return self
 
 
 class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
-    def __init__(self,*args,**kwargs):
-        super(MyChatGLMForConditionalGeneration, self).__init__(*args)
+    def __init__(self,config):
+        super(MyChatGLMForConditionalGeneration, self).__init__(config)
 
-        self.is_quantize_weight = False
-        # 加载int权重 ， 推理模型
-        if load_pretrain_weight_int4:
-            self.is_quantize_weight = True
-            self.quantized = False
-
-            quantization_bit = 4
-            if quantization_bit:
-                quantize_variable_weight(self,
-                                        bits=quantization_bit, # 4 or 8 bit
-                                        quantization_embeddings=False,
-                                        use_quantization_cache=True,
-                                        empty_init=True)
 
     @torch.no_grad()
     def chat(self, tokenizer, query: str, history: List[Tuple[str, str]] = None, max_length: int = 2048, num_beams=1,

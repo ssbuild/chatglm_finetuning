@@ -1,12 +1,13 @@
 ##
-    3月29日 缓存ctxlen , 使得GPU更充分利用，兼容旧数据缓存(旧数据缓存无法加速)
+    4月02日 增加p-tuning-v2训练
+    3月29日 使得GPU更充分利用
     3月28日 支持加载chatglm-6b-int4权重 (修改 models.py load_pretrain_weight_int4 字段)
     3月27日 fix eos bugs
     3月26日 增加三种数据策略，欢迎指正
 
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training>=0.0.21 cpm_kernels icetk transformers>=4.26.1 deepspeed
-  - 为了统一各种问题， deep_training 最低要求 0.0.21@post0
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.0rc0 cpm_kernels icetk transformers>=4.26.1 deepspeed
+  - 为了统一各种问题， deep_training 最低要求 0.1.0rc0,下载安装地址: https://pypi.org/project/deep-training/0.1.0rc0/#files
 
 
     
@@ -101,7 +102,7 @@
 ![inference](1.png)
 
 ## 8.训练
-    完整参数为 config.json
+    完整参数为 config.json ， 建议全层训练
     若显存不足 ， 可以修改 config_small.json num_layers 层数
     训练精度 可以修改 config_small.json precision 16 32
 
@@ -113,6 +114,10 @@
 ## 9.是否开启lora finetuning
 
     with_lora
+## 10. 是否开启ptuning v2
+    修改对应配置文件
+    "pre_seq_len": 32,
+    "prefix_projection": false
 
 ## 10.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 

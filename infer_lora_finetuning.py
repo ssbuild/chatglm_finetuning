@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     lora_args = LoraArguments.from_pretrained('./best_ckpt')
 
-    assert lora_args.inference_mode == True
+    assert lora_args.inference_mode == True and config.pre_seq_len is None
 
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
     # 加载lora权重

@@ -20,6 +20,10 @@ if __name__ == '__main__':
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
+    #加载int4模型
+    if train_info_args['model_name_or_path'].find('int4') != -1:
+        # 4 or 8
+        config.quantization_bit = 4
     # 官方28层
     config.precision = 16
     config.num_layers = 28
@@ -29,7 +33,7 @@ if __name__ == '__main__':
 
 
     model = pl_model.get_glm_model()
-    if not model.is_quantize_weight:
+    if not model.quantized:
         # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
         model.half().quantize(4).cuda()
     else:

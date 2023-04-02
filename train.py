@@ -93,7 +93,7 @@ if __name__ == '__main__':
                                               every_n_epochs=1)
 
 
-    strategy = 'ddp' if torch.cuda.device_count() > 1 else None
+    strategy = 'ddp' if torch.cuda.device_count() > 1 else 'auto'
     if deepspeed_config is not None and len(deepspeed_config):
         strategy = DeepSpeedStrategy(config=deepspeed_config,)
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         callbacks=[checkpoint_callback,LearningRateMonitor(logging_interval='step')],
         max_epochs=training_args.max_epochs,
         max_steps=training_args.max_steps,
-        accelerator="gpu",replace_sampler_ddp=False,
+        accelerator="gpu",
         devices=data_args.devices,
         enable_progress_bar=True,
         default_root_dir=data_args.output_dir,
@@ -118,6 +118,9 @@ if __name__ == '__main__':
 
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
     config.eos_token_id = 150005
+
+    if config.pre_seq_len is not None and lora_args.with_lora:
+        raise ValueError('with lora and ptuning v2 cannot open at the same time')
 
     # 额外参数
     checkpoint_callback.tokenizer = tokenizer
@@ -156,24 +159,14 @@ if __name__ == '__main__':
         #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
         #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,strict=False)
 
-        #deepspeed 保证整批次
-        def dataset_loader_filter_fn(dataset):
-            host_num = 1 # 机器数量
-            limit_count = len(dataset)
-            limit_count = int(limit_count // (data_args.devices * training_args.train_batch_size * host_num)) * (data_args.devices * training_args.train_batch_size * host_num)
-            return dataset.limit(int(limit_count))
 
-        with_record_iterable_dataset = False
-        train_datasets = dataHelper.load_random_sampler(dataHelper.train_files,
-                                                        with_load_memory=True,
-                                                        collate_fn=dataHelper.collate_fn,
-                                                        batch_size=training_args.train_batch_size,
-                                                        drop_last=True,#多卡建议扔掉
-                                                        shuffle=True,infinite=True,
-                                                        num_processes=trainer.world_size,
-                                                        process_index=trainer.global_rank,
-                                                        with_record_iterable_dataset=with_record_iterable_dataset,
-                                                        dataset_loader_filter_fn=dataset_loader_filter_fn if not with_record_iterable_dataset else None)
+        train_datasets = dataHelper.load_distributed_random_sampler(
+            dataHelper.train_files,
+            with_load_memory=True,
+            collate_fn=dataHelper.collate_fn,
+            batch_size=training_args.train_batch_size,
+            drop_last=True,#多卡建议扔掉
+            num_processes=trainer.world_size, process_index=trainer.global_rank)
 
         if train_datasets is not None:
             trainer.fit(pl_model, train_dataloaders=train_datasets)

@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     model = pl_model.get_glm_model()
 
-    if not model.is_quantize_weight:
+    if not model.quantized:
         # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
         model.half().quantize(4).cuda()
     else:

@@ -23,6 +23,6 @@
   "vocab_size": 150528,
   "precision": 16,
   "quantization_bit": 0,
-  "pre_seq_len": null,
+  "pre_seq_len": 32,
   "prefix_projection": false
 }

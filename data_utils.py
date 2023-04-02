@@ -38,9 +38,11 @@ train_info_args = {
     'max_steps': -1,
     'optimizer': 'lion', # one of adamw,adam,lamb,lion
 
+    'scheduler_type': 'CAWR',
+    'scheduler':{'T_mult': 1, 'rewarm_epoch_num': 0.5, 'verbose': True},
 
-    'scheduler_type': 'linear',# one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau
-    'scheduler': None,
+    # 'scheduler_type': 'linear',# one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau
+    # 'scheduler': None,
 
     # 切换scheduler类型
     # 'scheduler_type': 'WarmupCosine',
@@ -76,6 +78,7 @@ train_info_args = {
     'do_lower_case': False,
 
     ##############  lora模块
+    #注意lora和 ptuning-v2 禁止同时使用
     'with_lora': False,  # 是否启用lora模块
     'inference_mode': False, # 推理模型, 不需要手动设置
     'r': 8,
@@ -90,8 +93,6 @@ train_info_args = {
 
 #lora 模式暂时不支持deepspeed
 enable_deepspeed = False
-
-
 
 
 data_conf = {
@@ -232,25 +233,21 @@ class NN_DataHelper(DataHelper):
 
         max_len = torch.max(o.pop('seqlen')).tolist()
         b_input_ids = o['input_ids'][:, :max_len]
-        ctxlens = o.pop('ctxlen', None)  # 兼容旧版本数据
+        ctxlens = o.pop('ctxlen')  # 兼容旧版本数据
         if ctxlens is None:
             ctxlens = [None] * len(b_input_ids)
 
         b_position_ids,b_attention_mask = [],[]
         for input_ids,context_length in zip(b_input_ids,ctxlens):
-            if context_length is None:
-                context_length = input_ids.tolist().index(self.sptoken[-1]) + 1
-            else:
-                context_length = context_length.squeeze(dim=-1)
-            seq_length = context_length - 1
-            mask_position = seq_length - 1
+            context_length = context_length.squeeze(dim=-1)
+            mask_position = context_length - 1
             position_ids = list(range(context_length)) + [mask_position] * (max_len - context_length)
-            block_position_ids = [0] * seq_length + list(range(1, max_len - seq_length + 1))
+            block_position_ids = [0] * context_length + list(range(1, max_len - context_length + 1))
 
 
             attention_mask = torch.ones((1, max_len, max_len))
             attention_mask = torch.tril(attention_mask)
-            attention_mask[..., :seq_length] = 1
+            attention_mask[..., :context_length] = 1
             attention_mask = (attention_mask < 0.5)
 
             b_position_ids.append(torch.stack((torch.tensor(position_ids),torch.tensor(block_position_ids))))

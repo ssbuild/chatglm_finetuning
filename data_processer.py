@@ -17,15 +17,15 @@ class DataStrategy(Enum):
 class TokenIdsFinal:
     @classmethod
     def process(cls,input_ids: typing.List,sptoken,max_seq_length,tokenizer):
-        seq_length = input_ids.index(sptoken[-1])
-        mask_position = seq_length - 1
-        labels = [-100] * seq_length + input_ids[mask_position + 1:]
+        ctxlen = input_ids.index(sptoken[-1])
+        mask_position = ctxlen - 1
+        labels = [-100] * ctxlen + input_ids[mask_position + 1:]
 
         seqlen = np.asarray(len(input_ids), dtype=np.int32)
         pad_len = max_seq_length - seqlen
         input_ids = np.asarray(input_ids, dtype=np.int32)
         labels = np.asarray(labels, dtype=np.int32)
-        ctxlen = np.asarray(seq_length + 1, dtype=np.int32)
+        ctxlen = np.asarray(ctxlen, dtype=np.int32)
         if pad_len:
             pad_val = tokenizer.pad_token_id
             input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
