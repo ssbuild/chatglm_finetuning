@@ -10,7 +10,6 @@ from transformers import LogitsProcessorList
 
 from tokenization_chatglm import ChatGLMTokenizer
 
-load_pretrain_weight_int4 = False
 
 
 
@@ -18,11 +17,9 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
     def __init__(self,config):
         super(MyChatGLMForConditionalGeneration, self).__init__(config)
 
-
     @torch.no_grad()
     def chat(self, tokenizer, query: str, history: List[Tuple[str, str]] = None, max_length: int = 2048, num_beams=1,
              do_sample=True, top_p=0.7, temperature=0.95, logits_processor=None, **kwargs):
-
         if history is None:
             history = []
         if logits_processor is None:
@@ -37,10 +34,10 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
             for i, (old_query, response) in enumerate(history):
                 prompt += "[Round {}]\n问：{}\n答：{}\n".format(i, old_query, response)
             prompt += "[Round {}]\n问：{}\n答：".format(len(history), query)
-        input_ids = tokenizer([prompt], return_tensors="pt", padding=True)
-        input_ids = input_ids.to(self.device)
-        outputs = self.generate(**input_ids, **gen_kwargs)
-        outputs = outputs.tolist()[0][len(input_ids["input_ids"][0]):]
+        inputs = tokenizer([prompt], return_tensors="pt")
+        inputs = inputs.to(self.device)
+        outputs = self.generate(**inputs, **gen_kwargs)
+        outputs = outputs.tolist()[0][len(inputs["input_ids"][0]):]
         response = tokenizer.decode(outputs)
         response = self.process_response(response)
         history = history + [(query, response)]

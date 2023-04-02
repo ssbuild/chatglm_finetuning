@@ -12,7 +12,7 @@ from pytorch_lightning.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
-from models import MyTransformer,ChatGLMTokenizer,load_pretrain_weight_int4
+from models import MyTransformer,ChatGLMTokenizer
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
@@ -122,6 +122,10 @@ if __name__ == '__main__':
     if config.pre_seq_len is not None and lora_args.with_lora:
         raise ValueError('with lora and ptuning v2 cannot open at the same time')
 
+    if config.pre_seq_len is not None:
+        if config.quantization_bit:
+            raise Exception('量化模型不支持微调训练')
+
     # 额外参数
     checkpoint_callback.tokenizer = tokenizer
     checkpoint_callback.data_args = data_args
@@ -139,13 +143,7 @@ if __name__ == '__main__':
 
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
 
-    if load_pretrain_weight_int4:
-        raise Exception('量化模型不支持训练')
-        #量化后模型训练
-        if str(config.precision) == '16':
-            pl_model.half()
-        elif str(config.precision) == '32':
-            pl_model.float().to(pl_model.device)
+
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
