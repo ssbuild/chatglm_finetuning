@@ -203,6 +203,7 @@ class NN_DataHelper(DataHelper):
                     print(paragraph)
                 paragraph = [(preprocess(session['q']),preprocess('\n'.join(session['a']))) for session in paragraph]
                 for sid,(q,a) in enumerate(paragraph):
+                    assert len(a),ValueError('answer cannot empty')
                     if sid == 0:
                         D.append((q, a))
                     else:
