@@ -39,7 +39,7 @@ train_info_args = {
     'optimizer': 'lion', # one of adamw,adam,lamb,lion
 
     'scheduler_type': 'CAWR',
-    'scheduler':{'T_mult': 1, 'rewarm_epoch_num': 0.5, 'verbose': True},
+    'scheduler':{'T_mult': 1, 'rewarm_epoch_num': 0.5, 'verbose': False},
 
     # 'scheduler_type': 'linear',# one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau
     # 'scheduler': None,

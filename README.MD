@@ -1,7 +1,7 @@
 ##
-    4月02日 增加p-tuning-v2训练
+    4月02日 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
     3月29日 使得GPU更充分利用
-    3月28日 支持加载chatglm-6b-int4权重 (修改 models.py load_pretrain_weight_int4 字段)
+    3月28日 支持加载chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
     3月27日 fix eos bugs
     3月26日 增加三种数据策略，欢迎指正
 
