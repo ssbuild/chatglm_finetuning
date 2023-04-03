@@ -17,7 +17,7 @@
 
 - [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
 - [tf-task-example](https://github.com/ssbuild/tf-task-example)
-- [bloom_finetuning](https://github.com/ssbuild/bloom_finetuning)
+- [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
 
 
 
