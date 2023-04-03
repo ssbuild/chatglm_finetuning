@@ -6,8 +6,8 @@
     3月26日 增加三种数据策略，欢迎指正
 
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training>=0.1.0rc0 cpm_kernels icetk transformers>=4.26.1 deepspeed
-  - 为了统一各种问题， deep_training 最低要求 0.1.0rc0,下载安装地址: https://pypi.org/project/deep-training/0.1.0rc0/#files
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.0 cpm_kernels icetk transformers>=4.26.1 deepspeed
+  - 为了统一各种问题， deep_training 最低要求 0.1.0
 
 
 ## 2.更新详情
@@ -113,6 +113,7 @@
 
     with_lora
 ## 10. 是否开启ptuning v2
+    对于 deepspeed模式 , ptuning v2  只支持 stage 0
     修改对应配置文件
     "pre_seq_len": 32,
     "prefix_projection": false
