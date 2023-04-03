@@ -10,9 +10,6 @@
   - 为了统一各种问题， deep_training 最低要求 0.1.0rc0,下载安装地址: https://pypi.org/project/deep-training/0.1.0rc0/#files
 
 
-    
-
-
 ## 2.更新详情
 - [deep_training](https://github.com/ssbuild/deep_training)
 
@@ -20,6 +17,7 @@
 
 - [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
 - [tf-task-example](https://github.com/ssbuild/tf-task-example)
+- [bloom_finetuning](https://github.com/ssbuild/bloom_finetuning)
 
 
 
@@ -119,11 +117,11 @@
     "pre_seq_len": 32,
     "prefix_projection": false
 
-## 10.是否开启deepspeed
+## 11.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
     lora 模式暂时不支持deepspeed
 
 
 
-## 11. Reference
+## 12. Reference
     https://github.com/THUDM/ChatGLM-6B
