@@ -77,7 +77,8 @@ if __name__ == '__main__':
     # 保存最小loss模型
     if lora_args.with_lora:
         assert deepspeed_config is None,ValueError('lora mode does not support deepspeed')
-        checkpoint_callback = MySimpleModelCheckpoint(monitor="loss",
+        checkpoint_callback = MySimpleModelCheckpoint(
+                              # monitor="loss",
                               every_n_epochs = 1,
                               every_n_train_steps=2000 // training_args.gradient_accumulation_steps,
                               #模型参数
@@ -85,7 +86,8 @@ if __name__ == '__main__':
                               training_args=training_args,
                               lora_args=lora_args,)
     else:
-        checkpoint_callback = ModelCheckpoint('./best_ckpt', monitor='loss',
+        checkpoint_callback = ModelCheckpoint('./best_ckpt',
+                                              # monitor='loss',
                                               save_weights_only=False,
                                               save_last=True,
                                               save_top_k=1,
@@ -157,14 +159,18 @@ if __name__ == '__main__':
         #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
         #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,strict=False)
 
-
+        def dataset_loader_filter_fn(dataset):
+            print('*' * 30,'total',len(dataset))
+            return dataset
         train_datasets = dataHelper.load_distributed_random_sampler(
             dataHelper.train_files,
             with_load_memory=True,
             collate_fn=dataHelper.collate_fn,
             batch_size=training_args.train_batch_size,
             drop_last=True,#多卡建议扔掉
-            num_processes=trainer.world_size, process_index=trainer.global_rank)
+            num_processes=trainer.world_size, process_index=trainer.global_rank,
+            dataset_loader_filter_fn=dataset_loader_filter_fn
+        )
 
         if train_datasets is not None:
             trainer.fit(pl_model, train_dataloaders=train_datasets)
