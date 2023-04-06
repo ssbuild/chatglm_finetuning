@@ -7,10 +7,10 @@ from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, lo
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
 from transformers import LogitsProcessorList
-
 from tokenization_chatglm import ChatGLMTokenizer
 
-
+#如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+load_in_8bit = False
 
 
 class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
@@ -47,7 +47,8 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
 class MyTransformerChatGlmLMHeadModel(TransformerBase):
     def __init__(self, *args,**kwargs):
         #如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
-        # kwargs.update({"load_in_8bit": True})
+        if load_in_8bit:
+            kwargs.update({"load_in_8bit": True})
         super(MyTransformerChatGlmLMHeadModel, self).__init__(*args,**kwargs)
         self.set_model(self.from_pretrained(MyChatGLMForConditionalGeneration, *args, **kwargs))
 
