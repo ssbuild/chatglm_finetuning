@@ -48,7 +48,7 @@ class MyTransformerChatGlmLMHeadModel(TransformerBase):
     def __init__(self, *args,**kwargs):
         #如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
         if load_in_8bit:
-            kwargs.update({"load_in_8bit": True})
+            kwargs.update({"load_in_8bit": True,"device_map": "auto"})
         super(MyTransformerChatGlmLMHeadModel, self).__init__(*args,**kwargs)
         self.set_model(self.from_pretrained(MyChatGLMForConditionalGeneration, *args, **kwargs))
 
