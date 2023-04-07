@@ -86,9 +86,7 @@ if __name__ == '__main__':
 
     model = pl_model.get_glm_model()
     # 按需修改
-    model.half().to(torch.cuda.device(CUDA_DEVICE))
+    model.half().cuda()
     model = model.eval()
 
-
-    model.eval()
     uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
