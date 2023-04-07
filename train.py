@@ -119,7 +119,7 @@ if __name__ == '__main__':
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
 
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
-    config.eos_token_id = 150005
+    config.eos_token_id = 130005
 
     if config.pre_seq_len is not None and lora_args.with_lora:
         raise ValueError('with lora and ptuning v2 cannot open at the same time')
