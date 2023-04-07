@@ -6,7 +6,7 @@
     3月26日 增加三种数据策略，欢迎指正
 
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training>=0.1.0 cpm_kernels icetk transformers>=4.26.1 deepspeed
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.0 cpm_kernels transformers>=4.26.1 deepspeed
   - 为了统一各种问题， deep_training 最低要求 0.1.0
 
 
@@ -23,8 +23,8 @@
 
 ## 4.ChatGLM 预训练权重
 
-[chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
-[chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)
+- [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
+- [chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)
     
 
 
