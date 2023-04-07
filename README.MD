@@ -1,4 +1,5 @@
 ##
+    4月07日 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
     4月02日 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
     3月29日 使得GPU更充分利用
     3月28日 支持加载chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
@@ -6,8 +7,8 @@
     3月26日 增加三种数据策略，欢迎指正
 
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training>=0.1.0 cpm_kernels icetk transformers>=4.26.1 deepspeed
-  - 为了统一各种问题， deep_training 最低要求 0.1.0
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.1 cpm_kernels transformers>=4.26.1 deepspeed
+  - 为了统一各种问题， deep_training 最低要求 0.1.1
 
 
 ## 2.更新详情

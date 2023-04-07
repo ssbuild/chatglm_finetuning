@@ -10,6 +10,7 @@
   "remove_space": false,
   "do_lower_case": false,
   "tokenizer_class": "ChatGLMTokenizer",
+  "num_image_tokens": 0,
   "auto_map": {
     "AutoTokenizer": [
       "tokenization_chatglm.ChatGLMTokenizer",
