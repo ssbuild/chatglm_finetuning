@@ -3,15 +3,22 @@
 from typing import List, Tuple
 
 import torch
-from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger, InvalidScoreLogitsProcessor
+from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger
 from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
-from transformers import LogitsProcessorList
+from transformers import LogitsProcessorList, LogitsProcessor
 from tokenization_chatglm import ChatGLMTokenizer
 
 #如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
 load_in_8bit = False
 
+
+class InvalidScoreLogitsProcessor(LogitsProcessor):
+    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+        if torch.isnan(scores).any() or torch.isinf(scores).any():
+            scores.zero_()
+            scores[..., 5] = 5e4
+        return scores
 
 class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
     def __init__(self,config):
