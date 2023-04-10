@@ -1,6 +1,7 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
 import copy
+import re
 import warnings
 from typing import List, Tuple, Optional, Callable
 
@@ -10,11 +11,15 @@ from deep_training.nlp.models.lora import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
 from torch import nn
 from transformers import LogitsProcessorList, LogitsProcessor, GenerationConfig, StoppingCriteriaList
+
+
 from tokenization_chatglm import ChatGLMTokenizer
 
 #如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
 load_in_8bit = False
 
+#注意！！！ 非lora,非p-tuning 模式 ， <= config.json num_layers
+global_num_layers_freeze = -1
 
 class InvalidScoreLogitsProcessor(LogitsProcessor):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
@@ -196,20 +201,23 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         super(MyTransformer, self).__init__(*args, **kwargs)
         self.lora_args = lora_args
 
-
-        # 非 lora模式冻结示例
-        # assert lora_args.with_lora = False
-        # need_frozen_list = []
-        # M: nn.Module = self.backbone
-        # for param in M.named_parameters():
-        #     if param[0] in need_frozen_list:
-        #         param[1].requires_grad = False
-
         if lora_args is not None and lora_args.with_lora:
             model = LoraModel(self.backbone, lora_args)
             print('*' * 30,'lora info')
             model.print_trainable_parameters()
             self.set_model(model, copy_attr=False)
+
+        elif global_num_layers_freeze >0:  # 非 lora freeze
+            M: nn.Module = self.backbone
+            for param in M.named_parameters():
+                result = re.match(re.compile('.*transformer.layers.(\\d)'),param[0],re.IGNORECASE)
+                if result is not None:
+                    n_layer = int(result.group(1))
+                    if n_layer < global_num_layers_freeze:
+                        param[1].requires_grad = False
+                        print('freeze layer',param[0])
+
+
 
 
     def get_glm_model(self) -> MyChatGLMForConditionalGeneration:
