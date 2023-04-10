@@ -210,7 +210,7 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         elif global_num_layers_freeze >0:  # 非 lora freeze
             M: nn.Module = self.backbone
             for param in M.named_parameters():
-                result = re.match(re.compile('.*transformer.layers.(\\d)'),param[0],re.IGNORECASE)
+                result = re.match(re.compile('.*transformer.layers.(\\d)'),param[0])
                 if result is not None:
                     n_layer = int(result.group(1))
                     if n_layer < global_num_layers_freeze:
