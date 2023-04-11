@@ -19,7 +19,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
     def __init__(self, *args, **kwargs):
         super(MySimpleModelCheckpoint, self).__init__(*args, **kwargs)
         lora_args: LoraArguments = self.external_kwargs['lora_args']
-        if lora_args.with_lora:
+        if lora_args:
             self.weight_file = './best_ckpt'
             self.last_weight_file = './last_ckpt'
 
@@ -43,7 +43,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
 
         lora_args : LoraArguments =  self.external_kwargs['lora_args']
         # 保存权重
-        if not lora_args.with_lora:
+        if lora_args is None:
             super(MySimpleModelCheckpoint, self).on_save_model(trainer, pl_module)
         else:
             monitor_candidates = self._monitor_candidates(trainer)
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     deepspeed_config = get_deepspeed_config()
 
     # 保存最小loss模型
-    if lora_args.with_lora:
+    if lora_args:
         assert deepspeed_config is None,ValueError('lora mode does not support deepspeed')
         checkpoint_callback = MySimpleModelCheckpoint(
                               # monitor="loss",
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
     config.eos_token_id = 130005
 
-    if config.pre_seq_len is not None and lora_args.with_lora:
+    if config.pre_seq_len is not None and lora_args is not None:
         raise ValueError('with lora and ptuning v2 cannot open at the same time')
 
     if config.pre_seq_len is not None:
@@ -175,7 +175,7 @@ if __name__ == '__main__':
             trainer.fit(pl_model, train_dataloaders=train_datasets)
 
     else:
-        if not lora_args.with_lora:
+        if lora_args is not None:
             # 加载权重
             pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
                                                        model_args=model_args,
