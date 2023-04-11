@@ -1,4 +1,5 @@
 ##
+    4月11日 增加 lora v2 以及 adalora
     4月10日 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
     4月07日 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
     4月02日 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
