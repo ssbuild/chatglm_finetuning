@@ -14,7 +14,7 @@ import numpy as np
 import torch
 from deep_training.data_helper import DataHelper, ModelArguments, TrainingArguments, DataArguments
 from deep_training.nlp.models.chatglm import ChatGLMConfig
-from deep_training.nlp.models.lora import LoraArguments
+from deep_training.nlp.models.lora.v2 import LoraArguments
 from deep_training.utils.func import is_chinese_char
 from fastdatasets.record import load_dataset as Loader, RECORD, WriterObject, gfile
 from tqdm import tqdm
@@ -22,6 +22,37 @@ from transformers import HfArgumentParser
 
 from data_processer import DataStrategy, TokenTruncation, TokenSingleSliding, TokenDoubleSliding
 from models import ChatGLMTokenizer
+
+lora_info_args = {
+    'with_lora': False,  # 是否启用lora模块
+    'r': 8,
+    'target_modules': ['query_key_value'],
+    'target_dtype': 16, # 半精度
+    'lora_alpha': 32,
+    'lora_dropout': 0.1,
+    'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+}
+
+adalora_info_args = {
+    'with_lora': False,  # 是否启用adalora模块
+    'r': 8,
+    'target_modules': ['query_key_value'],
+    'target_dtype': 16, # 半精度
+    'lora_alpha': 32,
+    'lora_dropout': 0.1,
+    'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+
+    'target_r':8, # Target Lora matrix dimension.
+    'init_r': 12, #Intial Lora matrix dimension.
+    'tinit': 0, #The steps of initial warmup.
+    'tfinal': 0, #The steps of final warmup.
+    'deltaT': 1, #Step interval of rank allocation.
+    'beta1': 0.85, #Hyperparameter of EMA.
+    'beta2': 0.85, #Hyperparameter of EMA.
+    'orth_reg_weight': 0.5, #The orthogonal regularization coefficient.
+    'total_step': None, #The total training steps.
+    'rank_pattern': None, #The saved rank pattern.
+}
 
 train_info_args = {
     'devices': 1,
@@ -78,17 +109,9 @@ train_info_args = {
     'do_lower_case': False,
 
     ##############  lora模块
-    #注意lora和 ptuning-v2 禁止同时使用
-    'with_lora': False,  # 是否启用lora模块
-    'inference_mode': False, # 推理模型, 不需要手动设置
-    'r': 8,
-    'target_modules': ['query_key_value'],
-    'target_dtype': '16',
-    'lora_alpha': 32,
-    # 'enable_lora': [True],
-    'enable_lora': None,
-    'lora_dropout': 0.1,
-    'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+    #注意lora,adalora 和 ptuning-v2 禁止同时使用
+   'lora': {**lora_info_args},
+   'adalora': {**adalora_info_args},
 }
 
 #lora 模式暂时不支持deepspeed
@@ -267,6 +290,7 @@ class NN_DataHelper(DataHelper):
 if __name__ == '__main__':
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
     model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args)
+    lora_args = lora_args.config
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)

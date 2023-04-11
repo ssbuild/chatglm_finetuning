@@ -7,7 +7,7 @@ from typing import List, Tuple, Optional, Callable
 
 import torch
 from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger
-from deep_training.nlp.models.lora import LoraArguments, LoraModel
+from deep_training.nlp.models.lora.v2 import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
 from torch import nn
 from transformers import LogitsProcessorList, LogitsProcessor, GenerationConfig, StoppingCriteriaList

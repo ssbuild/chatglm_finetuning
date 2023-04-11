@@ -7,9 +7,12 @@
     3月27日 fix eos bugs
     3月26日 增加三种数据策略，欢迎指正
 
+## 注意事项 ！
+    dev 分支加一些新功能和想法 如果求稳定，请使用 stable-vocab130528 分支
+    
+
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training>=0.1.1 cpm_kernels transformers>=4.26.1 deepspeed
-  - 为了统一各种问题， deep_training 最低要求 0.1.1
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.2 cpm_kernels transformers>=4.26.1 deepspeed
 
 
 ## 2.更新详情
