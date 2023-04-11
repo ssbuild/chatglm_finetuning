@@ -31,6 +31,8 @@ class InvalidScoreLogitsProcessor(LogitsProcessor):
 class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
     def __init__(self,config):
         super(MyChatGLMForConditionalGeneration, self).__init__(config)
+        setattr(self, 'model_parallel', True)
+        setattr(self, 'is_parallelizable', True)
 
     @torch.no_grad()
     def chat(self, tokenizer, query: str, history: List[Tuple[str, str]] = None, max_length: int = 2048, num_beams=1,
