@@ -1,8 +1,8 @@
 {
   "name_or_path": "THUDM/chatglm-6b",
   "bos_token": "<sop>",
-  "eop_token": "<eop>",
-  "eos_token": "</s>",
+  "eos_token": "<eop>",
+  "end_token": "</s>",
   "gmask_token": "[gMASK]",
   "mask_token": "[MASK]",
   "pad_token": "<pad>",

@@ -28,7 +28,7 @@ if __name__ == '__main__':
     config.precision = 16
     config.num_layers = 28
     config.initializer_weight = False
-    config.eos_token_id = 130005
+    
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
 
 

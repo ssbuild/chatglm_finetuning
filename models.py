@@ -31,7 +31,7 @@ class InvalidScoreLogitsProcessor(LogitsProcessor):
 class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
     def __init__(self,config):
         super(MyChatGLMForConditionalGeneration, self).__init__(config)
-        if self.load_in_8bit:
+        if load_in_8bit:
             setattr(self, 'model_parallel', True)
             setattr(self, 'is_parallelizable', True)
 
