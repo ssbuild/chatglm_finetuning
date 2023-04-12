@@ -1,4 +1,5 @@
-##
+##  
+    4月12日 deep_training 0.1.2.post0 fix lora v1 , lova v2 load_in_8bit 没生效bug.
     4月11日 增加 lora v2 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
     4月10日 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
     4月07日 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
@@ -13,8 +14,8 @@
     
 
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training==0.1.2 cpm_kernels transformers>=4.26.1 deepspeed
-
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.2 cpm_kernels transformers>=4.26.1 deepspeed
+    
 
 ## 2.更新详情
 - [deep_training](https://github.com/ssbuild/deep_training)

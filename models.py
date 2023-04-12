@@ -4,15 +4,12 @@ import copy
 import re
 import warnings
 from typing import List, Tuple, Optional, Callable
-
 import torch
 from deep_training.nlp.models.chatglm import ChatGLMForConditionalGeneration, logger
 from deep_training.nlp.models.lora.v2 import LoraArguments, LoraModel
 from deep_training.nlp.models.transformer import TransformerBase
 from torch import nn
 from transformers import LogitsProcessorList, LogitsProcessor, GenerationConfig, StoppingCriteriaList
-
-
 from tokenization_chatglm import ChatGLMTokenizer
 
 #如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
@@ -209,7 +206,6 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
             print('*' * 30,'lora info')
             model.print_trainable_parameters()
             self.set_model(model, copy_attr=False)
-
         elif global_num_layers_freeze > 0 and self.config.pre_seq_len is None:  # 非 lora freeze 非 ptuning模式
             M: nn.Module = self.backbone
             for param in M.named_parameters():
@@ -219,8 +215,6 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
                     if n_layer < global_num_layers_freeze:
                         param[1].requires_grad = False
                         print('freeze layer',param[0])
-
-
 
 
     def get_glm_model(self) -> MyChatGLMForConditionalGeneration:
