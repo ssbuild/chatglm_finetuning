@@ -126,7 +126,7 @@
     "prefix_projection": false
 ## int高效训练方式
    1. p-tuning-v2   使用chatglm-6b-int4 权重 ，配置文件quantization_bit=4
-   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 修改data_utils.py lora节的target dtype为None
+   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 修改data_utils.py 对应with_lora=True
 
 ## 11.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
