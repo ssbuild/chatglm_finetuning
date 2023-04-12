@@ -117,13 +117,16 @@
 
 
 ## 9.是否开启lora finetuning
-
     with_lora
+
 ## 10. 是否开启ptuning v2
     对于 deepspeed模式 , ptuning v2  只支持 stage 0
     修改对应配置文件
     "pre_seq_len": 32,
     "prefix_projection": false
+## int高效训练方式
+   1. p-tuning-v2   使用chatglm-6b-int4 权重 ，配置文件quantization_bit=4
+   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 修改data_utils.py lora节的target dtype为None
 
 ## 11.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
