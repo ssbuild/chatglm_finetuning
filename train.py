@@ -168,7 +168,8 @@ if __name__ == '__main__':
             batch_size=training_args.train_batch_size,
             drop_last=True,#多卡建议扔掉
             num_processes=trainer.world_size, process_index=trainer.global_rank,
-            dataset_loader_filter_fn=dataset_loader_filter_fn
+            dataset_loader_filter_fn=dataset_loader_filter_fn,
+            num_workers=0
         )
 
         if train_datasets is not None:
