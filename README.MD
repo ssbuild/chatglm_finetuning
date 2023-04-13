@@ -126,7 +126,9 @@
     "prefix_projection": false
 ## int高效训练方式
    1. p-tuning-v2   使用chatglm-6b-int4 权重 ，配置文件quantization_bit=4
-   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 修改data_utils.py 对应with_lora=True
+   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 
+修改data_utils.py 对应with_lora=True 
+   注意 lora int8 多卡训练  CUDA_VISIBLE_DEVICES=显卡数量 和 data_utils.py devices 保持一致，否则容易出故障 ， 建议使用 CUDA_VISIBLE_DEVICES=显卡数量 python train.py
 
 ## 11.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
