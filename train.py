@@ -47,6 +47,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
             super(MySimpleModelCheckpoint, self).on_save_model(trainer, pl_module)
         else:
             #保存最新权重
+            logging.info('step {} saving model'.format(trainer.global_step))
             pl_module.backbone.save_pretrained(self.weight_file)
 
             # monitor_candidates = self._monitor_candidates(trainer)
