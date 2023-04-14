@@ -46,21 +46,23 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
         if lora_args is None:
             super(MySimpleModelCheckpoint, self).on_save_model(trainer, pl_module)
         else:
-            monitor_candidates = self._monitor_candidates(trainer)
-            monitor_candidates.update(self.on_get_metric(trainer, pl_module))
-            val = monitor_candidates.get(self.monitor, None)
-
-            #保存loss最小权重
-            if self.update_best(val):
-                logging.info('epoch {} ,step {} , save best {}, {}\n'.format(monitor_candidates['epoch'],
-                                                                             monitor_candidates['step'],
-                                                                             self.best[self.monitor],
-                                                                             self.weight_file))
-                pl_module.backbone.save_pretrained(self.weight_file)
             #保存最新权重
-            pl_module.backbone.save_pretrained(self.last_weight_file)
-            # # 从最新权重加载模型
-            # pl_module = self.load_model_from_ckpt()
+            pl_module.backbone.save_pretrained(self.weight_file)
+
+            # monitor_candidates = self._monitor_candidates(trainer)
+            # monitor_candidates.update(self.on_get_metric(trainer, pl_module))
+            # val = monitor_candidates.get(self.monitor, None)
+            # #保存loss最小权重
+            # if self.update_best(val):
+            #     logging.info('epoch {} ,step {} , save best {}, {}\n'.format(monitor_candidates['epoch'],
+            #                                                                  monitor_candidates['step'],
+            #                                                                  self.best[self.monitor],
+            #                                                                  self.weight_file))
+            #     pl_module.backbone.save_pretrained(self.weight_file)
+            # #保存最新权重
+            # pl_module.backbone.save_pretrained(self.last_weight_file)
+            # # # 从最新权重加载模型
+            # # pl_module = self.load_model_from_ckpt()
 
 
 
