@@ -175,6 +175,8 @@ class ChatGLMTokenizer(PreTrainedTokenizer):
             mask_token='[MASK]',
             gmask_token='[gMASK]',
             padding_side="left",
+            pad_token="<pad>",
+            unk_token="<unk>",
             num_image_tokens=20000,
             **kwargs
     ) -> None:
@@ -187,6 +189,8 @@ class ChatGLMTokenizer(PreTrainedTokenizer):
             end_token=end_token,
             mask_token=mask_token,
             gmask_token=gmask_token,
+            pad_token=pad_token,
+            unk_token=unk_token,
             num_image_tokens=num_image_tokens,
             **kwargs
         )
@@ -316,22 +320,11 @@ class ChatGLMTokenizer(PreTrainedTokenizer):
         Returns:
             `List[int]`: List of [input IDs](../glossary#input-ids) with the appropriate special tokens.
         """
-        mask_ids = self.sp_tokenizer[self.mask_token]
-        gmask_ids = self.sp_tokenizer[self.gmask_token]
+        gmask_id = self.sp_tokenizer[self.gmask_token]
         eos_id = self.sp_tokenizer[self.eos_token]
-        if mask_ids not in token_ids_0 and gmask_ids not in token_ids_0:
-            token_ids_0 += [gmask_ids]
-
-        if token_ids_0[-1] != mask_ids and token_ids_0[-1] != gmask_ids:
-            token_ids_0 += [self.sp_tokenizer[self.end_token]]
-
-        token_ids_0 += [self.sp_tokenizer[self.bos_token]]
-
+        token_ids_0 = token_ids_0 + [gmask_id, self.sp_tokenizer[self.bos_token]]
         if token_ids_1 is not None:
-            if not token_ids_1 or token_ids_1[-1] != eos_id:
-                token_ids_1 += [eos_id]
-            token_ids_0 += token_ids_1
-
+            token_ids_0 = token_ids_0 + token_ids_1 + [eos_id]
         return token_ids_0
 
     def _pad(
@@ -393,6 +386,10 @@ class ChatGLMTokenizer(PreTrainedTokenizer):
                 encoded_inputs["attention_mask"] = attention_mask
 
             if "position_ids" not in encoded_inputs:
+                if bos_token_id in required_input:
+                    context_length = required_input.index(bos_token_id)
+                else:
+                    context_length = seq_length
                 position_ids = np.arange(seq_length, dtype=np.int64)
                 mask_token = mask_token_id if mask_token_id in required_input else gmask_token_id
                 if mask_token in required_input:
