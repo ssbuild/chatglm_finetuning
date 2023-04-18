@@ -107,7 +107,11 @@
 ![inference](1.png)
 
 ## 8.训练
-    支持三种微调方式 1. 冻结 N 层 修改models.py global_num_layers_freeze   2. ptuning v2    3. lora
+    支持4种微调方式 
+- 1. 冻结 N 层 修改models.py global_num_layers_freeze   
+- 2. ptuning v2    
+- 3. lora
+- 4. 正常微调
 
     训练精度 可以修改 config.json precision 16 32
     如果优化器不是lion ,可以尝试将config/config.json precision 改为32 ，然后修改 train.py Trainner 添加参数 precision=16 或者precision='bf16'
