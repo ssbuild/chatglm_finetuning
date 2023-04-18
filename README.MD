@@ -108,19 +108,23 @@
 
 ## 8.训练
     支持4种微调方式 
-- 1. 冻结 N 层 修改models.py global_num_layers_freeze   
-- 2. ptuning v2    
-- 3. lora
-- 4. 正常微调
-
+- 冻结 N 层 修改models.py global_num_layers_freeze   
+- ptuning v2    
+- lora
+- 正常微调
+```text
     训练精度 可以修改 config.json precision 16 32
     如果优化器不是lion ,可以尝试将config/config.json precision 改为32 ，然后修改 train.py Trainner 添加参数 precision=16 或者precision='bf16'
     python train.py
+```
 
-多机多卡训练 例子 3个机器 没个机器 4个卡
+```text
+多机多卡训练 例子 3个机器 每个机器 4个卡
 MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=0 python train.py 
 MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=1 python train.py 
 MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py 
+```
+
 
 ### 是否开启lora finetuning
     with_lora
