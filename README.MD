@@ -25,7 +25,7 @@
 - [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
 - [tf-task-example](https://github.com/ssbuild/tf-task-example)
 - [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
-- [chatglm_reward_finetuning](https://github.com/ssbuild/chatglm_reward_finetuning)
+- [llm_rlhf_finetuning](https://github.com/ssbuild/llm_rlhf_finetuning)
 - [chatglm_rlhf_finetuning](https://github.com/ssbuild/chatglm_rlhf_finetuning)
 
 
@@ -40,7 +40,7 @@
 
 
 ## 5.数据示例
-    给出一种qa 数据示例 , 如果想跟母模型保持一致，可以参考https://huggingface.co/THUDM/chatglm-6b 数据组织结构.
+    给出一种qa 数据示例.
     单条数据示例1
     {
         "id": 0, "paragraph": [
@@ -143,11 +143,11 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
 修改data_utils.py 对应with_lora=True 
    注意 lora int8 多卡训练  CUDA_VISIBLE_DEVICES=显卡数量 和 data_utils.py devices 保持一致，否则容易出故障 ， 建议使用 CUDA_VISIBLE_DEVICES=显卡数量 python train.py
 
-## 11.是否开启deepspeed
+## 9.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
     lora 模式暂时不支持deepspeed
 
 
 
-## 12. Reference
+## 10. Reference
     https://github.com/THUDM/ChatGLM-6B
