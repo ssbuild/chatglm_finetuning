@@ -25,6 +25,8 @@
 - [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
 - [tf-task-example](https://github.com/ssbuild/tf-task-example)
 - [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
+- [chatglm_reward_finetuning](https://github.com/ssbuild/chatglm_reward_finetuning)
+- [chatglm_rlhf_finetuning](https://github.com/ssbuild/chatglm_rlhf_finetuning)
 
 
 
