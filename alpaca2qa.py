@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/20 8:50
 
-# 数据参考 https://github.com/carbonz0/alpaca-chinese-dataset
+# 数据参考 https://github.com/hikariming/alpaca_chinese_dataset
+#
 ### 样例
 
 # ``` json
