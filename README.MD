@@ -153,9 +153,11 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     启动则将data_utils.py  修改 enable_deepspeed 
     lora 模式暂时不支持deepspeed
 
+
+## 10. Reference
+    https://github.com/THUDM/ChatGLM-6B
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ssbuild/chatglm_finetuning&type=Date)](https://star-history.com/#ssbuild/chatglm_finetuning&Date)
 
-## 10. Reference
-    https://github.com/THUDM/ChatGLM-6B
