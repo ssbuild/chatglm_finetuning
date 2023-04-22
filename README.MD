@@ -42,7 +42,8 @@
 
 
 ## 5.数据示例
-    单条数据示例1
+   第三方羊驼数据 https://github.com/hikariming/alpaca_chinese_dataset
+    单条数据示例
 ```json
  {
      "id": 0, "paragraph": [

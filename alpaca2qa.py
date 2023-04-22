@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/20 8:50
 
+# @misc{alpaca_chinese_dataset,
+#   author = {Liu, Beiming and Huang, Kunhao and Jiao, Lihua and He, Yuchen and Zhang, Ruiqin and Liang, Yuan and Wang, Yingshan},
+#   title = {Chinese Alpaca Dataset},
+#   year = {2023},
+#   publisher = {GitHub},
+#   journal = {GitHub repository},
+#   howpublished = {\url{https://github.com/hikariming/alpaca_chinese_dataset}},
+# }
+
 # 数据参考 https://github.com/hikariming/alpaca_chinese_dataset
 #
 ### 样例
