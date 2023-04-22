@@ -1,21 +1,17 @@
 # @Time    : 2023/1/22 16:22
 # @Author  : tk
 # @FileName: data_utils.py
-
-
 import copy
 import json
 import os
 import random
 import typing
 from enum import Enum
-
 import numpy as np
 import torch
 from deep_training.data_helper import DataHelper, ModelArguments, TrainingArguments, DataArguments
 from deep_training.nlp.models.chatglm import ChatGLMConfig
 from deep_training.nlp.models.lora.v2 import LoraArguments
-from deep_training.utils.func import is_chinese_char
 from fastdatasets.record import load_dataset as Loader, RECORD, WriterObject, gfile
 from tqdm import tqdm
 from transformers import HfArgumentParser
@@ -224,7 +220,10 @@ class NN_DataHelper(DataHelper):
                 paragraph = jd['paragraph']
                 if line_id < 10:
                     print(paragraph)
-                paragraph = [(preprocess(session['q']),preprocess('\n'.join(session['a']))) for session in paragraph]
+                #兼容支持 answer string
+                paragraph = [(preprocess(session['q']),
+                              preprocess('\n'.join(session['a'])) if isinstance(session['a'],list) else preprocess(session['a']))
+                    for session in paragraph]
                 for sid,(q,a) in enumerate(paragraph):
                     assert len(a),ValueError('answer cannot empty')
                     if sid == 0:
