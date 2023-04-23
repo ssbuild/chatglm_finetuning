@@ -1,6 +1,7 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
 import copy
+import os
 import re
 import warnings
 from typing import List, Tuple, Optional, Callable
@@ -221,3 +222,12 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         if self.lora_args is not None and self.lora_args.with_lora:
             return self.backbone.model.model
         return self.backbone.model
+
+    def save_pretrained_merge_lora(self,weight_path_file: str):
+        assert not load_in_8bit , ValueError('load_in_8bit is not support merge')
+        assert os.path.exists(os.path.dirname(weight_path_file))
+        assert self.lora_args is not None and self.lora_args.with_lora
+        lora_model : LoraModel = self.backbone
+        model = lora_model.merge_and_unload()
+        torch.save(model,weight_path_file)
+        return model

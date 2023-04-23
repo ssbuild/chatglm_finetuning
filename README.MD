@@ -1,4 +1,5 @@
 ##  
+    4月23日 增加lora merge权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
     4月12日 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2 .
     4月11日 增加 lora v2 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
     4月10日 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
@@ -151,9 +152,9 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
 
 ### 超大数据集
     修改train.py enable_IterableDataset 
-    - 不建議使用IterableDataset , 当数据非常多 例如千万以上 而且 内存不足， 可以采用 IterableDataset , 
+    - 不建议使用IterableDataset , 当数据非常多 例如千万以上 而且 内存不足， 可以采用 IterableDataset , 
     - 缺点不显示进度条 ,  打乱范围有限。 不能全局打乱（性能不足）
-    - 需要設置 max_epochs = None ， max_steps = 训练步数
+    - 需要设置 max_epochs = None ， max_steps = 训练步数
 
 ## 9.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 

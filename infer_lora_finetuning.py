@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
+import os.path
+
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
 from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
 from deep_training.nlp.models.lora.v2 import LoraArguments
@@ -22,31 +24,33 @@ if __name__ == '__main__':
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
 
-    config = ChatGLMConfig.from_pretrained('./best_ckpt')
+    ckpt_dir = './best_ckpt'
+    config = ChatGLMConfig.from_pretrained(ckpt_dir)
     config.initializer_weight = False
-
-    lora_args = LoraArguments.from_pretrained('./best_ckpt')
-
+    lora_args = LoraArguments.from_pretrained(ckpt_dir)
     assert lora_args.inference_mode == True and config.pre_seq_len is None
-
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
     # 加载lora权重
-    pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path = './best_ckpt', lora_config = lora_args)
+    pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path = ckpt_dir, lora_config = lora_args)
+    pl_model.eval().half().cuda()
 
-    model = pl_model.get_glm_model()
-    # 按需修改
-    model.half().cuda()
-    model = model.eval()
+    enable_merge_weight = False
+    if enable_merge_weight:
 
-    response, history = model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,
-                                        eos_token_id=config.eos_token_id,
-                                        do_sample=True, top_p=0.7, temperature=0.95,)
-    print('写一个诗歌，关于冬天',' ',response)
+        # 合并lora 权重 保存
+        pl_model.save_pretrained_merge_lora(os.path.join(ckpt_dir,'pytorch_model_merge.bin'))
+    else:
+        model = pl_model.get_glm_model()
 
-    response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=2048,
-                                        eos_token_id=config.eos_token_id,
-                                        do_sample=True, top_p=0.7, temperature=0.95,)
-    print('晚上睡不着应该怎么办',' ',response)
+        response, history = model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,
+                                            eos_token_id=config.eos_token_id,
+                                            do_sample=True, top_p=0.7, temperature=0.95,)
+        print('写一个诗歌，关于冬天',' ',response)
+
+        response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", history=[],max_length=2048,
+                                            eos_token_id=config.eos_token_id,
+                                            do_sample=True, top_p=0.7, temperature=0.95,)
+        print('晚上睡不着应该怎么办',' ',response)
 
 
 
