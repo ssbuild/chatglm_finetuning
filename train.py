@@ -177,6 +177,18 @@ if __name__ == '__main__':
             num_workers=0
         )
 
+        #IterableDataset 不建議使用IterableDataset , 当数据非常多 例如千万以上 而且 内存不足， 可以采用 IterableDataset , 缺点不显示进度条 , 需要設置 max_epochs = None ， max_steps = 训练步数
+
+        # train_datasets = dataHelper.load_random_sampler(dataHelper.train_files,
+        #     with_load_memory=False,with_record_iterable_dataset=True,
+        #     collate_fn=dataHelper.collate_fn,
+        #     batch_size=training_args.train_batch_size,
+        #     cycle_length = 10,
+        #     block_length = 100,
+        #     infinite=True,
+        #     num_processes=trainer.world_size, process_index=trainer.global_rank,
+        #     num_workers=0)
+
         if train_datasets is not None:
             trainer.fit(pl_model, train_dataloaders=train_datasets)
 
