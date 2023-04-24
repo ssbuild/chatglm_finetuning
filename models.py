@@ -229,5 +229,6 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         assert self.lora_args is not None and self.lora_args.with_lora
         lora_model : LoraModel = self.backbone
         model: nn.Module = lora_model.merge_and_unload()
-        torch.save(model.state_dict(),weight_path_file)
+        #保存hf权重，可用infer.py推理
+        torch.save(model.model.state_dict(),weight_path_file)
         return model
