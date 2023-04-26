@@ -8,7 +8,7 @@ from deep_training.nlp.models.lora.v2 import LoraArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer,ChatGLMTokenizer
+from models import MyTransformer,ChatGLMTokenizer,load_in_8bit
 
 
 if __name__ == '__main__':
@@ -32,7 +32,10 @@ if __name__ == '__main__':
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
     # 加载lora权重
     pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path = ckpt_dir, lora_config = lora_args)
-    pl_model.eval().half().cuda()
+    if load_in_8bit:
+        pl_model.eval().cuda()
+    else:
+        pl_model.eval().half().cuda()
 
     enable_merge_weight = False
     if enable_merge_weight:
