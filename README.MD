@@ -154,7 +154,7 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     修改train.py enable_IterableDataset 
     - 不建议使用IterableDataset , 当数据非常多 例如千万以上 而且 内存不足， 可以采用 IterableDataset , 
     - 缺点不显示进度条 ,  打乱范围有限。 不能全局打乱（性能不足）
-    - 需要设置 max_epochs = None ， max_steps = 训练步数
+    - 需要设置 max_epochs = None ， max_steps = 训练步数 , 注释 rewarm_epoch_num 改用 scheduler 键 T_0
 
 ## 9.是否开启deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
