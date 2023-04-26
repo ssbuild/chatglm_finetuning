@@ -66,7 +66,10 @@ train_info_args = {
     'optimizer': 'lion', # one of adamw,adam,lamb,lion
 
     'scheduler_type': 'CAWR',
-    'scheduler':{'T_mult': 1, 'rewarm_epoch_num': 0.5, 'verbose': False},
+    'scheduler':{'T_mult': 1,
+                 'rewarm_epoch_num': 0.5,  # 如果 max_epochs is not None !
+                 # 'T_0': 50000,    # 如果 max_epochs is None , 设定步数
+                 'verbose': False},
 
     # 'scheduler_type': 'linear',# one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau
     # 'scheduler': None,
