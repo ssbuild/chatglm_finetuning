@@ -14,7 +14,7 @@
     
 
 ## 1.安装
-  - pip install -i https://pypi.org/simple -U deep_training==0.1.2 cpm_kernels transformers>=4.26.1 deepspeed
+  - pip install --pre -i https://pypi.org/simple -U deep_training>=0.1.3 cpm_kernels transformers>=4.26.1 deepspeed
     
 
 ## 2.更新详情
