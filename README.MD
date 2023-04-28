@@ -1,4 +1,5 @@
 ##  
+    4月28日 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     4月23日 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
     4月12日 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
     4月11日 增加 lora v2 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
@@ -14,7 +15,7 @@
     
 
 ## 1.安装
-  - pip install --pre -i https://pypi.org/simple -U deep_training>=0.1.3 cpm_kernels transformers>=4.26.1 deepspeed
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.3 cpm_kernels transformers>=4.26.1 deepspeed
     
 
 ## 2.更新详情
