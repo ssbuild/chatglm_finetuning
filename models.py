@@ -232,3 +232,13 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         #保存hf权重，可用infer.py推理
         torch.save(model.model.state_dict(),weight_path_file)
         return model
+
+    def save_pretrained_merge_lora_and_restore(self, weight_path_file: str):
+        assert not load_in_8bit, ValueError('load_in_8bit is not support merge')
+        assert os.path.exists(os.path.dirname(weight_path_file))
+        assert self.lora_args is not None and self.lora_args.with_lora
+        lora_model: LoraModel = self.backbone
+        lora_model.merge_adapter()
+        # 保存hf权重，可用infer.py推理
+        torch.save(lora_model.model.model.state_dict(), weight_path_file)
+        lora_model.unmerge_adapter()
