@@ -128,9 +128,6 @@ if __name__ == '__main__':
     if config.pre_seq_len is not None and lora_args is not None:
         raise ValueError('with lora and ptuning v2 cannot open at the same time')
 
-    if config.pre_seq_len is not None:
-        if config.quantization_bit:
-            raise Exception('量化模型不支持微调训练')
 
     # 额外参数
     checkpoint_callback.tokenizer = tokenizer
