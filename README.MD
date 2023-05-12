@@ -3,16 +3,17 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
-    4月28日 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
-    4月23日 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
-    4月12日 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
-    4月11日 增加 lora v2 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
-    4月10日 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
-    4月07日 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
-    4月02日 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
-    3月28日 支持加载chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
-    3月27日 fix eos
-    3月26日 增加三种数据策略
+    05-12 ppo reinforcement learning training move to https://github.com/ssbuild/rlhf_chatglm
+    04-28 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
+    04-23 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
+    04-12 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
+    04-11 增加 lora v2 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
+    04-10 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
+    04-07 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
+    04-02 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
+    03-28 支持加载chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
+    03-27 fix eos
+    03-26 增加三种数据策略
 ```
    
 
