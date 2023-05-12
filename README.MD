@@ -3,7 +3,7 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
-    05-12 ppo reinforcement learning training move to https://github.com/ssbuild/rlhf_chatglm
+    05-12 fix lora int8 多卡训练 , ppo training move to https://github.com/ssbuild/rlhf_chatglm
     04-28 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     04-23 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
     04-12 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
