@@ -1,4 +1,5 @@
-##  
+##  statement
+    dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
     4月28日 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     4月23日 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
     4月12日 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
@@ -10,29 +11,17 @@
     3月27日 fix eos
     3月26日 增加三种数据策略
 
-## 注意事项 ！
-    dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
-    
 
-## 1.安装
+## install
   - pip install -i https://pypi.org/simple -U deep_training>=0.1.3 cpm_kernels transformers>=4.26.1 deepspeed
     
 
-## 2.更新详情
+## update information
 - [deep_training](https://github.com/ssbuild/deep_training)
 
-## 3.深度学习常规任务例子
-
-- [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
-- [tf-task-example](https://github.com/ssbuild/tf-task-example)
-- [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
-- [llm_rlhf_finetuning](https://github.com/ssbuild/llm_rlhf_finetuning)
-- [chatglm_rlhf_finetuning](https://github.com/ssbuild/chatglm_rlhf_finetuning)
-- [chatmoss_finetuning](https://github.com/ssbuild/chatmoss_finetuning)
 
 
-
-## 4.ChatGLM 预训练权重
+## weight
 
 - [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
 - [chatglm-6b-int8](https://huggingface.co/THUDM/chatglm-6b-int8)
@@ -40,9 +29,7 @@
     
 
 
-
-
-## 5.数据示例
+## data sample
    第三方羊驼数据 https://github.com/hikariming/alpaca_chinese_dataset
     单条数据示例
 ```json
@@ -90,20 +77,19 @@
 
 
 
-## 6.生成训练record
+## generate record
     python data_utils.py
     注:
     num_process_worker 为多进程制作数据 ， 如果数据量较大 ， 适当调大至cpu数量
     dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False, shuffle=True,mode='train',num_process_worker=0)
 
 
-## 7.推理
+## infer
     # infer.py 推理预训练模型
     # infer_finetuning.py 推理微调模型
     # infer_lora_finetuning.py 推理lora微调模型
      python infer.py
 
-### 硬件需求
 
 | **量化等级**    | **最低 GPU 显存** |
 | -------------- | ----------------- |
@@ -115,7 +101,7 @@
 
 ![inference](1.png)
 
-## 8.训练
+## finetuning
     支持4种微调方式 
 - 冻结 N 层 修改models.py global_num_layers_freeze   
 - ptuning v2    
@@ -136,30 +122,45 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
 ```
 
 
-### 是否开启lora finetuning
+### lora finetuning
     with_lora = True ， lora 和 adalora 不能同时开启
 
-### 是否开启ptuning v2
+### ptuning v2
     对于 deepspeed模式 , ptuning v2  只支持 stage 0
     修改对应配置文件
     "pre_seq_len": 32,
     "prefix_projection": false
+
 ### int高效训练方式
    1. p-tuning-v2   使用chatglm-6b-int4 权重 ，配置文件quantization_bit=4
    2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 
 修改data_utils.py 对应with_lora=True 
-   注意 lora int8 多卡训练  CUDA_VISIBLE_DEVICES=显卡数量 和 data_utils.py devices 保持一致，否则容易出故障 ， 建议使用 CUDA_VISIBLE_DEVICES=显卡数量 python train.py
 
 ### 超大数据集
     修改data_utils.py "data_backend": "lmdb" 
 
-## 9.是否开启deepspeed
+## deepspeed
     启动则将data_utils.py  修改 enable_deepspeed 
     lora 模式暂时不支持deepspeed
 
 
-## 10. Reference
+## Reference
     https://github.com/THUDM/ChatGLM-6B
+
+## 友情链接
+
+- [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
+- [tf-task-example](https://github.com/ssbuild/tf-task-example)
+- [chatmoss_finetuning](https://github.com/ssbuild/chatmoss_finetuning)
+- [chatglm_finetuning](https://github.com/ssbuild/chatglm_finetuning)
+- [chatyuan_finetuning](https://github.com/ssbuild/chatyuan_finetuning)
+- [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
+- [rlhf_llm](https://github.com/ssbuild/rlhf_llm)
+- [rlhf_chatglm](https://github.com/ssbuild/rlhf_chatglm)
+- [rlhf_chatyuan](https://github.com/ssbuild/rlhf_chatyuan)
+
+## 
+    纯粹而干净的代码
 
 ## Star History
 
