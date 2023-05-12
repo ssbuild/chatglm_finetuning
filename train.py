@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-
 import torch
 from deep_training.data_helper import ModelArguments, DataArguments, TrainingArguments
-from deep_training.nlp.models.chatglm import ChatGLMConfig, setup_model_profile
-from deep_training.nlp.models.lora.v2 import LoraArguments
 from deep_training.utils.trainer import ModelCheckpoint, SimpleModelCheckpoint
 from lightning import Trainer
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
-
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
-from models import MyTransformer,ChatGLMTokenizer
+from models import MyTransformer, ChatGLMTokenizer, load_in_8bit,LoraArguments,ChatGLMConfig, setup_model_profile
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
@@ -144,7 +140,9 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file,mode='test')
 
 
-    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args)
+
+    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args,
+                             load_in_8bit=load_in_8bit,device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
 
 
@@ -155,7 +153,9 @@ if __name__ == '__main__':
         # if os.path.exists(ckpt_path):
         #     if lora_args is None:
         #         # 加载权重继续训练
-        #         pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,strict=False)
+        #         pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,
+        #                       load_in_8bit = load_in_8bit, device_map = {"": trainer.local_rank} if trainer.world_size > 1 else "auto")
+        #         strict=False)
         #     else:
         #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
         #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,is_trainable=True,strict=False)
