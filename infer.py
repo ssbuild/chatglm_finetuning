@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
+import sys
+sys.path.append('..')
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
-from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
-from deep_training.nlp.models.lora.v2 import LoraArguments
 from transformers import HfArgumentParser
-
 from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer,ChatGLMTokenizer
+from models import MyTransformer,ChatGLMTokenizer,LoraArguments,setup_model_profile, ChatGLMConfig
 
 if __name__ == '__main__':
     train_info_args['seed'] = None

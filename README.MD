@@ -3,7 +3,7 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
-    05-12 ppo reinforcement learning training move to https://github.com/ssbuild/rlhf_chatglm
+    05-12 fix lora int8 多卡训练 , ppo training move to https://github.com/ssbuild/rlhf_chatglm
     04-28 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     04-23 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
     04-12 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
@@ -99,17 +99,18 @@
 
    
 
-![inference](1.png)
+![inference](data/1.png)
 
 ## finetuning
     支持4种微调方式 
-- 冻结 N 层 修改models.py global_num_layers_freeze   
+- 冻结 N 层 修改models/chatglm_model.py global_num_layers_freeze   
 - ptuning v2    
 - lora
 - 正常微调
 ```text
     训练精度 可以修改 config.json precision 16 32
-    如果优化器不是lion ,可以尝试将config/config.json precision 改为32 ，然后修改 train.py Trainner 添加参数 precision=16 或者precision='bf16'
+    如果优化器不是lion ,可以尝试将models/config/config.json precision 改为32 
+    然后修改 train.py Trainner 添加参数 precision=16 或者precision='bf16'
     python train.py
 ```
 
@@ -123,9 +124,11 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
 
 
 ### lora finetuning
+    config/__init__.py
     with_lora = True ， lora 和 adalora 不能同时开启
 
 ### ptuning v2
+    odels/config/config_ptv2.json
     对于 deepspeed模式 , ptuning v2  只支持 stage 0
     修改对应配置文件
     "pre_seq_len": 32,
