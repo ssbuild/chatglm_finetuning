@@ -1,5 +1,6 @@
 ##  statement
-    - [deep_training](https://github.com/ssbuild/deep_training)
+- [deep_training](https://github.com/ssbuild/deep_training)
+
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
     4月28日 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     4月23日 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
