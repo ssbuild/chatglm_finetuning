@@ -197,5 +197,6 @@ class MyTransformerChatGlmLMHeadModel(TransformerBase):
         super(MyTransformerChatGlmLMHeadModel, self).__init__(*args,**kwargs)
         self.set_model(self.from_pretrained(MyChatGLMForConditionalGeneration, *args, **kwargs))
         if load_in_8bit:
-            setattr(self.backbone, 'model_parallel', True)
-            setattr(self.backbone, 'is_parallelizable', True)
+            setattr(self.model, 'model_parallel', True)
+            setattr(self.model, 'is_parallelizable', True)
+            self.model.enable_input_require_grads()
