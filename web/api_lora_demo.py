@@ -11,7 +11,7 @@ from deep_training.nlp.models.lora.v2 import LoraArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer, ChatGLMTokenizer, load_in_8bit
+from models import MyTransformer, ChatGLMTokenizer, global_load_in_8bit
 
 DEVICE = "cuda"
 DEVICE_ID = "0"
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     assert lora_args.inference_mode == True and config.pre_seq_len is None
 
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
-                             load_in_8bit=load_in_8bit, device_map="auto")
+                             load_in_8bit=global_load_in_8bit, device_map="auto")
     # 加载lora权重
     pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path='./best_ckpt',
                                       lora_config=lora_args)

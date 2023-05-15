@@ -15,12 +15,8 @@ from deep_training.nlp.models.transformer import TransformerBase
 from torch import nn
 from transformers import LogitsProcessorList, LogitsProcessor, GenerationConfig, StoppingCriteriaList
 from models.tokenization_chatglm import ChatGLMTokenizer
+from config import global_load_in_8bit,global_num_layers_freeze
 
-#如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
-load_in_8bit = False
-
-#注意！！！ 非lora,非p-tuning 模式 ， <= config.json num_layers
-global_num_layers_freeze = -1
 
 class InvalidScoreLogitsProcessor(LogitsProcessor):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:

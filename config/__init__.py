@@ -5,6 +5,13 @@
 import json
 import os
 
+# 全局变量
+#如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+global_load_in_8bit = False
+
+#注意！！！ 非lora,非p-tuning 模式 ， <= config.json num_layers
+global_num_layers_freeze = -1
+
 lora_info_args = {
     'with_lora': True,  # 是否启用lora模块
     'r': 8,
