@@ -4,7 +4,7 @@ import os
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
 from transformers import HfArgumentParser
 from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer,ChatGLMTokenizer,load_in_8bit,setup_model_profile, ChatGLMConfig,LoraArguments
+from models import MyTransformer,ChatGLMTokenizer,global_load_in_8bit,setup_model_profile, ChatGLMConfig,LoraArguments
 
 
 if __name__ == '__main__':
@@ -25,11 +25,11 @@ if __name__ == '__main__':
     config.initializer_weight = False
     lora_args = LoraArguments.from_pretrained(ckpt_dir)
     assert lora_args.inference_mode == True and config.pre_seq_len is None
-    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args,
-                             load_in_8bit=load_in_8bit,device_map="auto")
+    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
+                             load_in_8bit=global_load_in_8bit, device_map="auto")
     # 加载lora权重
     pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path = ckpt_dir, lora_config = lora_args)
-    if load_in_8bit:
+    if global_load_in_8bit:
         pl_model.eval().cuda()
     else:
         pl_model.eval().half().cuda()

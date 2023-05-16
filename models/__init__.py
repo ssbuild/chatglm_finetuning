@@ -36,7 +36,7 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         model.save_pretrained(save_directory)
 
     def save_pretrained_merge_lora(self,weight_path_file: str):
-        assert not load_in_8bit , ValueError('load_in_8bit is not support merge')
+        assert not global_load_in_8bit , ValueError('load_in_8bit is not support merge')
         assert os.path.exists(os.path.dirname(weight_path_file))
         assert self.lora_args is not None and self.lora_args.with_lora
         lora_model : LoraModel = self.backbone
@@ -46,7 +46,7 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         return model
 
     def save_pretrained_merge_lora_and_restore(self, weight_path_file: str):
-        assert not load_in_8bit, ValueError('load_in_8bit is not support merge')
+        assert not global_load_in_8bit, ValueError('load_in_8bit is not support merge')
         assert os.path.exists(os.path.dirname(weight_path_file))
         assert self.lora_args is not None and self.lora_args.with_lora
         lora_model: LoraModel = self.backbone

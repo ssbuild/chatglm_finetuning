@@ -135,9 +135,8 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     "prefix_projection": false
 
 ### int高效训练方式
-   1. p-tuning-v2   使用chatglm-6b-int4 权重 ，配置文件quantization_bit=4
-   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改modes.py load_in_8bit = True 
-修改data_utils.py 对应with_lora=True 
+   1. p-tuning-v2   使用chatglm-6b-int4 权重 ，修改配置文件models/config/config.json  quantization_bit=4
+   2. lora int8     配置文件quantization_bit=0，使用官方标准float 16权重文件，修改 config/__init__.py global_load_in_8bit = True  并且对应with_lora=True 
 
 ### 超大数据集
     修改data_utils.py "data_backend": "lmdb" 

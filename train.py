@@ -9,7 +9,7 @@ from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
-from models import MyTransformer, ChatGLMTokenizer, load_in_8bit,LoraArguments,ChatGLMConfig, setup_model_profile
+from models import MyTransformer, ChatGLMTokenizer, global_load_in_8bit,LoraArguments,ChatGLMConfig, setup_model_profile
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
@@ -141,8 +141,8 @@ if __name__ == '__main__':
 
 
 
-    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args,lora_args=lora_args,
-                             load_in_8bit=load_in_8bit,device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
+    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
+                             load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
 
 
