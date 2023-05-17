@@ -58,7 +58,7 @@ if __name__ == '__main__':
     model = pl_model.get_glm_model()
     #保存hf权重
     #config.save_pretrained('convert/')
-    #torch.save(model,'pytorch_model_sft.bin')
+    # torch.save(model.state_dict(),'pytorch_model_sft.bin')
 
 
 
