@@ -108,9 +108,6 @@
 - lora
 - 正常微调
 ```text
-    训练精度 可以修改 config.json precision 16 32
-    如果优化器不是lion ,可以尝试将models/config/config.json precision 改为32 
-    然后修改 train.py Trainner 添加参数 precision=16 或者precision='bf16'
     python train.py
 ```
 
@@ -133,6 +130,9 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     修改对应配置文件
     "pre_seq_len": 32,
     "prefix_projection": false
+
+## 混合精度训练
+    Trainer.precision=‘bf16’,#混合精度训练，需显卡支持
 
 ### int高效训练方式
    1. p-tuning-v2   使用chatglm-6b-int4 权重 ，修改配置文件models/config/config.json  quantization_bit=4
