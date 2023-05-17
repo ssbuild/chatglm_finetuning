@@ -60,10 +60,10 @@ if __name__ == '__main__':
     #config.save_pretrained('convert/')
 
     # 保存sft p-tuning-v2 权重
-    # torch.save(model.state_dict(),'pytorch_model_sft_ptv2.bin')
+    # torch.save(model.state_dict(),'convert/pytorch_model_sft_ptv2.bin')
 
     #保存sft权重
-    #model.save_pretrained('pytorch_model_sft.bin')
+    #model.save_pretrained('convert/pytorch_model_sft.bin')
 
 
 
