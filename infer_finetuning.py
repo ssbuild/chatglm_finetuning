@@ -56,6 +56,9 @@ if __name__ == '__main__':
         pl_model.load_state_dict(state_dict= weights_dict_new, strict=False)
 
     model = pl_model.get_glm_model()
+    #保存hf权重
+    #config.save_pretrained('convert/')
+    #model.save_pretrained('convert/pytorch_model.bin')
 
     if not model.quantized:
         # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
