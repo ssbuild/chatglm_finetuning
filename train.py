@@ -113,7 +113,7 @@ if __name__ == '__main__':
         accumulate_grad_batches=training_args.gradient_accumulation_steps,
         num_sanity_val_steps=0,
         strategy=strategy,
-        # precision='16-mixed',#混合精度训练 需显卡这次
+        # precision='16-mixed',#混合精度训练
     )
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
@@ -144,8 +144,11 @@ if __name__ == '__main__':
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
                              load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
+    # 如果使用  Trainer.precision = '16-mixed',
+    # pl_model.float()
+
     if not global_load_in_8bit:
-        pl_model.bfloat16()
+        pl_model.half()
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
