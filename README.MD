@@ -132,7 +132,7 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     "prefix_projection": false
 
 ## 混合精度训练
-    Trainer.precision=‘bf16’,#混合精度训练，需显卡支持
+    Trainer.precision=‘16-mixed’,#混合精度训练
 
 ### int高效训练方式
    1. p-tuning-v2   使用chatglm-6b-int4 权重 ，修改配置文件models/config/config.json  quantization_bit=4

@@ -113,7 +113,7 @@ if __name__ == '__main__':
         accumulate_grad_batches=training_args.gradient_accumulation_steps,
         num_sanity_val_steps=0,
         strategy=strategy,
-        # precision='bf16',#混合精度训练 需显卡这次
+        # precision='16-mixed',#混合精度训练 需显卡这次
     )
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
