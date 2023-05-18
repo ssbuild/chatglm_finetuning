@@ -145,7 +145,7 @@ if __name__ == '__main__':
                              load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
     # 混合精度训练
-    # 如果使用  Trainer.precision = '16-mixed', 开启pl_model.float()，并注释掉 Trainer.max_grad_norm
+    # 如果使用  Trainer.precision = '16-mixed', pl_model.float() 并注释掉 Trainer.max_grad_norm
     # pl_model.float()
 
     # 半精度训练
