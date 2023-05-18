@@ -113,6 +113,7 @@ if __name__ == '__main__':
         accumulate_grad_batches=training_args.gradient_accumulation_steps,
         num_sanity_val_steps=0,
         strategy=strategy,
+        precision='16', # 半精度
         # precision='16-mixed',#混合精度训练
     )
 
@@ -152,9 +153,9 @@ if __name__ == '__main__':
     # 如果使用  Trainer.precision = '16', pl_model.float()
     # pl_model.float()
 
-    if not global_load_in_8bit:
-        pl_model.half()
-
+    # if not global_load_in_8bit:
+    #     pl_model.half()
+    pl_model.float()
 
 
 
