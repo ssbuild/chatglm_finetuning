@@ -135,7 +135,7 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     Trainer.precision='16-mixed',#混合精度训练 需 pl_model.float() 并注释掉 Trainer.max_grad_norm
 
 ## 半精度训练
-    Trainer.precision='16',#混合精度训练 需 pl_model.float() 并注释掉 Trainer.max_grad_norm
+    Trainer.precision='16',#混合精度训练 需 pl_model.float()
 
 ### int高效训练方式
    1. p-tuning-v2   使用chatglm-6b-int4 权重 ，修改配置文件models/config/config.json  quantization_bit=4
