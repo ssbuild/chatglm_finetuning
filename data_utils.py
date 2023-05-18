@@ -12,7 +12,7 @@ from fastdatasets.record import load_dataset as Loader, RECORD, WriterObject, gf
 from tqdm import tqdm
 from transformers import HfArgumentParser
 from data_processer import DataStrategy, TokenTruncation, TokenSingleSliding, TokenDoubleSliding
-from models import ChatGLMTokenizer,LoraArguments,ChatGLMConfig
+from models import ChatGLMTokenizer,LoraArguments,ChatGLMConfig,build_masks_and_position_ids_glm
 from config import *
 
 data_conf = {
@@ -147,33 +147,13 @@ class NN_DataHelper(DataHelper):
 
 
         max_len = torch.max(o.pop('seqlen')).tolist()
-        b_input_ids = o['input_ids'][:, :max_len]
-        ctxlens = o.pop('ctxlen')  # 兼容旧版本数据
-        if ctxlens is None:
-            ctxlens = [None] * len(b_input_ids)
-
-        b_position_ids,b_attention_mask = [],[]
-        for input_ids,context_length in zip(b_input_ids,ctxlens):
-            context_length = context_length.squeeze(dim=-1)
-            mask_position = context_length - 1
-            position_ids = list(range(context_length)) + [mask_position] * (max_len - context_length)
-            block_position_ids = [0] * context_length + list(range(1, max_len - context_length + 1))
-
-
-            attention_mask = torch.ones((1, max_len, max_len))
-            attention_mask = torch.tril(attention_mask)
-            attention_mask[..., :context_length] = 1
-            attention_mask = (attention_mask < 0.5)
-
-            b_position_ids.append(torch.stack((torch.tensor(position_ids),torch.tensor(block_position_ids))))
-            b_attention_mask.append(attention_mask)
-
-        b_attention_mask = torch.stack(b_attention_mask, dim=0)
-        b_position_ids = torch.stack(b_position_ids,dim=0)
-
-        o['input_ids'] = b_input_ids.long()
-        o['attention_mask'] = b_attention_mask.bool()
-        o['position_ids'] = b_position_ids.long()
+        input_ids = o['input_ids'][:, :max_len]
+        ctxlens = o.pop('ctxlen')
+        assert ctxlens is not None
+        attention_mask,position_ids = build_masks_and_position_ids_glm(input_ids,ctxlens,max_len)
+        o['input_ids'] = input_ids.long()
+        o['attention_mask'] = attention_mask.bool()
+        o['position_ids'] = position_ids.long()
         o['labels'] = o['labels'][:, :max_len].long()
         return o
 

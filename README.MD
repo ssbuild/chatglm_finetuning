@@ -145,6 +145,13 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     启动则将data_utils.py  修改 enable_deepspeed 
     lora 模式暂时不支持deepspeed
 
+## 关于续写
+    解码可调用 
+    model = pl_model.get_glm_model()
+    model.generate_for_continue_writing(tokenizer, "请帮我续写一段关于春天文字的文字", history=[],max_length=2048,
+                                            eos_token_id=config.eos_token_id,
+                                            do_sample=True, top_p=0.7, temperature=0.95,)
+    
 
 ## Reference
     https://github.com/THUDM/ChatGLM-6B

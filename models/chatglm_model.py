@@ -18,6 +18,33 @@ from models.tokenization_chatglm import ChatGLMTokenizer
 from config import global_load_in_8bit,global_num_layers_freeze
 
 
+def build_masks_and_position_ids_glm(batch_input_ids, ctxlens, max_len = None):
+    if max_len is None:
+        max_len = batch_input_ids.size(1)
+
+    batch_position_ids, batch_attention_mask = [], []
+    for input_ids, context_length in zip(batch_input_ids, ctxlens):
+        if context_length.dim() == 1:
+            context_length = context_length.squeeze(dim=-1)
+
+        mask_position = context_length - 1
+        position_ids = list(range(context_length)) + [mask_position] * (max_len - context_length)
+        block_position_ids = [0] * context_length + list(range(1, max_len - context_length + 1))
+
+        attention_mask = torch.ones((1, max_len, max_len))
+        attention_mask = torch.tril(attention_mask)
+        attention_mask[..., :context_length] = 1
+        attention_mask = (attention_mask < 0.5)
+
+        batch_position_ids.append(torch.stack((torch.tensor(position_ids), torch.tensor(block_position_ids))))
+        batch_attention_mask.append(attention_mask)
+
+    batch_attention_mask = torch.stack(batch_attention_mask, dim=0)
+    batch_position_ids = torch.stack(batch_position_ids, dim=0)
+    return batch_attention_mask,batch_position_ids
+
+
+
 class InvalidScoreLogitsProcessor(LogitsProcessor):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
         if torch.isnan(scores).any() or torch.isinf(scores).any():
@@ -29,7 +56,28 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
     def __init__(self,config):
         super(MyChatGLMForConditionalGeneration, self).__init__(config)
 
+    @torch.no_grad()
+    def generate_for_continue_writing(self,tokenizer, query: str, max_length: int = 2048, num_beams=1,
+        do_sample=True, top_p=0.7, temperature=0.95, logits_processor=None, **kwargs
+    ):
+        if logits_processor is None:
+            logits_processor = LogitsProcessorList()
+        logits_processor.append(InvalidScoreLogitsProcessor())
+        gen_kwargs = {"max_length": max_length, "num_beams": num_beams, "do_sample": do_sample, "top_p": top_p,
+                      "temperature": temperature, "logits_processor": logits_processor, **kwargs}
 
+        tokenizer: ChatGLMTokenizer
+        inputs_ids = tokenizer.encode(query)
+        inputs_ids = torch.tensor(inputs_ids[:-2] + inputs_ids[:-2],dtype=torch.int32).unsqueeze(0)
+        attention_mask,position_ids = build_masks_and_position_ids_glm(inputs_ids,[1])
+        inputs_ids = inputs_ids.to(self.device)
+        attention_mask = attention_mask.to(self.device)
+        position_ids = position_ids.to(self.device)
+        outputs = self.generate(inputs_ids=inputs_ids,attention_mask=attention_mask,position_ids=position_ids, **gen_kwargs)
+        outputs = outputs.tolist()[0][len(inputs_ids[0]):]
+        response = tokenizer.decode(outputs)
+        response = self.process_response(response)
+        return response
     @torch.no_grad()
     def chat(self, tokenizer, query: str, history: List[Tuple[str, str]] = None, max_length: int = 2048, num_beams=1,
              do_sample=True, top_p=0.7, temperature=0.95, logits_processor=None, **kwargs):
