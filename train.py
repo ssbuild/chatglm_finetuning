@@ -144,11 +144,15 @@ if __name__ == '__main__':
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
                              load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
-    # 如果使用  Trainer.precision = '16-mixed', 开启pl_model.float()，并注释掉 Trainer.max_grad_norm
+    # 如果使用  Trainer.precision = '16-mixed' or '16', 开启pl_model.float()，并注释掉 Trainer.max_grad_norm
     # pl_model.float()
 
     if not global_load_in_8bit:
         pl_model.half()
+
+
+
+
 
     ckpt_path = './best_ckpt/best.pt'
     if not data_args.convert_onnx:
