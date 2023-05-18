@@ -15,7 +15,7 @@ lora_info_args = {
     'with_lora': True,  # 是否启用lora模块
     'r': 8,
     'target_modules': ['query_key_value'],
-    'target_dtype': 16, # 半精度
+    'target_dtype': None,
     'lora_alpha': 32,
     'lora_dropout': 0.1,
     'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
@@ -27,7 +27,7 @@ adalora_info_args = {
     'with_lora': False,  # 是否启用adalora模块
     'r': 8,
     'target_modules': ['query_key_value'],
-    'target_dtype': 16, # 半精度
+    'target_dtype': None, #
     'lora_alpha': 32,
     'lora_dropout': 0.1,
     'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
