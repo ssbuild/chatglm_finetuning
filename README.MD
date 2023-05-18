@@ -146,9 +146,10 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     lora 模式暂时不支持deepspeed
 
 ## 关于续写
-    解码可调用 
+    训练 q 置空
+    推理如下
     model = pl_model.get_glm_model()
-    model.generate_for_continue_writing(tokenizer, "请帮我续写一段关于春天文字的文字", history=[],max_length=2048,
+    model.generate_for_continue_writing(tokenizer, "请帮我续写一段关于春天文字的文字", max_length=2048,
                                             eos_token_id=config.eos_token_id,
                                             do_sample=True, top_p=0.7, temperature=0.95,)
     
