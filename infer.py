@@ -31,8 +31,7 @@ if __name__ == '__main__':
     
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
 
-
-    model = pl_model.get_glm_model()
+    model = pl_model.get_llm_model()
     if not model.quantized:
         # 按需修改，目前只支持 4/8 bit 量化 ， 可以保存量化模型
         model.half().quantize(4).cuda()

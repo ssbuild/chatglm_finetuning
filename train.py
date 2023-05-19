@@ -218,7 +218,7 @@ if __name__ == '__main__':
             #                       output_names=output_names,
             #                       dynamic_axes=dynamic_axes)
 
-            model = pl_model.get_glm_model()
+            model = pl_model.get_llm_model()
             #保存huggingface model
             model.save_pretrained('huggingface_model',max_shard_size='10GB')
         else:
@@ -231,4 +231,4 @@ if __name__ == '__main__':
             # 二次加载权重
             pl_module.backbone.from_pretrained(pl_module.backbone.model, pretrained_model_name_or_path='./best_ckpt',lora_config=lora_args)
 
-            model = pl_model.get_glm_model()
+            model = pl_model.get_llm_model()

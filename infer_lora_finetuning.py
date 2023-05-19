@@ -36,11 +36,11 @@ if __name__ == '__main__':
 
     enable_merge_weight = False
     if enable_merge_weight:
-
         # 合并lora 权重 保存
-        pl_model.save_pretrained_merge_lora(os.path.join(ckpt_dir,'pytorch_model_merge.bin'))
+        pl_model.save_sft_weight(os.path.join(ckpt_dir,'pytorch_model_merge.bin'),merge_lora_weight=True)
+
     else:
-        model = pl_model.get_glm_model()
+        model = pl_model.get_llm_model()
 
         response, history = model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=2048,
                                             eos_token_id=config.eos_token_id,

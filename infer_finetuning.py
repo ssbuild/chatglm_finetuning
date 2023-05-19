@@ -55,15 +55,17 @@ if __name__ == '__main__':
         pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
         pl_model.load_state_dict(state_dict= weights_dict_new, strict=False)
 
-    model = pl_model.get_glm_model()
+    model = pl_model.get_llm_model()
+
+
     #保存hf权重
     #config.save_pretrained('convert/')
 
     # 保存sft p-tuning-v2 权重
-    # torch.save(model.state_dict(),'convert/pytorch_model_sft_ptv2.bin')
+    #  pl_model.save_sft_weight('convert/pytorch_model_sft_ptv2.bin')
 
     #保存sft权重
-    #model.save_pretrained('convert/pytorch_model_sft.bin')
+    # pl_model.save_sft_weight('convert/pytorch_model_sft.bin')
 
 
 
