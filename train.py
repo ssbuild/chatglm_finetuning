@@ -159,76 +159,35 @@ if __name__ == '__main__':
 
 
 
-
     ckpt_path = './best_ckpt/best.pt'
-    if not data_args.convert_onnx:
-        # #  只恢复权重 ， 不恢复步数和优化器 ，
-        # #  如果想恢复步数， 修改 trainer.fit(pl_model, train_dataloaders=train_datasets，ckpt=ckpt_path)  注lora 当前不支持恢复步数。
-        # if os.path.exists(ckpt_path):
-        #     if lora_args is None:
-        #         # 加载权重继续训练
-        #         pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,
-        #                       load_in_8bit = load_in_8bit, device_map = {"": trainer.local_rank} if trainer.world_size > 1 else "auto")
-        #         strict=False)
-        #     else:
-        #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
-        #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,is_trainable=True,strict=False)
+    # #  只恢复权重 ， 不恢复步数和优化器 ，
+    # #  如果想恢复步数， 修改 trainer.fit(pl_model, train_dataloaders=train_datasets，ckpt=ckpt_path)  注lora 当前不支持恢复步数。
+    # if os.path.exists(ckpt_path):
+    #     if lora_args is None:
+    #         # 加载权重继续训练
+    #         pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,
+    #                       load_in_8bit = load_in_8bit, device_map = {"": trainer.local_rank} if trainer.world_size > 1 else "auto")
+    #         strict=False)
+    #     else:
+    #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
+    #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,is_trainable=True,strict=False)
+
+    def dataset_loader_filter_fn(dataset):
+        print('*' * 30, 'total', len(dataset))
+        return dataset
 
 
-        def dataset_loader_filter_fn(dataset):
-            print('*' * 30, 'total', len(dataset))
-            return dataset
+    train_datasets = dataHelper.load_distributed_random_sampler(
+        dataHelper.train_files,
+        with_load_memory=data_args.data_backend == 'record',
+        collate_fn=dataHelper.collate_fn,
+        batch_size=training_args.train_batch_size,
+        drop_last=True,  # 多卡建议扔掉
+        num_processes=trainer.world_size, process_index=trainer.global_rank,
+        dataset_loader_filter_fn=dataset_loader_filter_fn,
+        num_workers=0
+    )
 
+    if train_datasets is not None:
+        trainer.fit(pl_model, train_dataloaders=train_datasets)
 
-        train_datasets = dataHelper.load_distributed_random_sampler(
-            dataHelper.train_files,
-            with_load_memory=data_args.data_backend == 'record',
-            collate_fn=dataHelper.collate_fn,
-            batch_size=training_args.train_batch_size,
-            drop_last=True,  # 多卡建议扔掉
-            num_processes=trainer.world_size, process_index=trainer.global_rank,
-            dataset_loader_filter_fn=dataset_loader_filter_fn,
-            num_workers=0
-        )
-
-        if train_datasets is not None:
-            trainer.fit(pl_model, train_dataloaders=train_datasets)
-
-    else:
-        if lora_args is not None:
-            # 加载权重
-            pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,
-                                                       model_args=model_args,
-                                                       training_args=training_args,
-                                                       lora_args=lora_args,strict=False)
-            # input_sample = (
-            #     ("input_ids", torch.ones(size=(1, 128), dtype=torch.int32)),
-            #     ("attention_mask", torch.ones(size=(1, 1,128,128), dtype=torch.int32)),
-            #     ("position_ids", torch.ones(size=(1, 2, 128), dtype=torch.int32)),
-            # )
-            # input_names = ("input_ids",'attention_mask','position_ids')
-            # output_names = ("pred_ids",)
-            # dynamic_axes = None or {"input_ids": [0, 1],
-            #                         "attention_mask": [0, 0,1,1],
-            #                         "position_ids": [0, 0,1],
-            #                         "pred_ids": [0, 1]}
-            # pl_module.convert_to_onnx('./best_ckpt/best.onnx',
-            #                       input_sample=input_sample,
-            #                       input_names=input_names,
-            #                       output_names=output_names,
-            #                       dynamic_axes=dynamic_axes)
-
-            model = pl_model.get_llm_model()
-            #保存huggingface model
-            model.save_pretrained('huggingface_model',max_shard_size='10GB')
-        else:
-            # 加载权重
-            lora_args = LoraArguments.from_pretrained('./best_ckpt')
-            pl_module = MyTransformer(lora_args=lora_args,
-                                      config=config,
-                                      model_args=model_args,
-                                      training_args=training_args)
-            # 二次加载权重
-            pl_module.backbone.from_pretrained(pl_module.backbone.model, pretrained_model_name_or_path='./best_ckpt',lora_config=lora_args)
-
-            model = pl_model.get_llm_model()
