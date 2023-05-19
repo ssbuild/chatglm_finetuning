@@ -98,25 +98,3 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel,SftWeightMinMax, with_pl=Tru
             return self.backbone.model.model
         return self.backbone.model
 
-    def save_pretrained_merge_lora(self,sft_weight_path: str):
-        assert not global_load_in_8bit , ValueError('load_in_8bit is not support merge')
-        assert os.path.exists(os.path.dirname(sft_weight_path))
-        assert self.lora_args is not None and self.lora_args.with_lora
-        lora_model : LoraModel = self.backbone
-        model: nn.Module = lora_model.merge_and_unload()
-        #保存hf权重，可用infer.py推理
-        # torch.save(model.model.state_dict(),weight_path_file)
-        model.model.save_pretrained(sft_weight_path)
-        return model
-
-    def save_pretrained_merge_lora_and_restore(self, sft_weight_path: str):
-        assert not global_load_in_8bit, ValueError('load_in_8bit is not support merge')
-        assert os.path.exists(os.path.dirname(sft_weight_path))
-        assert self.lora_args is not None and self.lora_args.with_lora
-        lora_model: LoraModel = self.backbone
-        lora_model.merge_adapter()
-        # 保存hf权重，可用infer.py推理
-        #torch.save(lora_model.model.model.state_dict(), weight_path_file)
-        lora_model.model.model.save_pretrained(sft_weight_path)
-        lora_model.unmerge_adapter()
-
