@@ -146,7 +146,8 @@ if __name__ == '__main__':
                              load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
     #恢复权重继续训练
-    #pl_model.load_sft_weight('./best_ckpt/best.pt')
+    # pl_model.load_sft_weight('./best_ckpt/best.pt',is_trainable=True)
+
 
 
 
