@@ -110,9 +110,9 @@
 ```text
     python train.py
 ```
-
+### 多机多卡训练
 ```text
-多机多卡训练 例子 3个机器 每个机器 4个卡
+例子 3个机器 每个机器 4个卡
 修改train.py Trainer num_nodes = 3
 MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=0 python train.py 
 MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=1 python train.py 
@@ -121,15 +121,41 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
 
 
 ### lora finetuning
-    config/__init__.py
-    with_lora = True ， lora 和 adalora 不能同时开启
+```text
+        global_args = {
+           "load_in_8bit": False, # lora 如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+           "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
+           "pre_seq_len":  32,    #p-tuning-v2 参数
+           "prefix_projection": False, #p-tuning-v2 参数
+           "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
+        }
+         lora_info_args = {
+               'with_lora': True,  # 是否启用lora模块
+               'r': 8,
+               'target_modules': ['query_key_value'],
+               'target_dtype': None,
+               'lora_alpha': 32,
+               'lora_dropout': 0.1,
+               'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+               'modules_to_save' : None, # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+        }
+```
+    
 
 ### ptuning v2
-    odels/config/config_ptv2.json
+ 
     对于 deepspeed模式 , ptuning v2  只支持 stage 0
-    修改对应配置文件
-    "pre_seq_len": 32,
-    "prefix_projection": false
+
+```text
+    global_args = {
+            "load_in_8bit": False, # lora 如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+            "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
+            "pre_seq_len":  32,    #p-tuning-v2 参数
+            "prefix_projection": False, #p-tuning-v2 参数
+            "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
+        }
+
+```
 
 ## 混合精度训练
     Trainer.precision='16-mixed',#需 pl_model.float() 并注释掉 Trainer.max_grad_norm
@@ -155,7 +181,7 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
          global_args = {
            "load_in_8bit": True, # lora 如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
            "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
-           "pre_seq_len":  32,    #p-tuning-v2 参数
+           "pre_seq_len":  None,    #p-tuning-v2 参数
            "prefix_projection": False, #p-tuning-v2 参数
            "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
         }
