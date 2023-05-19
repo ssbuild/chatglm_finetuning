@@ -10,11 +10,11 @@ from models import MyTransformer,ChatGLMTokenizer,LoraArguments,setup_model_prof
 if __name__ == '__main__':
     train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
-    model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
+    model_args, _, data_args, _ = parser.parse_dict(train_info_args)
 
     setup_model_profile()
 
-    dataHelper = NN_DataHelper(model_args, training_args, data_args)
+    dataHelper = NN_DataHelper(model_args, None, data_args)
     tokenizer: ChatGLMTokenizer
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     config.num_layers = 28
     config.initializer_weight = False
     
-    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args)
+    pl_model = MyTransformer(config=config, model_args=model_args)
 
     model = pl_model.get_llm_model()
     if not model.quantized:

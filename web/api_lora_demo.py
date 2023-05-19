@@ -62,11 +62,11 @@ async def create_item(request: Request):
 if __name__ == '__main__':
     train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
-    model_args, training_args, data_args, _ = parser.parse_dict(train_info_args)
+    model_args, _, data_args, _ = parser.parse_dict(train_info_args)
 
     setup_model_profile()
 
-    dataHelper = NN_DataHelper(model_args, training_args, data_args)
+    dataHelper = NN_DataHelper(model_args, None, data_args)
     tokenizer: ChatGLMTokenizer
     tokenizer, _, _, _ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
@@ -78,8 +78,7 @@ if __name__ == '__main__':
 
     assert lora_args.inference_mode == True and config.pre_seq_len is None
 
-    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
-                             load_in_8bit=global_load_in_8bit, device_map="auto")
+    pl_model = MyTransformer(config=config, model_args=model_args, lora_args=lora_args,load_in_8bit=global_load_in_8bit, device_map="auto")
     # 加载lora权重
     pl_model.save_sft_weight('./best_ckpt')
 

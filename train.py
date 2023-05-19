@@ -145,6 +145,12 @@ if __name__ == '__main__':
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
                              load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
+    #恢复权重继续训练
+    #pl_model.load_sft_weight('./best_ckpt/best.pt')
+
+
+
+
     # 混合精度训练
     # 如果使用  Trainer.precision = '16-mixed', pl_model.float() 并注释掉 Trainer.max_grad_norm
     # pl_model.float()
@@ -157,20 +163,6 @@ if __name__ == '__main__':
     #     pl_model.half()
     pl_model.float()
 
-
-
-    ckpt_path = './best_ckpt/best.pt'
-    # #  只恢复权重 ， 不恢复步数和优化器 ，
-    # #  如果想恢复步数， 修改 trainer.fit(pl_model, train_dataloaders=train_datasets，ckpt=ckpt_path)  注lora 当前不支持恢复步数。
-    # if os.path.exists(ckpt_path):
-    #     if lora_args is None:
-    #         # 加载权重继续训练
-    #         pl_model = MyTransformer.load_from_checkpoint(ckpt_path, config=config,model_args=model_args,training_args=training_args,lora_args=lora_args,
-    #                       load_in_8bit = load_in_8bit, device_map = {"": trainer.local_rank} if trainer.world_size > 1 else "auto")
-    #         strict=False)
-    #     else:
-    #         # 加载lora权重 继续训练  0.0.20版本支持lora 继续训练
-    #         pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path=ckpt_path,lora_config=lora_args,is_trainable=True,strict=False)
 
     def dataset_loader_filter_fn(dataset):
         print('*' * 30, 'total', len(dataset))

@@ -19,13 +19,13 @@
 
 
 ## install
-  - pip install -i https://pypi.org/simple -U deep_training>=0.1.3 cpm_kernels transformers>=4.26.1 deepspeed
+  - pip install -i https://pypi.org/simple -U deep_training>=0.1.7 cpm_kernels transformers>=4.26.1 deepspeed
 
 ## weight
 
-- [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)
-- [chatglm-6b-int8](https://huggingface.co/THUDM/chatglm-6b-int8)
-- [chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)
+- [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)   支持四种微调方式
+- [chatglm-6b-int8](https://huggingface.co/THUDM/chatglm-6b-int8)  目前只支持ptv2微调和推理
+- [chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)  目前只支持ptv2微调和推理
     
 
 
