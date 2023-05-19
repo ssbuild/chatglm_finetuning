@@ -82,13 +82,13 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel,SftWeightMinMax, with_pl=Tru
             print('*' * 30,'lora info')
             model.print_trainable_parameters()
             self.set_model(model, copy_attr=False)
-        elif global_num_layers_freeze > 0 and self.config.pre_seq_len is None:  # 非 lora freeze 非 ptuning模式
+        elif global_args["num_layers_freeze"] > 0 and self.config.pre_seq_len is None:  # 非 lora freeze 非 ptuning模式
             M: nn.Module = self.backbone
             for param in M.named_parameters():
                 result = re.match(re.compile('.*transformer.layers.(\\d+)'),param[0])
                 if result is not None:
                     n_layer = int(result.group(1))
-                    if n_layer < global_num_layers_freeze:
+                    if n_layer < global_args["num_layers_freeze"]:
                         param[1].requires_grad = False
                         print('freeze layer',param[0])
 

@@ -9,7 +9,7 @@ from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config
-from models import MyTransformer, ChatGLMTokenizer, global_load_in_8bit,LoraArguments,ChatGLMConfig, setup_model_profile
+from models import MyTransformer, ChatGLMTokenizer,LoraArguments,ChatGLMConfig, setup_model_profile,global_args
 
 
 class MySimpleModelCheckpoint(SimpleModelCheckpoint):
@@ -99,7 +99,26 @@ if __name__ == '__main__':
     if deepspeed_config is not None and len(deepspeed_config):
         strategy = DeepSpeedStrategy(config=deepspeed_config,)
 
+    dataHelper = NN_DataHelper(model_args, training_args, data_args)
+    config_kwargs = {"pre_seq_len": global_args["pre_seq_len"],
+                     "prefix_projection": global_args["pre_seq_len"]}
+    if global_args["num_layers"] > 0:
+        config_kwargs["num_layers"] = global_args["num_layers"]
+    tokenizer, config, _, _ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig,config_kwargs=config_kwargs)
+    assert tokenizer.eos_token_id == 130005
 
+    if config.quantization_bit !=0 and not config.pre_seq_len:
+        raise AssertionError("quantization only support ptv2 finetuning")
+
+    if config.quantization_bit != 0 and lora_args is not None:
+        raise AssertionError("quantization only support ptv2 finetuning")
+
+    #config.num_layers = 4
+
+    precision = '16' # 半精度训练 "32": "32-true", "16": "16-mixed", "bf16": "bf16-mixed"
+    if config.quantization_bit != 0:
+        #量化权重 p-tuning-v2训练
+        precision = '32'
 
     trainer = Trainer(
         callbacks=[checkpoint_callback,LearningRateMonitor(logging_interval='step')],
@@ -113,14 +132,11 @@ if __name__ == '__main__':
         accumulate_grad_batches=training_args.gradient_accumulation_steps,
         num_sanity_val_steps=0,
         strategy=strategy,
-        precision='16', # 半精度
+        precision=precision , # 半精度
         # precision='16-mixed',#混合精度训练
     )
 
-    dataHelper = NN_DataHelper(model_args, training_args, data_args)
 
-    tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,config_class_name=ChatGLMConfig)
-    assert tokenizer.eos_token_id == 130005
 
     if config.pre_seq_len is not None and lora_args is not None:
         raise ValueError('with lora and ptuning v2 cannot open at the same time')
@@ -143,7 +159,7 @@ if __name__ == '__main__':
 
 
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
-                             load_in_8bit=global_load_in_8bit, device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
+                             load_in_8bit=global_args["load_in_8bit"], device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
     #恢复权重继续训练
     # pl_model.load_sft_weight('./best_ckpt/best.pt',is_trainable=True)
@@ -153,16 +169,20 @@ if __name__ == '__main__':
 
 
     # 混合精度训练
-    # 如果使用  Trainer.precision = '16-mixed', pl_model.float() 并注释掉 Trainer.max_grad_norm
+    # 如果使用  Trainer.precision = '16-mixed', pl_model.float()
     # pl_model.float()
 
     # 半精度训练
     # 如果使用  Trainer.precision = '16', pl_model.float()
     # pl_model.float()
 
-    # if not global_load_in_8bit:
+    # if not global_args["load_in_8bit"]:
     #     pl_model.half()
-    pl_model.float()
+
+    if config.quantization_bit != 0 or global_args["load_in_8bit"]:
+        pl_model.half()
+    else:
+        pl_model.float()
 
 
     def dataset_loader_filter_fn(dataset):

@@ -5,11 +5,16 @@ import json
 import os
 
 # 全局变量
-#如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
-global_load_in_8bit = False
 
-#注意！！！ 非lora,非p-tuning 模式 ， <= config.json num_layers
-global_num_layers_freeze = -1
+global_args = {
+    "load_in_8bit": False, # lora 如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+    "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
+    "pre_seq_len": None,    #p-tuning-v2 参数
+    "prefix_projection": False, #p-tuning-v2 参数
+    "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
+}
+
+
 
 lora_info_args = {
     'with_lora': True,  # 是否启用lora模块
@@ -51,8 +56,17 @@ train_info_args = {
     'model_type': 'chatglm',
     # 预训练模型路径 , 从0训练，则置空
     'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
-    'config_name': './models/config/config.json',
+    'config_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b/config.json',
     'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
+
+    # 'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int4',
+    # 'config_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int4/config.json',
+    # 'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int4',
+
+    # 'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int8',
+    # 'config_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int8/config.json',
+    # 'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int8',
+
     'convert_onnx': False, # 转换onnx模型
     'do_train': True,
     'train_file':  [ './data/finetune_train_examples.json'],
@@ -119,3 +133,4 @@ def get_deepspeed_config():
     with open(os.path.join(os.path.dirname(__file__),'deepspeed.json'), mode='r', encoding='utf-8') as f:
         deepspeed_config = json.loads(f.read())
     return deepspeed_config
+

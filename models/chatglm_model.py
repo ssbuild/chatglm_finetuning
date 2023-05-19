@@ -15,7 +15,7 @@ from deep_training.nlp.models.transformer import TransformerBase
 from torch import nn
 from transformers import LogitsProcessorList, LogitsProcessor, GenerationConfig, StoppingCriteriaList
 from models.tokenization_chatglm import ChatGLMTokenizer
-from config import global_load_in_8bit,global_num_layers_freeze
+from config import global_args
 
 
 def build_masks_and_position_ids_glm(batch_input_ids, ctxlens, max_len = None):

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
-import os
-import re
-from collections import OrderedDict
 import torch
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
 from transformers import HfArgumentParser
@@ -16,8 +13,8 @@ if __name__ == '__main__':
     train_info_args['seed'] = None
     train_info_args['model_name_or_path'] = None
 
-    parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
-    model_args, _, data_args, _ = parser.parse_dict(train_info_args)
+    parser = HfArgumentParser((ModelArguments,  DataArguments))
+    model_args,data_args= parser.parse_dict(train_info_args,allow_extra_keys=True)
 
     setup_model_profile()
 

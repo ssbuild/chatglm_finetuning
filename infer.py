@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
-import sys
-sys.path.append('..')
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
 from transformers import HfArgumentParser
 from data_utils import train_info_args, NN_DataHelper
@@ -9,8 +7,8 @@ from models import MyTransformer,ChatGLMTokenizer,LoraArguments,setup_model_prof
 
 if __name__ == '__main__':
     train_info_args['seed'] = None
-    parser = HfArgumentParser((ModelArguments, TrainingArguments, DataArguments, LoraArguments))
-    model_args, _, data_args, _ = parser.parse_dict(train_info_args)
+    parser = HfArgumentParser((ModelArguments, DataArguments,))
+    model_args, data_args = parser.parse_dict(train_info_args,allow_extra_keys=True)
 
     setup_model_profile()
 
