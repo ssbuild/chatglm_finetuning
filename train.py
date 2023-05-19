@@ -113,8 +113,6 @@ if __name__ == '__main__':
     if config.quantization_bit != 0 and lora_args is not None:
         raise AssertionError("quantization only support ptv2 finetuning")
 
-    #config.num_layers = 4
-
     precision = '16' # 半精度训练 "32": "32-true", "16": "16-mixed", "bf16": "bf16-mixed"
     if config.quantization_bit != 0:
         #量化权重 p-tuning-v2训练
