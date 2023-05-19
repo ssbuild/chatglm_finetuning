@@ -28,7 +28,7 @@ if __name__ == '__main__':
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
                              load_in_8bit=global_load_in_8bit, device_map="auto")
     # 加载lora权重
-    pl_model.backbone.from_pretrained(pl_model.backbone.model, pretrained_model_name_or_path = ckpt_dir, lora_config = lora_args)
+    pl_model.load_sft_weight(ckpt_dir)
     if global_load_in_8bit:
         pl_model.eval().cuda()
     else:

@@ -54,3 +54,12 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel, with_pl=True):
         # 保存hf权重，可用infer.py推理
         torch.save(lora_model.model.model.state_dict(), weight_path_file)
         lora_model.unmerge_adapter()
+
+    def load_sft_weight(self, sft_weight_path: str, is_trainable=False, strict=False):
+        if self.lora_args is not None and self.lora_args.with_lora:
+            # 加载lora权重
+            self.backbone.from_pretrained(self.backbone.model, pretrained_model_name_or_path=sft_weight_path,
+                                          is_trainable=is_trainable)
+        else:
+            # 加载sft 或者 p-tuning-v2权重
+            self.get_llm_model().load_state_dict(torch.load(sft_weight_path), strict=strict)
