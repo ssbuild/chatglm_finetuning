@@ -102,11 +102,6 @@
 ![inference](data/1.png)
 
 ## finetuning
-    支持4种微调方式 
-- 冻结 N 层 修改models/chatglm_model.py global_num_layers_freeze   
-- ptuning v2    
-- lora
-- 正常微调
 ```text
     python train.py
 ```
@@ -168,19 +163,43 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
             "pre_seq_len":  None,    #p-tuning-v2 参数
             "prefix_projection": False, #p-tuning-v2 参数
             "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
-        }
+    }
+    
+ 
 
 ```
 
+## 全参数微调
+
+```text
+    global_args = {
+            "load_in_8bit": False, # lora 如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+            "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
+            "pre_seq_len":  None,    #p-tuning-v2 参数
+            "prefix_projection": False, #p-tuning-v2 参数
+            "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
+        }
+   lora_info_args = {
+       'with_lora': False,  # 是否启用lora模块
+        ...
+   }
+   adalora_info_args = {
+       'with_lora': False,  # 是否启用lora模块
+        ...
+   }
+```
+
+## 32精度训练
+    Trainer.precision='32',#pl_model.float() 
 
 ## 混合精度训练
-    Trainer.precision='16-mixed',#需 pl_model.float() 并注释掉 Trainer.max_grad_norm
+    Trainer.precision='16-mixed',#pl_model.float() 
 
 ## 半精度训练
-    Trainer.precision='16',#需 pl_model.float()
+    Trainer.precision='16',#pl_model.float()
 
 ### int高效训练方式
-1.p-tuning-v2   使用chatglm-6b-int4 or chatglm-6b-int8  或者 
+1.p-tuning-v2   使用chatglm-6b-int4 or chatglm-6b-int8  或者 chatglm-6b 权重
 
 ```text
         global_args = {

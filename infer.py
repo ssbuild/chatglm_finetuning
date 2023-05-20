@@ -17,14 +17,6 @@ if __name__ == '__main__':
     tokenizer, config, _,_ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
     assert tokenizer.eos_token_id == 130005
-
-    #加载int4模型
-    if train_info_args['model_name_or_path'].find('int4') != -1:
-        # 4 or 8
-        config.quantization_bit = 4
-    # 官方28层
-    config.precision = 16
-    config.num_layers = 28
     config.initializer_weight = False
     
     pl_model = MyTransformer(config=config, model_args=model_args)
