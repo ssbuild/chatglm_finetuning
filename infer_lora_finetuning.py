@@ -23,7 +23,10 @@ if __name__ == '__main__':
     lora_args = LoraArguments.from_pretrained(ckpt_dir)
 
     assert lora_args.inference_mode == True and config.pre_seq_len is None
-    pl_model = MyTransformer(config=config, model_args=model_args, lora_args=lora_args,load_in_8bit=global_args["load_in_8bit"], device_map="auto")
+    pl_model = MyTransformer(config=config, model_args=model_args, lora_args=lora_args,load_in_8bit=global_args["load_in_8bit"],
+                             # device_map="auto",
+                             device_map = {"":0} # 第一块卡
+                             )
     # 加载lora权重
     pl_model.load_sft_weight(ckpt_dir)
 
