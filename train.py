@@ -159,7 +159,7 @@ if __name__ == '__main__':
 
     if config.pre_seq_len is not None:
         # P-tuning v2
-        pl_model.half()
+        pl_model.get_llm_model().half()
         pl_model.get_llm_model().transformer.prefix_encoder.float()
     else:
         # Finetune
