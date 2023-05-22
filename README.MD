@@ -190,13 +190,13 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
 ```
 
 ## 32精度训练
-    Trainer.precision='32',#pl_model.float() 
+    Trainer.precision='32'
 
 ## 混合精度训练
-    Trainer.precision='16-mixed',#pl_model.float() 
+    Trainer.precision='16-mixed'
 
 ## 半精度训练
-    Trainer.precision='16',#pl_model.float()
+    Trainer.precision='16'
 
 ### int高效训练方式
 1.p-tuning-v2   使用chatglm-6b-int4 or chatglm-6b-int8  或者 chatglm-6b 权重
