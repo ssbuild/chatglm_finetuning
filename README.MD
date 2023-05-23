@@ -105,6 +105,20 @@
 ```text
     python train.py
 ```
+
+### 单机多卡
+```text
+可见的前两块卡
+train_info_args = {
+    'devices': 2,
+}
+
+# 第 0块 和 第三块卡
+train_info_args = {
+    'devices': [0,2],
+}
+```
+
 ### 多机多卡训练
 ```text
 例子 3个机器 每个机器 4个卡
