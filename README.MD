@@ -113,7 +113,7 @@ train_info_args = {
     'devices': 2,
 }
 
-# 第 0块 和 第三块卡
+# 第一块 和 第三块卡
 train_info_args = {
     'devices': [0,2],
 }
