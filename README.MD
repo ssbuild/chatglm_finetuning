@@ -19,7 +19,7 @@
 
 
 ## install
-  - pip install -i https://pypi.org/simple -U deep_training>=0.1.7 cpm_kernels transformers>=4.26.1 deepspeed
+  - pip install -i https://pypi.org/simple -U deep_training==0.1.8 cpm_kernels transformers>=4.26.1 deepspeed
 
 ## weight
 

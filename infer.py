@@ -30,18 +30,16 @@ if __name__ == '__main__':
         model.half().cuda()
     model = model.eval()
 
-    # 注意 长度不等于2048 会影响效果
-    response, history = model.chat(tokenizer, "你好", history=[],max_length=2048,
-                                   eos_token_id=config.eos_token_id,
-                                   do_sample=True, top_p=0.7, temperature=0.95,
-                                   )
-    print('你好',' ',response)
-
-    response, history = model.chat(tokenizer, "晚上睡不着应该怎么办", history=history,max_length=2048,
-                                   eos_token_id=config.eos_token_id,
-                                   do_sample=True, top_p=0.7, temperature=0.95,
-                                   )
-    print('晚上睡不着应该怎么办',' ',response)
+    text_list = [
+        "写一个诗歌，关于冬天",
+        "晚上睡不着应该怎么办",
+    ]
+    for input in text_list:
+        response, history = model.chat(tokenizer, input, history=[], max_length=2048,
+                                       eos_token_id=config.eos_token_id,
+                                       do_sample=True, top_p=0.7, temperature=0.95, )
+        print("input", input)
+        print("response", response)
 
     # response, history = base_model.chat(tokenizer, "写一个诗歌，关于冬天", history=[],max_length=30)
     # print('写一个诗歌，关于冬天',' ',response)

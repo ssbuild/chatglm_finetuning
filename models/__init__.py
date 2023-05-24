@@ -34,8 +34,7 @@ class SftWeightMinMax:
         assert os.path.exists(sft_weight_path)
         if self.lora_args is not None and self.lora_args.with_lora:
             # 加载lora权重
-            self.backbone.from_pretrained(self.backbone.model, pretrained_model_name_or_path=sft_weight_path,
-                                          is_trainable=is_trainable)
+            self.backbone.load_weight(pretrained_model_name_or_path=sft_weight_path,is_trainable=is_trainable)
         else:
             weight_dict = torch.load(sft_weight_path)
             weights_dict_new = OrderedDict()
