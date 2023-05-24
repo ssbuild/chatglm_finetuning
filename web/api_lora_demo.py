@@ -84,7 +84,7 @@ if __name__ == '__main__':
                              # device_map={"": 0},  # 第一块卡
                              )
     # 加载lora权重
-    pl_model.save_sft_weight('./best_ckpt')
+    pl_model.load_sft_weight('./best_ckpt')
 
     model = pl_model.get_llm_model()
     # 按需修改
