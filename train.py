@@ -30,7 +30,7 @@ class MySimpleModelCheckpoint(SimpleModelCheckpoint):
                               training_args=training_args)
 
 
-        pl_module.backbone.from_pretrained(pl_module.backbone.model,self.last_weight_file)
+        pl_module.load_sft_weight(self.last_weight_file)
         return pl_module
 
 
