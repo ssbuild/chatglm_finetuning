@@ -44,11 +44,12 @@ class SftWeightMinMax:
                     weight_dict = weight_dict[k]
                     break
             for k, v in weight_dict.items():
+                k = re.sub(r'_forward_module\.', '', k)
                 rm_key = '_TransformerLightningModule__backbone'
                 if k.startswith(rm_key):
                     base_model_prefix = self.backbone.base_model_prefix
-                    k = re.sub(r'{}.{}.'.format(rm_key,base_model_prefix), '', k)
-                weights_dict_new[re.sub(r'_forward_module\.', '', k)] = v
+                    k = re.sub(r'{}.{}.'.format(rm_key, base_model_prefix), '', k)
+                weights_dict_new[k] = v
             # 加载sft 或者 p-tuning-v2权重
             self.get_llm_model().load_state_dict(weights_dict_new, strict=strict)
 
