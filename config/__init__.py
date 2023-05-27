@@ -5,5 +5,5 @@
 import json
 import os
 
-from config.chatglm_sft_config import *
+from config.sft_config import *
 

@@ -234,13 +234,31 @@ class MyChatGLMForConditionalGeneration(ChatGLMForConditionalGeneration):
 
 class MyTransformerChatGlmLMHeadModel(TransformerBase):
     def __init__(self, *args,**kwargs):
-        #如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
-        load_in_8bit = kwargs.get('load_in_8bit',False)
-        if not load_in_8bit:
-            kwargs.pop("device_map",None)
+        load_in_8bit = kwargs.get('load_in_8bit', False)
+        load_in_4bit = kwargs.get('load_in_4bit', False)
+        if not load_in_4bit:
+            load_in_4bit = kwargs.get("quantization_config", {}).get('load_in_4bit', False)
+
+        if not load_in_8bit and not load_in_4bit:
+            kwargs.pop("device_map", None)
+            kwargs.pop("quantization_config", None)
         super(MyTransformerChatGlmLMHeadModel, self).__init__(*args,**kwargs)
         self.set_model(self.from_pretrained(MyChatGLMForConditionalGeneration, *args, **kwargs))
-        if load_in_8bit:
-            setattr(self.model, 'model_parallel', True)
-            setattr(self.model, 'is_parallelizable', True)
-            self.model.enable_input_require_grads()
+
+        # for param in self.model.parameters():
+        #     param.requires_grad = False  # freeze the model - train adapters later
+        #     if param.ndim == 1:
+        #         # cast the small parameters (e.g. layernorm) to fp32 for stability
+        #         param.data = param.data.to(torch.float32)
+
+        # class CastOutputToFloat(nn.Sequential):
+        #     def forward(self, x):
+        #         return super().forward(x).to(torch.float32)
+        #
+        # self.model.lm_head = CastOutputToFloat(self.model.lm_head)
+
+
+    def enable_input_require_grads(self):
+        setattr(self.model, 'model_parallel', True)
+        setattr(self.model, 'is_parallelizable', True)
+        self.model.enable_input_require_grads()

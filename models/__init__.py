@@ -78,10 +78,22 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel,SftWeightMinMax, with_pl=Tru
         self.lora_args = lora_args
 
         if lora_args is not None and lora_args.with_lora:
+            self.backbone.enable_input_require_grads()
             model = LoraModel(self.backbone, lora_args)
             print('*' * 30,'lora info')
             model.print_trainable_parameters()
             self.set_model(model, copy_attr=False)
+
+            # for name, module in model.named_modules():
+            #     if isinstance(module, LoraLayer):
+            #         module = module.to(torch.bfloat16)
+            #     if 'norm' in name:
+            #         module = module.to(torch.float32)
+            #     if 'lm_head' in name or 'embed_tokens' in name:
+            #         if hasattr(module, 'weight'):
+            #             if module.weight.dtype == torch.float32:
+            #                 module = module.to(torch.bfloat16)
+
         elif global_args["num_layers_freeze"] > 0 and self.config.pre_seq_len is None:  # 非 lora freeze 非 ptuning模式
             M: nn.Module = self.backbone
             for param in M.named_parameters():

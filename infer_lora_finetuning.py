@@ -31,10 +31,7 @@ if __name__ == '__main__':
     # 加载lora权重
     pl_model.load_sft_weight(ckpt_dir)
 
-    if getattr(pl_model.get_llm_model(), "is_loaded_in_8bit", False):
-        pl_model.eval().cuda()
-    else:
-        pl_model.eval().half().cuda()
+    pl_model.eval().half().cuda()
 
     enable_merge_weight = False
     if enable_merge_weight:

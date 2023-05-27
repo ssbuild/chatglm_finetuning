@@ -3,6 +3,7 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
+    05-27 add qlora transformers>=4.30
     05-12 fix lora int8 多卡训练 , ppo training move to https://github.com/ssbuild/rlhf_chatglm
     04-28 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     04-23 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
@@ -19,7 +20,7 @@
 
 
 ## install
-  - pip install -i https://pypi.org/simple -U deep_training==0.1.8 cpm_kernels transformers>=4.26.1 deepspeed
+  - pip install -i https://pypi.org/simple -U -r requirements.txt
 
 ## weight
 
@@ -229,6 +230,37 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
            "pre_seq_len":  None,    #p-tuning-v2 参数
            "prefix_projection": False, #p-tuning-v2 参数
            "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
+        }
+        lora_info_args = {
+               'with_lora': True,  # 是否启用lora模块
+               'r': 8,
+               'target_modules': ['query_key_value'],
+               'target_dtype': None,
+               'lora_alpha': 32,
+               'lora_dropout': 0.1,
+               'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+               'modules_to_save' : None, # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+        }
+3.lora int4
+
+```text      
+        global_args = {
+            "load_in_8bit": False, # qlora int8
+            "load_in_4bit": True, # qlora int4
+        
+            # load_in_4bit 量化配置
+            "quantization_config": BitsAndBytesConfig(
+                load_in_4bit=True,
+                llm_int8_threshold=6.0,
+                llm_int8_has_fp16_weight=False,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4",
+            ),
+            "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
+            "pre_seq_len": None,    #p-tuning-v2 参数 , None 禁用p-tuning-v2
+            "prefix_projection": False, #p-tuning-v2 参数
+            "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
         }
         lora_info_args = {
                'with_lora': True,  # 是否启用lora模块

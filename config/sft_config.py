@@ -4,16 +4,32 @@
 import json
 import os
 
+import torch
+from transformers import BitsAndBytesConfig
+
 # 全局变量
 
 global_args = {
-    "load_in_8bit": False, # lora 如果显卡支持int8 可以开启 ， 需安装依赖 pip install bitsandbytes
+    "load_in_8bit": False, # qlora int8
+    "load_in_4bit": False, # qlora int4
+
+    # load_in_4bit 量化配置
+    "quantization_config": BitsAndBytesConfig(
+        load_in_4bit=True,
+        llm_int8_threshold=6.0,
+        llm_int8_has_fp16_weight=False,
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+    ),
     "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
     "pre_seq_len": None,    #p-tuning-v2 参数 , None 禁用p-tuning-v2
     "prefix_projection": False, #p-tuning-v2 参数
     "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
 }
 
+if global_args['load_in_4bit'] != True:
+    global_args['quantization_config'] = None
 
 
 lora_info_args = {
@@ -121,6 +137,17 @@ train_info_args = {
    'lora': {**lora_info_args},
    'adalora': {**adalora_info_args},
 }
+
+
+#配置检查
+
+
+if global_args['load_in_8bit'] == global_args['load_in_4bit'] and global_args['load_in_8bit'] == True:
+    raise Exception('load_in_8bit and load_in_4bit only set one at same time!')
+
+if lora_info_args['with_lora'] == adalora_info_args['with_lora'] and lora_info_args['with_lora'] == True:
+    raise Exception('lora and adalora can set one at same time !')
+
 
 #lora 模式暂时不支持deepspeed
 enable_deepspeed = False

@@ -139,7 +139,7 @@ if __name__ == '__main__':
         num_sanity_val_steps=0,
         strategy=strategy,
         #lora int8 precision='32'
-        precision='32' if global_args['load_in_8bit'] else '16' , #  #可以自行尝试  "32": "32-true", "16": "16-mixed", "bf16": "bf16-mixed"
+        precision= '16' , #  #可以自行尝试  "32": "32-true", "16": "16-mixed", "bf16": "bf16-mixed"
     )
 
 
@@ -154,10 +154,10 @@ if __name__ == '__main__':
     config.save_pretrained('best_ckpt')
 
 
-
-
     pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
-                             load_in_8bit=global_args["load_in_8bit"], device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
+                             quantization_config=global_args["quantization_config"],
+                             load_in_8bit=global_args["load_in_8bit"],
+                             device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto")
 
     #恢复权重继续训练
     # pl_model.load_sft_weight('./best_ckpt/best.pt',is_trainable=True)
