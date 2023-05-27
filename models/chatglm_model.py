@@ -236,7 +236,9 @@ class MyTransformerChatGlmLMHeadModel(TransformerBase):
         load_in_8bit = kwargs.get('load_in_8bit', False)
         load_in_4bit = kwargs.get('load_in_4bit', False)
         if not load_in_4bit:
-            load_in_4bit = (kwargs.get("quantization_config", {}) or {}).get('load_in_4bit', False)
+            quantization_config = kwargs.get("quantization_config", None)
+            if quantization_config:
+                load_in_4bit = quantization_config.load_in_4bit
 
         if not load_in_8bit and not load_in_4bit:
             kwargs.pop("device_map", None)
