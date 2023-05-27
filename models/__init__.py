@@ -1,9 +1,7 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
 from collections import OrderedDict
-
 from transformers import PretrainedConfig
-
 from models.chatglm_model import *
 
 
@@ -74,8 +72,10 @@ class SftWeightMinMax:
 class MyTransformer(MyTransformerChatGlmLMHeadModel,SftWeightMinMax, with_pl=True):
     def __init__(self, *args, **kwargs):
         lora_args: LoraArguments = kwargs.pop('lora_args',None)
+        num_layers_freeze = kwargs.pop('num_layers_freeze',-1)
         super(MyTransformer, self).__init__(*args, **kwargs)
         self.lora_args = lora_args
+
 
         if lora_args is not None and lora_args.with_lora:
             self.backbone.enable_input_require_grads()
@@ -94,13 +94,13 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel,SftWeightMinMax, with_pl=Tru
             #             if module.weight.dtype == torch.float32:
             #                 module = module.to(torch.bfloat16)
 
-        elif global_args["num_layers_freeze"] > 0 and self.config.pre_seq_len is None:  # 非 lora freeze 非 ptuning模式
+        elif num_layers_freeze > 0 and self.config.pre_seq_len is None:  # 非 lora freeze 非 ptuning模式
             M: nn.Module = self.backbone
             for param in M.named_parameters():
                 result = re.match(re.compile('.*transformer.layers.(\\d+)'),param[0])
                 if result is not None:
                     n_layer = int(result.group(1))
-                    if n_layer < global_args["num_layers_freeze"]:
+                    if n_layer < num_layers_freeze:
                         param[1].requires_grad = False
                         print('freeze layer',param[0])
 

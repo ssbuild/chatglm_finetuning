@@ -13,16 +13,60 @@ from transformers import BitsAndBytesConfig
 
 global_args = {
     "load_in_8bit": False, # qlora int8
-    "load_in_4bit": False, # qlora int4
+    "load_in_4bit": True, # qlora int4
 
     # load_in_4bit 量化配置
-    "quantization_config": None,
+    "quantization_config": BitsAndBytesConfig(
+        load_in_4bit=True,
+        llm_int8_threshold=6.0,
+        llm_int8_has_fp16_weight=False,
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+    ),
     "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
     "pre_seq_len": None,    #p-tuning-v2 参数 , None 禁用p-tuning-v2
     "prefix_projection": False, #p-tuning-v2 参数
     "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
 }
 
+if global_args['load_in_4bit'] != True:
+    global_args['quantization_config'] = None
+
+
+lora_info_args = {
+    'with_lora': True,  # 是否启用lora模块
+    'r': 8,
+    'target_modules': ['query_key_value'],
+    'target_dtype': None,
+    'lora_alpha': 32,
+    'lora_dropout': 0.1,
+    'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+    'modules_to_save' : None, # "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+
+}
+
+adalora_info_args = {
+    'with_lora': False,  # 是否启用adalora模块
+    'r': 8,
+    'target_modules': ['query_key_value'],
+    'target_dtype': None, #
+    'lora_alpha': 32,
+    'lora_dropout': 0.1,
+    'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+    'modules_to_save' : None, # "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+
+    'target_r':8, # Target Lora matrix dimension.
+    'init_r': 12, #Intial Lora matrix dimension.
+    'tinit': 0, #The steps of initial warmup.
+    'tfinal': 0, #The steps of final warmup.
+    'deltaT': 1, #Step interval of rank allocation.
+    'beta1': 0.85, #Hyperparameter of EMA.
+    'beta2': 0.85, #Hyperparameter of EMA.
+    'orth_reg_weight': 0.5, #The orthogonal regularization coefficient.
+    'total_step': None, #The total training steps.
+    'rank_pattern': None, #The saved rank pattern.
+}
 
 train_info_args = {
     'devices': 1,
@@ -90,7 +134,10 @@ train_info_args = {
     'use_fast_tokenizer': False,
     'do_lower_case': False,
 
-
+    ##############  lora模块
+    #注意lora,adalora 和 ptuning-v2 禁止同时使用
+   'lora': {**lora_info_args},
+   'adalora': {**adalora_info_args},
 }
 
 
@@ -99,4 +146,9 @@ train_info_args = {
 
 if global_args['load_in_8bit'] == global_args['load_in_4bit'] and global_args['load_in_8bit'] == True:
     raise Exception('load_in_8bit and load_in_4bit only set one at same time!')
+
+if lora_info_args['with_lora'] == adalora_info_args['with_lora'] and lora_info_args['with_lora'] == True:
+    raise Exception('lora and adalora can set one at same time !')
+
+
 

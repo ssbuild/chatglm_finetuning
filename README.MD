@@ -129,6 +129,14 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=1 python train.py
 MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py 
 ```
 
+## 切换训练模式配置
+    修改 config/__init__.py       “from config.sft_config import *”  切换配置文件
+    config/sft_config.py            finetuning
+    config/sft_config_lora.py       lora finetuning
+    config/sft_config_lora_int4.py  lora int4 finetuning
+    config/sft_config_lora_int8.py  lora int8 finetuning
+    config/sft_config_ptv2.py       lora p-tuning-v2 finetuning
+    
 
 ### lora finetuning
 ```text
