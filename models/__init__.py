@@ -1,7 +1,7 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
 from collections import OrderedDict
-from transformers import PretrainedConfig
+from transformers import PretrainedConfig, PreTrainedModel
 from models.chatglm_model import *
 
 
@@ -104,6 +104,13 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel,SftWeightMinMax, with_pl=Tru
                         param[1].requires_grad = False
                         print('freeze layer',param[0])
 
+    def get_model_lr(self, model=None, lr=None):
+        # for n, p in self.named_parameters():
+        #     print(n, p.requires_grad)
+        lr = lr if lr is not None else self.config.task_specific_params['learning_rate']
+        if self.lora_args is not None and self.lora_args.with_lora:
+            return [(self.backbone, lr)]
+        return super(MyTransformer, self).get_model_lr(model, lr)
 
     def get_llm_model(self) -> MyChatGLMForConditionalGeneration:
         if self.lora_args is not None and self.lora_args.with_lora:
