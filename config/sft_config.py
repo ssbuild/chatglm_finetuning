@@ -88,9 +88,9 @@ train_info_args = {
     'train_file':  [ './data/finetune_train_examples.json'],
     'max_epochs': 20,
     'max_steps': -1,
-    'optimizer': 'lion', # one of adamw,adam,lamb,lion
+    'optimizer': 'lion', # one of [lamb,adamw_hf,adamw,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_apex_fused,adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion_8bit,lion_32bit,paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit]
 
-    'scheduler_type': 'CAWR',
+    'scheduler_type': 'CAWR', #one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau, cosine,cosine_with_restarts,polynomial,constant,constant_with_warmup,inverse_sqrt,reduce_lr_on_plateau]
     'scheduler':{'T_mult': 1,
                  'rewarm_epoch_num': 0.5,  # 如果 max_epochs is not None !
                  # 'T_0': 50000,    # 如果 max_epochs is None , 设定步数
