@@ -78,12 +78,6 @@
 
 
 
-## generate record
-    python data_utils.py
-    注:
-    num_process_worker 为多进程制作数据 ， 如果数据量较大 ， 适当调大至cpu数量
-    dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False, shuffle=True,mode='train',num_process_worker=0)
-
 
 ## infer
     # infer.py 推理预训练模型
@@ -104,6 +98,12 @@
 
 ## finetuning
 ```text
+    制作数据
+    python data_utils.py
+    注: num_process_worker 为多进程制作数据 ， 如果数据量较大 ， 适当调大至cpu数量
+    dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False, shuffle=True,mode='train',num_process_worker=0)
+    
+    训练
     python train.py
 ```
 
