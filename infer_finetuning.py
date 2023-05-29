@@ -37,7 +37,7 @@ if __name__ == '__main__':
         train_weight = './best_ckpt/last.ckpt/best.pt'
 
     #加载微调权重
-    pl_model.load_sft_weight(train_weight)
+    pl_model.load_sft_weight(train_weight,strict=True)
 
     model = pl_model.get_llm_model()
     #保存hf权重
