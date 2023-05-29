@@ -70,16 +70,22 @@ class ModelWeightMinMax:
                     weight_dict = weight_dict[k]
                     break
             pl_model_prefix = '_TransformerLightningModule__backbone'
+            is_pl_weight = pl_model_prefix in ','.join(list(weight_dict.keys()))
             base_model_prefix = self.backbone.base_model_prefix
+            model_prefix = r'{}\.{}'.format(pl_model_prefix, base_model_prefix)
             for k, v in weight_dict.items():
-                k = re.sub(r'_forward_module\.', '', k)
-                model_prefix = r'{}\.{}'.format(pl_model_prefix, base_model_prefix)
-                if k.startswith(model_prefix):
-                    k = re.sub(r'{}\.'.format(model_prefix), '', k)
+                if is_pl_weight:
+                    k = re.sub(r'_forward_module\.', '', k)
+                    #llm module
+                    if k.startswith(model_prefix):
+                        k = re.sub(r'{}\.'.format(model_prefix), '', k)
+                        k = model_prefix + '.' + k
+                    #TransformerBase module
+                    if not k.startswith(pl_model_prefix):
+                        k = pl_model_prefix + '.' + k
+                else:
+                    # hf module weight
                     k = model_prefix + '.' + k
-
-                if not k.startswith(pl_model_prefix):
-                    k = pl_model_prefix + '.' + k
                 weights_dict_new[k] = v
             # 加载sft 或者 p-tuning-v2权重
             def assert_state_dict_fn(model,incompatible_keys: _IncompatibleKeys):
