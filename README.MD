@@ -20,7 +20,16 @@
 
 
 ## install
+    
   - pip install -i https://pypi.org/simple -U -r requirements.txt
+
+```text
+dev 版本可通过下列方式安装 
+pip install -i https://pypi.org/simple deep_training==0.1.9 cpm_kernels bitsandbytes
+pip install -q -U git+https://github.com/huggingface/transformers.git
+pip install -q -U git+https://github.com/huggingface/accelerate.git
+```
+
 
 ## weight
 
