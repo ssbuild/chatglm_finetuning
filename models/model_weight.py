@@ -119,9 +119,10 @@ class ModelWeightMinMax:
                     return None
                 return missing_keys or incompatible_keys.unexpected_keys
             self: nn.Module
-            self.register_load_state_dict_post_hook(assert_state_dict_fn)
+            h = self.register_load_state_dict_post_hook(assert_state_dict_fn)
             # TransformerBase类 可能有自定义额外模块
             self.load_state_dict(weights_dict_new, strict=strict)
+            h.remove()
 
     #保存模型权重，除了llm之外可能还有其他模块
     def save_sft_weight(self, sft_weight_path, merge_lora_weight=False):
