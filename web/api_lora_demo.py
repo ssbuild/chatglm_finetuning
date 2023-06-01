@@ -71,10 +71,11 @@ if __name__ == '__main__':
     tokenizer, _, _, _ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    config = ChatGLMConfig.from_pretrained('./best_ckpt')
+    ckpt_dir = './best_ckpt/last'
+    config = ChatGLMConfig.from_pretrained(ckpt_dir)
     config.initializer_weight = False
 
-    lora_args = LoraArguments.from_pretrained('./best_ckpt')
+    lora_args = LoraArguments.from_pretrained(ckpt_dir)
 
     assert lora_args.inference_mode == True and config.pre_seq_len is None
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
                              # device_map={"": 0},  # 第一块卡
                              )
     # 加载lora权重
-    pl_model.load_sft_weight('./best_ckpt')
+    pl_model.load_sft_weight(ckpt_dir)
 
     model = pl_model.get_llm_model()
     # 按需修改

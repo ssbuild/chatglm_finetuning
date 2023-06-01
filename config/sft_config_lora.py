@@ -3,11 +3,12 @@
 
 import json
 import os
-
 import torch
 from transformers import BitsAndBytesConfig
+from config.constant_map import train_info_models, train_target_modules_maps
 
-# **************切换 配置文件 修改 config.__init__.py
+# 量化权重不支持此模式训练
+train_model_config = train_info_models['chatglm']
 
 # 全局变量
 
@@ -30,14 +31,13 @@ global_args = {
     "num_layers": -1, # 是否使用骨干网络的全部层数 最大1-28， -1 表示全层, 否则只用只用N层
 }
 
-if global_args['load_in_4bit'] != True:
-    global_args['quantization_config'] = None
+
 
 
 lora_info_args = {
     'with_lora': True,  # 是否启用lora模块
     'r': 8,
-    'target_modules': ['query_key_value'],
+    'target_modules': train_target_modules_maps[train_model_config['model_type']],
     'target_dtype': None,
     'lora_alpha': 32,
     'lora_dropout': 0.1,
@@ -49,7 +49,7 @@ lora_info_args = {
 adalora_info_args = {
     'with_lora': False,  # 是否启用adalora模块
     'r': 8,
-    'target_modules': ['query_key_value'],
+    'target_modules': train_target_modules_maps[train_model_config['model_type']],
     'target_dtype': None, #
     'lora_alpha': 32,
     'lora_dropout': 0.1,
@@ -73,24 +73,14 @@ train_info_args = {
     'data_backend': 'record',  #one of record lmdb, 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
     'model_type': 'chatglm',
     # 预训练模型路径 , 从0训练，则置空
-    'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
-    'config_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b/config.json',
-    'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
-
-    # 'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int4',
-    # 'config_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int4/config.json',
-    # 'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int4',
-
-    # 'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int8',
-    # 'config_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int8/config.json',
-    # 'tokenizer_name': '/data/nlp/pre_models/torch/chatglm/chatglm-6b-int8',
+    **train_model_config,
 
     'convert_onnx': False, # 转换onnx模型
     'do_train': True,
     'train_file':  [ './data/finetune_train_examples.json'],
     'max_epochs': 20,
     'max_steps': -1,
-    'optimizer': 'lion', # one of [lamb,adamw_hf,adamw,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_apex_fused,adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion_8bit,lion_32bit,paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit]
+    'optimizer': 'lion', # one of [lamb,adma,adamw_hf,adamw,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_apex_fused,adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion_8bit,lion_32bit,paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit]
 
     'scheduler_type': 'CAWR', #one of [linear,WarmupCosine,CAWR,CAL,Step,ReduceLROnPlateau, cosine,cosine_with_restarts,polynomial,constant,constant_with_warmup,inverse_sqrt,reduce_lr_on_plateau]
     'scheduler':{'T_mult': 1,
@@ -122,7 +112,7 @@ train_info_args = {
     'train_batch_size': 4,
     'eval_batch_size': 2,
     'test_batch_size': 2,
-    'learning_rate': 2e-5,  #
+    'learning_rate': 2e-4,  #
     'adam_epsilon': 1e-8,
     'gradient_accumulation_steps': 1,
     'max_grad_norm': 1.0,
@@ -140,15 +130,6 @@ train_info_args = {
    'adalora': {**adalora_info_args},
 }
 
-
-#配置检查
-
-
-if global_args['load_in_8bit'] == global_args['load_in_4bit'] and global_args['load_in_8bit'] == True:
-    raise Exception('load_in_8bit and load_in_4bit only set one at same time!')
-
-if lora_info_args['with_lora'] == adalora_info_args['with_lora'] and lora_info_args['with_lora'] == True:
-    raise Exception('lora and adalora can set one at same time !')
 
 
 

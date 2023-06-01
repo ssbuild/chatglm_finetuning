@@ -31,10 +31,10 @@ if __name__ == '__main__':
     if deep_config is None:
         train_weight = './best_ckpt/last-v3.ckpt'
     else:
-        #建议直接使用转换脚本命令 支持 deepspeed stage 0,1,2,3， 生成 ./best_ckpt/last.ckpt/best.pt 权重文件
+        #使用转换脚本命令 生成 ./best_ckpt/last.ckpt/best.pt 权重文件
         # cd best_ckpt/last.ckpt
         # python zero_to_fp32.py . best.pt
-        train_weight = './best_ckpt/last.ckpt/best.pt'
+        train_weight = './best_ckpt/last/best.pt'
 
     #加载微调权重
     pl_model.load_sft_weight(train_weight,strict=True)
@@ -58,7 +58,6 @@ if __name__ == '__main__':
         #已经量化，已经保存微调后的量化模型可以 直接加载
         model.half().cuda()
     model = model.eval()
-
 
     text_list = [
         "写一个诗歌，关于冬天",
