@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/5/16 10:11
-
 import json
-import os
-
-import torch
-from transformers import BitsAndBytesConfig
-from config import train_info_models
+from config.constant_map import train_info_models
 
 # 可切换量化模型 ptv2 训练
 train_model_config = train_info_models['chatglm']
