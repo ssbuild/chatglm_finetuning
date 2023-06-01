@@ -5,13 +5,13 @@ from fastapi import FastAPI, Request
 import uvicorn, json, datetime
 import torch
 
-from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
+from deep_training.data_helper import ModelArguments, DataArguments
 from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
 from deep_training.nlp.models.lora.v2 import LoraArguments
 from transformers import HfArgumentParser
 
-from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer, ChatGLMTokenizer, global_args
+from data_utils import train_info_args, NN_DataHelper,global_args
+from models import MyTransformer, ChatGLMTokenizer
 
 DEVICE = "cuda"
 DEVICE_ID = "0"
