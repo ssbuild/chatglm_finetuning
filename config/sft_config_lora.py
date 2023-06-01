@@ -71,7 +71,6 @@ adalora_info_args = {
 train_info_args = {
     'devices': 1,
     'data_backend': 'record',  #one of record lmdb, 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
-    'model_type': 'chatglm',
     # 预训练模型路径 , 从0训练，则置空
     **train_model_config,
 

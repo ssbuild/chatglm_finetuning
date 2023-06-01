@@ -48,6 +48,10 @@ if __name__ == '__main__':
         dataHelper.make_dataset_with_args(data_args.test_file, mode='test')
 
     deepspeed_config = get_deepspeed_config()
+    strategy = 'ddp' if torch.cuda.device_count() > 1 else 'auto'
+    if deepspeed_config is not None and len(deepspeed_config):
+        strategy = DeepSpeedStrategy(config=deepspeed_config, )
+
     checkpoint_callback = ModelCheckpointEx(
         # monitor='loss',
         dirpath=output_weight_dir,
@@ -58,10 +62,6 @@ if __name__ == '__main__':
         every_n_epochs=1,
         lora_args=lora_args,
     )
-
-    strategy = 'ddp' if torch.cuda.device_count() > 1 else 'auto'
-    if deepspeed_config is not None and len(deepspeed_config):
-        strategy = DeepSpeedStrategy(config=deepspeed_config, )
 
     trainer = Trainer(
         callbacks=[checkpoint_callback,LearningRateMonitor(logging_interval='step')],
