@@ -3,7 +3,7 @@
     修改 config/main.py
     # 模块配置， 默认启用lora
     enable_deepspeed = False
-    enable_ptv2 = True
+    enable_ptv2 = False
     enable_lora = True
     enable_int8 = False # qlora int8
     enable_int4 = False # qlora int4
