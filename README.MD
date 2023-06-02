@@ -107,11 +107,10 @@ pip install -q -U git+https://github.com/huggingface/accelerate.git
 ![inference](data/1.png)
 
 
-## 训练参数
-[训练参数](args.MD)
 
 
-## finetuning
+
+## training
 ```text
     制作数据
     python data_utils.py
@@ -122,6 +121,8 @@ pip install -q -U git+https://github.com/huggingface/accelerate.git
     python train.py
 ```
 
+## 训练参数
+[训练参数](args.MD)
 
 
 ## 关于续写
