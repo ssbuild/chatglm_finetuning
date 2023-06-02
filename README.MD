@@ -26,7 +26,9 @@
 
 ```text
 dev 版本可通过下列方式安装 
-pip install -i --pre https://pypi.org/simple deep_training==0.1.10 cpm_kernels bitsandbytes>=0.39
+pip 安装rc 版本
+pip install -U --pre -i https://pypi.org/simple deep_training==0.1.10rc 
+pip install -U cpm_kernels bitsandbytes>=0.39
 pip install -q -U git+https://github.com/huggingface/transformers.git
 pip install -q -U git+https://github.com/huggingface/accelerate.git
 ```
