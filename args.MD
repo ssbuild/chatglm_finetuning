@@ -62,8 +62,7 @@ MASTER_ADDR=10.0.0.1 MASTER_PORT=6667 WORLD_SIZE=12 NODE_RANK=2 python train.py
     
 
 ### ptuning v2
- 
-    对于 deepspeed模式 , ptuning v2  只支持 stage 0
+
 
 ```text
     global_args = {
