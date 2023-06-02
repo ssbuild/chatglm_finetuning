@@ -31,7 +31,7 @@ if __name__ == '__main__':
     if deep_config is None:
         train_weight = './best_ckpt/last-v3.ckpt'
     else:
-        #使用转换脚本命令 生成 ./best_ckpt/last.ckpt/best.pt 权重文件
+        #使用转换脚本命令 生成 ./best_ckpt/last/best.pt 权重文件
         # cd best_ckpt/last.ckpt
         # python zero_to_fp32.py . best.pt
         train_weight = './best_ckpt/last/best.pt'
