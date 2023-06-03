@@ -6,6 +6,5 @@ import json
 import os
 
 # 切换配置
-from config.sft_config_lora import *
-from config.deepspeed_config import *
+from config.main import *
 

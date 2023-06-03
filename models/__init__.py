@@ -1,8 +1,7 @@
 # @Time    : 2023/3/28 21:56
 # @Author  : tk
-
 from models.chatglm_model import *
-from models.model_weight import *
+from deep_training.trainer.pl.modelweighter import *
 
 class MyTransformer(MyTransformerChatGlmLMHeadModel,ModelWeightMinMax, with_pl=True):
     def __init__(self, *args, **kwargs):
@@ -15,7 +14,7 @@ class MyTransformer(MyTransformerChatGlmLMHeadModel,ModelWeightMinMax, with_pl=T
         if lora_args is not None and lora_args.with_lora:
             self.backbone.enable_input_require_grads()
             model = LoraModel(self.backbone, lora_args)
-            print('*' * 30,'lora info')
+            print('==' * 30,'lora info')
             model.print_trainable_parameters()
             self.set_model(model, copy_attr=False)
 

@@ -5,13 +5,13 @@ from fastapi import FastAPI, Request
 import uvicorn, json, datetime
 import torch
 
-from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
+from deep_training.data_helper import ModelArguments, DataArguments
 from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
 from deep_training.nlp.models.lora.v2 import LoraArguments
 from transformers import HfArgumentParser
 
-from data_utils import train_info_args, NN_DataHelper
-from models import MyTransformer, ChatGLMTokenizer, global_args
+from data_utils import train_info_args, NN_DataHelper,global_args
+from models import MyTransformer, ChatGLMTokenizer
 
 DEVICE = "cuda"
 DEVICE_ID = "0"
@@ -71,10 +71,11 @@ if __name__ == '__main__':
     tokenizer, _, _, _ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    config = ChatGLMConfig.from_pretrained('./best_ckpt')
+    ckpt_dir = './best_ckpt/last'
+    config = ChatGLMConfig.from_pretrained(ckpt_dir)
     config.initializer_weight = False
 
-    lora_args = LoraArguments.from_pretrained('./best_ckpt')
+    lora_args = LoraArguments.from_pretrained(ckpt_dir)
 
     assert lora_args.inference_mode == True and config.pre_seq_len is None
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
                              # device_map={"": 0},  # 第一块卡
                              )
     # 加载lora权重
-    pl_model.load_sft_weight('./best_ckpt')
+    pl_model.load_sft_weight(ckpt_dir)
 
     model = pl_model.get_llm_model()
     # 按需修改
