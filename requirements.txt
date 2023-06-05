@@ -3,4 +3,4 @@ cpm_kernels
 transformers>=4.30
 deepspeed
 bitsandbytes>=0.39
-accelerate>=0.20
+accelerate>=0.19
