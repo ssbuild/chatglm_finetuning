@@ -27,7 +27,7 @@
 ```text
 dev 版本可通过下列方式安装 
 pip 安装rc 版本
-pip install -U --pre -i https://pypi.org/simple deep_training==0.1.10rc 
+pip install -U -i https://pypi.org/simple deep_training==0.1.10
 pip install -U cpm_kernels bitsandbytes>=0.39 accelerate>=0.19
 pip install -q -U git+https://github.com/huggingface/transformers.git
 ```
@@ -149,6 +149,7 @@ pip install -q -U git+https://github.com/huggingface/transformers.git
 - [rlhf_llm](https://github.com/ssbuild/rlhf_llm)
 - [rlhf_chatglm](https://github.com/ssbuild/rlhf_chatglm)
 - [rlhf_chatyuan](https://github.com/ssbuild/rlhf_chatyuan)
+- [rwkv_finetuning](https://github.com/ssbuild/rwkv_finetuning)
 
 ## 
     纯粹而干净的代码
