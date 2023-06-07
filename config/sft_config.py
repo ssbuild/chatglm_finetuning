@@ -15,17 +15,10 @@ train_model_config = train_info_models['chatglm']
 
 global_args = {
     "load_in_8bit": False, # qlora int8
-    "load_in_4bit": True, # qlora int4
+    "load_in_4bit": False, # qlora int4
 
     # load_in_4bit 量化配置
-    "quantization_config": BitsAndBytesConfig(
-        load_in_4bit=True,
-        llm_int8_threshold=6.0,
-        llm_int8_has_fp16_weight=False,
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_quant_type="nf4",
-    ),
+    "quantization_config": None,
     "num_layers_freeze": -1, # 非lora,非p-tuning 模式 ， <= config.json num_layers
     "pre_seq_len": None,    #p-tuning-v2 参数 , None 禁用p-tuning-v2
     "prefix_projection": False, #p-tuning-v2 参数
