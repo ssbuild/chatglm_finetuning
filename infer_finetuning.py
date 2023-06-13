@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #选择最新的权重 ， 根据时间排序 选最新的
     config = ChatGLMConfig.from_pretrained('./best_ckpt')
     config.initializer_weight = False
-    pl_model = MyTransformer(config=config, model_args=model_args)
+    pl_model = MyTransformer(config=config, model_args=model_args, torch_dtype=torch.float16,)
     if deep_config is None:
         train_weight = './best_ckpt/last-v3.ckpt'
     else:

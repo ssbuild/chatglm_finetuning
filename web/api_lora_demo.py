@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     assert lora_args.inference_mode == True and config.pre_seq_len is None
 
-    pl_model = MyTransformer(config=config, model_args=model_args, lora_args=lora_args,
+    pl_model = MyTransformer(config=config, model_args=model_args, lora_args=lora_args, torch_dtype=torch.float16,
                              # load_in_8bit=global_args["load_in_8bit"],
                              # # device_map="auto",
                              # device_map={"": 0},  # 第一块卡
