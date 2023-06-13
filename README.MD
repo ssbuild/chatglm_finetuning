@@ -3,13 +3,14 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
+    06-13 support resize_token_embeddings
     06-01 支持lora deepspeed 训练，0.1.9 和 0.1.10合并
     05-27 add qlora transformers>=4.30
     05-12 fix lora int8 多卡训练 , ppo training move to https://github.com/ssbuild/rlhf_chatglm
     04-28 deep_training 0.1.3 pytorch-lightning 改名 ligntning ，旧版本 deep_training <= 0.1.2
     04-23 增加lora 保存hf权重（修改infer_lora_finetuning.py enable_merge_weight 选项），超大数据集见训练节说明
-    04-12 deep_training 0.1.2.post0 fix load_in_8bit in lora v1 , lora v2
-    04-11 增加 lora v2 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
+    04-12 deep_training 0.1.2.post0 fix load_in_8bit in lora
+    04-11 升级 lora 以及 adalora, 另外官方fix eos_token , 请更新tokenizer_config.json
     04-10 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
     04-07 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
     04-02 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
@@ -21,16 +22,7 @@
 
 
 ## install
-    
   - pip install -i https://pypi.org/simple -U -r requirements.txt
-
-```text
-dev 版本可通过下列方式安装 
-pip 安装rc 版本
-pip install -U -i https://pypi.org/simple deep_training==0.1.10
-pip install -U cpm_kernels bitsandbytes>=0.39 accelerate>=0.19
-pip install -q -U git+https://github.com/huggingface/transformers.git
-```
 
 
 ## weight
@@ -126,17 +118,7 @@ pip install -q -U git+https://github.com/huggingface/transformers.git
 [训练参数](args.MD)
 
 
-## 关于续写
-    训练 q 置空
-    推理如下
-    model = pl_model.get_glm_model()
-    model.generate_for_continue_writing(tokenizer, "请帮我续写一段关于春天文字的文字", max_length=2048,
-                                            eos_token_id=config.eos_token_id,
-                                            do_sample=True, top_p=0.7, temperature=0.95,)
-    
 
-## Reference
-    https://github.com/THUDM/ChatGLM-6B
 
 ## 友情链接
 
@@ -151,8 +133,25 @@ pip install -q -U git+https://github.com/huggingface/transformers.git
 - [rlhf_chatyuan](https://github.com/ssbuild/rlhf_chatyuan)
 - [rwkv_finetuning](https://github.com/ssbuild/rwkv_finetuning)
 
+
 ## 
     纯粹而干净的代码
+
+
+## 关于续写
+    训练 q 置空
+    推理如下
+    model = pl_model.get_glm_model()
+    model.generate_for_continue_writing(tokenizer, "请帮我续写一段关于春天文字的文字", max_length=2048,
+                                            eos_token_id=config.eos_token_id,
+                                            do_sample=True, top_p=0.7, temperature=0.95,)
+    
+
+## Reference
+    https://github.com/THUDM/ChatGLM-6B
+
+
+
 
 ## Star History
 
