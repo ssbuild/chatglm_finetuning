@@ -1,4 +1,4 @@
-deep_training==0.1.10
+deep_training>=0.1.10,<0.1.12
 cpm_kernels
 transformers>=4.30
 deepspeed
