@@ -124,15 +124,15 @@
 ## 友情链接
 
 - [pytorch-task-example](https://github.com/ssbuild/pytorch-task-example)
-- [tf-task-example](https://github.com/ssbuild/tf-task-example)
 - [chatmoss_finetuning](https://github.com/ssbuild/chatmoss_finetuning)
 - [chatglm_finetuning](https://github.com/ssbuild/chatglm_finetuning)
-- [chatyuan_finetuning](https://github.com/ssbuild/chatyuan_finetuning)
+- [t5_finetuning](https://github.com/ssbuild/t5_finetuning)
 - [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
-- [rlhf_llm](https://github.com/ssbuild/rlhf_llm)
-- [rlhf_chatglm](https://github.com/ssbuild/rlhf_chatglm)
-- [rlhf_chatyuan](https://github.com/ssbuild/rlhf_chatyuan)
+- [llm_rlhf](https://github.com/ssbuild/llm_rlhf)
+- [chatglm_rlhf](https://github.com/ssbuild/chatglm_rlhf)
+- [t5_rlhf](https://github.com/ssbuild/t5_rlhf)
 - [rwkv_finetuning](https://github.com/ssbuild/rwkv_finetuning)
+- [baichuan_finetuning](https://github.com/ssbuild/baichuan_finetuning)
 
 
 ## 
