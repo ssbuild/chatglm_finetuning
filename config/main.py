@@ -9,8 +9,7 @@ import os
 enable_deepspeed = False
 enable_ptv2 = False
 enable_lora = True
-enable_int8 = False # qlora int8
-enable_int4 = False # qlora int4
+load_in_bit = 0  # 4 load_in_4bit, 8 load_in_8bit  other  0
 
 
 if enable_lora:
@@ -24,15 +23,10 @@ else:
 
 if enable_lora:
     enable_ptv2 = False
-    if enable_int4:
-        global_args['load_in_4bit'] = True
-        global_args['load_in_8bit'] = False
+    global_args['load_in_4bit'] = load_in_bit == 4
+    global_args['load_in_8bit'] = load_in_bit == 8
 
-    if enable_int8:
-        global_args['load_in_4bit'] = False
-        global_args['load_in_8bit'] = True
-
-    if not enable_int4:
+    if global_args['load_in_4bit']:
         global_args['quantization_config'] = None
 
     #检查lora adalora是否开启
