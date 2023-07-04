@@ -28,7 +28,7 @@ global_args = {
 
 train_info_args = {
     'devices': 1,
-    'data_backend': 'record',  #one of record lmdb, 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
+    'data_backend': 'parquet',  #one of record lmdb arrow_stream ,arrow_file, parquet , 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
     # 预训练模型路径 , 从0训练，则置空
     **train_model_config,
     'convert_onnx': False, # 转换onnx模型

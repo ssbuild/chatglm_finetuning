@@ -43,7 +43,8 @@ lora_info_args = {
     'lora_dropout': 0.1,
     'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
     'modules_to_save' : None, # "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
-
+    'layers_to_transform': None,
+    'layers_pattern': None,
 }
 
 adalora_info_args = {
@@ -55,6 +56,9 @@ adalora_info_args = {
     'lora_dropout': 0.1,
     'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
     'modules_to_save' : None, # "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+    'layers_to_transform': None,
+    'layers_pattern': None,
+
 
     'target_r':8, # Target Lora matrix dimension.
     'init_r': 12, #Intial Lora matrix dimension.
@@ -70,7 +74,7 @@ adalora_info_args = {
 
 train_info_args = {
     'devices': 1,
-    'data_backend': 'record',  #one of record lmdb, 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
+    'data_backend': 'parquet',  #one of record lmdb arrow_stream ,arrow_file, parquet , 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
     # 预训练模型路径 , 从0训练，则置空
     **train_model_config,
 
