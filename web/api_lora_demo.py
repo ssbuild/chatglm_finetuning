@@ -11,7 +11,7 @@ from deep_training.nlp.models.lora.v2 import LoraArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper,global_args
-from models import MyTransformer, ChatGLMTokenizer
+from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer
 
 DEVICE = "cuda"
 DEVICE_ID = "0"

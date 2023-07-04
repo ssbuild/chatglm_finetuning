@@ -9,7 +9,7 @@ from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.strategies import DeepSpeedStrategy
 from transformers import HfArgumentParser
 from data_utils import NN_DataHelper, train_info_args, get_deepspeed_config,global_args
-from models import MyTransformer, ChatGLMTokenizer,LoraArguments,ChatGLMConfig, setup_model_profile
+from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer,LoraArguments,ChatGLMConfig, setup_model_profile
 
             
 if __name__ == '__main__':
