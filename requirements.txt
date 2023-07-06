@@ -4,4 +4,5 @@ transformers>=4.30
 deepspeed
 bitsandbytes>=0.39
 accelerate>=0.20
-aigc-zoo>=0.1.11,<0.1.12
+# aigc-zoo>=0.1.11,<0.1.12
+git+https://github.com/ssbuild/aigc_zoo#egg=aigc_zoo
