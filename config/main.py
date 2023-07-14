@@ -67,7 +67,7 @@ def get_deepspeed_config():
 
     # 选择 deepspeed 配置文件
     is_need_update_config = False
-    if enable_lora:
+    if enable_lora or enable_ptv2:
         is_need_update_config = True
         filename = os.path.join(os.path.dirname(__file__), 'deepspeed_offload.json')
     else:
