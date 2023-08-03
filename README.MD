@@ -3,6 +3,7 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
+    08-02 增加 muti lora infer 例子, 手动升级 aigc_zoo , pip install -U git+https://github.com/ssbuild/aigc_zoo.git --force-reinstall --no-deps 
     07-18 微调经验分享见: https://github.com/ssbuild/aigc_zoo#训练经验分享
     06-26 chatglm2_finetuning 移至(https://github.com/ssbuild/chatglm2_finetuning)
     06-13 support resize_token_embeddings
