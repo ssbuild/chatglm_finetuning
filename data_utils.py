@@ -121,7 +121,7 @@ class NN_DataHelper(DataHelper):
                 for sid,(q,a) in enumerate(paragraph):
                     assert len(a),ValueError('answer cannot empty')
                     if sid == 0:
-                        D.append((q, a))
+                        D.append((prefix + q, a))
                     else:
                         prompt_text = ''
                         for j in range(sid + 1):
