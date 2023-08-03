@@ -112,6 +112,8 @@ class NN_DataHelper(DataHelper):
                 paragraph = jd['paragraph']
                 if line_id < 10:
                     print(paragraph)
+
+                prefix = jd.get('p', '')
                 #兼容支持 answer string
                 paragraph = [(preprocess(session['q']),
                               preprocess('\n'.join(session['a'])) if isinstance(session['a'],list) else preprocess(session['a']))
@@ -127,7 +129,7 @@ class NN_DataHelper(DataHelper):
                                 prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
                             else:
                                 prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
-                        D.append((prompt_text,a))
+                        D.append((prefix + prompt_text,a))
         return D
 
     def collate_fn(self,batch):
