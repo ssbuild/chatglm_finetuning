@@ -84,5 +84,7 @@ def get_deepspeed_config():
             optimizer['params']['betas'] = train_info_args.get('optimizer_betas', (0.9, 0.999))
             optimizer['params']['lr'] = train_info_args.get('learning_rate', 2e-5)
             optimizer['params']['eps'] = train_info_args.get('adam_epsilon', 1e-8)
+            # deepspeed_offload 优化器有效
+            train_info_args['optimizer'] = optimizer['type']
     return deepspeed_config
 
