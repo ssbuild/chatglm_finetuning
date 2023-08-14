@@ -82,55 +82,91 @@ class NN_DataHelper(DataHelper):
             print(ds[0])
         return ds
 
-    # {
-    #     "id": 0, "paragraph": [
-    #     # 一轮会话
-    #     {
-    #         "q": "从南京到上海的路线",
-    #         "a": [
-    #             "你好，南京到上海的路线如下：",
-    #             "1. 南京到上海，可以乘坐南京地铁1号线，在南京站乘坐轨道交通1号线。",
-    #             "2. 南京到浦东机场，可以搭乘上海地铁1号，在陆家嘴站乘坐地铁1线，在浦东国际机场站乘坐机场快线，前往上海浦东国际机场。",
-    #             "3. 上海到南京，可以换乘上海地铁2号线，从南京站换乘地铁2线，再从南京南站换乘地铁1路，然后到达上海站"
-    #         ]
-    #     }
-    #     # 二轮....
-    # ]
-    # }
 
+
+    def _get_paragraph(self,lines):
+        D = []
+        for line_id, line in enumerate(lines):
+            jd = json.loads(line)
+            if not jd:
+                continue
+            paragraph = jd['paragraph']
+            if line_id < 10:
+                print(paragraph)
+
+            prefix = jd.get('p', '')
+            # 兼容支持 answer string
+            paragraph = [(preprocess(session['q']),
+                          preprocess('\n'.join(session['a'])) if isinstance(session['a'], list) else preprocess(
+                              session['a']))
+                         for session in paragraph]
+            for sid, (q, a) in enumerate(paragraph):
+                assert len(a), ValueError('answer cannot empty')
+                if sid == 0:
+                    D.append((prefix + q, a))
+                else:
+                    prompt_text = ''
+                    for j in range(sid + 1):
+                        if j == sid:
+                            prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
+                        else:
+                            prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
+                    D.append((prefix + prompt_text, a))
+        return D
+
+    def _get_messages(self,lines):
+        D = []
+        for line_id, line in enumerate(lines):
+            jd = json.loads(line)
+            if not jd:
+                continue
+            conversations = jd['conversations']
+            if line_id < 10:
+                print(conversations)
+
+            paragraph = []
+            prefix = ''
+            pair = [None,None]
+            for m in conversations:
+                if m["from"] == 'user':
+                    pair[0] = preprocess(m["value"])
+                elif m["from"] == 'assistant':
+                    pair[1] = preprocess(m["value"])
+                elif m["from"] == 'system':
+                    prefix = preprocess(m["value"])
+                if pair[0] is not None and pair[1] is not None:
+                    paragraph.append(tuple(pair))
+                    pair[0],pair[1] = None,None
+
+
+            for sid, (q, a) in enumerate(paragraph):
+                assert len(a), ValueError('answer cannot empty')
+                if sid == 0:
+                    D.append((prefix + q, a))
+                else:
+                    prompt_text = ''
+                    for j in range(sid + 1):
+                        if j == sid:
+                            prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
+                        else:
+                            prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
+                    D.append((prefix + prompt_text, a))
+        return D
     # 读取文件
     def on_get_corpus(self, files: typing.List, mode: str):
         D = []
         for file in files:
             with open(file, mode='r', encoding='utf-8', newline='\n') as f:
                 lines = f.readlines()
-
-            for line_id, line in enumerate(lines):
-                jd = json.loads(line)
-                if not jd:
-                    continue
-                paragraph = jd['paragraph']
-                if line_id < 10:
-                    print(paragraph)
-
-                prefix = jd.get('p', '')
-                #兼容支持 answer string
-                paragraph = [(preprocess(session['q']),
-                              preprocess('\n'.join(session['a'])) if isinstance(session['a'],list) else preprocess(session['a']))
-                    for session in paragraph]
-                for sid,(q,a) in enumerate(paragraph):
-                    assert len(a),ValueError('answer cannot empty')
-                    if sid == 0:
-                        D.append((prefix + q, a))
-                    else:
-                        prompt_text = ''
-                        for j in range(sid + 1):
-                            if j == sid:
-                                prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
-                            else:
-                                prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
-                        D.append((prefix + prompt_text,a))
+            is_new = False
+            if len(lines) > 0:
+                is_new = 'conversations' in json.loads(lines[0])
+            if is_new:
+                D.extend(self._get_messages(lines))
+            else:
+                D.extend(self._get_paragraph(lines))
         return D
+
 
     def collate_fn(self,batch):
         if not hasattr(self,'sptoken'):
