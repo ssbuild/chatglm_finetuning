@@ -55,6 +55,8 @@ if __name__ == '__main__':
         # every_n_train_steps=2000 // training_args.gradient_accumulation_steps,
         every_n_epochs=1,
         lora_args=lora_args,
+        # monitor="loss"，mode = "min", save_top_k = 10 按loss存储10个模型
+        # monitor="step"，mode = "max", save_top_k = 10 按步存储最后10个模型
     )
 
     trainer = Trainer(
