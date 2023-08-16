@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
 
     if config.quantization_bit != 0 and lora_args is not None:
-        raise AssertionError("quantization only support ptv2 finetuning")
+        raise AssertionError("quantization lora not support")
 
     if config.pre_seq_len is not None and lora_args is not None:
         raise ValueError('with lora and ptuning v2 cannot open at the same time')
