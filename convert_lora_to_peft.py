@@ -16,7 +16,7 @@ from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer
 
 
 
-def convert_to_peft(output_dir = './peft_lora'):
+def convert_to_peft(ckpt_dir,output_dir = './peft_lora'):
     train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments,))
     (model_args,) = parser.parse_dict(train_info_args, allow_extra_keys=True)
@@ -26,7 +26,7 @@ def convert_to_peft(output_dir = './peft_lora'):
     tokenizer, _, _, _ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    ckpt_dir = './best_ckpt/last'
+
     config = ChatGLMConfig.from_pretrained(ckpt_dir)
 
     lora_args = LoraArguments.from_pretrained(ckpt_dir)
@@ -53,7 +53,7 @@ def convert_to_peft(output_dir = './peft_lora'):
 
 
 
-def get_base_model():
+def get_base_model(ckpt_dir):
     train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments,))
     (model_args,) = parser.parse_dict(train_info_args, allow_extra_keys=True)
@@ -63,17 +63,14 @@ def get_base_model():
     tokenizer, _, _, _ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    ckpt_dir = './best_ckpt/last'
     config = ChatGLMConfig.from_pretrained(ckpt_dir)
-
-
     pl_model = MyTransformer(config=config, model_args=model_args, torch_dtype=torch.float16, )
-
     return pl_model.get_llm_model()
 
 if __name__ == '__main__':
-    peft_lora_weight = './peft_lora'
-    tokenizer,config,lora_args = convert_to_peft(peft_lora_weight)
+    ckpt_dir = './best_ckpt/last'
+    output_peft = './peft_lora'
+    tokenizer,config,lora_args = convert_to_peft(ckpt_dir,output_peft)
 
     # 验证peft模型推理
     from transformers import AutoModelForCausalLM
@@ -93,14 +90,14 @@ if __name__ == '__main__':
     )
 
     #覆盖配置文件
-    peft_config.save_pretrained(peft_lora_weight)
+    peft_config.save_pretrained(output_peft)
     # model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
     # model = get_peft_model(model, peft_config)
     # model.print_trainable_parameters()
 
-    model = get_base_model()
+    model = get_base_model(ckpt_dir)
     # model = get_peft_model(model, peft_config)
-    model = PeftModel.from_pretrained(model,peft_lora_weight)
+    model = PeftModel.from_pretrained(model, output_peft)
     model.print_trainable_parameters()
 
     model.eval().half().cuda()
