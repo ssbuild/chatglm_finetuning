@@ -3,6 +3,7 @@
 
 ```text
     dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
+    08-16 解除 chatglm-6b-int4 全参训练限制， 推理可选使用 Rope NtkScale , 不训练扩展推理长度
     08-02 增加 muti lora infer 例子, 手动升级 aigc_zoo , pip install -U git+https://github.com/ssbuild/aigc_zoo.git --force-reinstall --no-deps 
     07-18 微调经验分享见: https://github.com/ssbuild/aigc_zoo#训练经验分享
     06-26 chatglm2_finetuning 移至(https://github.com/ssbuild/chatglm2_finetuning)
@@ -32,8 +33,8 @@
 ## weight
 
 - [chatglm-6b](https://huggingface.co/THUDM/chatglm-6b)   支持四种微调方式
-- [chatglm-6b-int8](https://huggingface.co/THUDM/chatglm-6b-int8)  目前只支持ptv2微调和推理
-- [chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)  目前只支持ptv2微调和推理
+- [chatglm-6b-int8](https://huggingface.co/THUDM/chatglm-6b-int8)  支持四种微调方式
+- [chatglm-6b-int4](https://huggingface.co/THUDM/chatglm-6b-int4)  支持四种微调方式
     
 
 

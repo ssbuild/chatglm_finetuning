@@ -15,6 +15,7 @@ from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer
 
 
 
+
 def convert_to_peft(output_dir = './peft_lora'):
     train_info_args['seed'] = None
     parser = HfArgumentParser((ModelArguments,))
@@ -47,21 +48,7 @@ def convert_to_peft(output_dir = './peft_lora'):
     # 加载lora权重
     pl_model.load_sft_weight(ckpt_dir, is_trainable=True)
 
-    lora_model: LoraModel = pl_model.backbone  # noqa
-
-    lora_model.save_pretrained(output_dir)
-
-
-    del pl_model
-    gc.collect()
-
-    #权重修改
-    weight_file = os.path.join(output_dir,'adapter_model.bin')
-    m = torch.load(weight_file)
-    m_new = {}
-    for k,v in m.items():
-        m_new[re.sub(r'transformer.transformer','transformer',k)] = v
-    torch.save(m_new,weight_file)
+    pl_model.save_peft_weight(output_dir)
     return tokenizer,config,lora_args
 
 
@@ -88,10 +75,9 @@ if __name__ == '__main__':
     peft_lora_weight = './peft_lora'
     tokenizer,config,lora_args = convert_to_peft(peft_lora_weight)
 
+    # 验证peft模型推理
     from transformers import AutoModelForCausalLM
     from peft import get_peft_config, get_peft_model, LoraConfig, TaskType,PeftModel
-
-
 
     peft_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
