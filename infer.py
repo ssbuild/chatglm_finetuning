@@ -5,7 +5,7 @@ from deep_training.data_helper import ModelArguments
 from transformers import HfArgumentParser
 from data_utils import train_info_args, NN_DataHelper
 from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer,ChatGLMTokenizer,setup_model_profile, ChatGLMConfig
-from aigc_zoo.model_zoo.chatglm.llm_model import RotaryNtkScaledArguments # aigc-zoo 0.1.20
+from aigc_zoo.model_zoo.chatglm.llm_model import RotaryNtkScaledArguments,RotaryLinearScaledArguments # aigc-zoo 0.1.21
 
 if __name__ == '__main__':
     train_info_args['seed'] = None
@@ -23,7 +23,8 @@ if __name__ == '__main__':
     config.initializer_weight = False
 
 
-    rope_args = RotaryNtkScaledArguments(max_position_embeddings=config.max_sequence_length,alpha=4) # 扩展 8k
+    rope_args = RotaryNtkScaledArguments(model_type='chatglm',max_position_embeddings=config.max_sequence_length,alpha=4) # 扩展 8k
+    # rope_args = RotaryLinearScaledArguments(model_type='chatglm',name='rotary_pos_emb',max_position_embeddings=2048, scale=4) # 扩展 8k
     
     pl_model = MyTransformer(config=config, model_args=model_args, torch_dtype=torch.float16,rope_args=rope_args)
 
