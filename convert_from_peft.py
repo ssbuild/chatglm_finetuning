@@ -41,8 +41,6 @@ if __name__ == '__main__':
 
     model = pl_model.get_llm_model()
 
-    model.print_trainable_parameters()
-
     model.eval().half().cuda()
     text_list = [
         "写一个诗歌，关于冬天",
