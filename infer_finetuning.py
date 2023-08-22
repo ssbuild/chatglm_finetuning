@@ -4,7 +4,7 @@ import torch
 from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
 from transformers import HfArgumentParser
 from data_utils import train_info_args, NN_DataHelper, get_deepspeed_config
-from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer,ChatGLMTokenizer,setup_model_profile, ChatGLMConfig,LoraArguments
+from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer,ChatGLMTokenizer,setup_model_profile, ChatGLMConfig,EffiArguments
 
 deep_config = get_deepspeed_config()
 

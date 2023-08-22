@@ -7,7 +7,7 @@ import torch
 
 from deep_training.data_helper import ModelArguments, DataArguments
 from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
-from deep_training.nlp.models.lora.v2 import LoraArguments
+from deep_training.nlp.models.lora.v2 import EffiArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper,global_args
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     config = ChatGLMConfig.from_pretrained(ckpt_dir)
     config.initializer_weight = False
 
-    lora_args = LoraArguments.from_pretrained(ckpt_dir)
+    lora_args = EffiArguments.from_pretrained(ckpt_dir)
 
     assert lora_args.inference_mode == True and config.pre_seq_len is None
 

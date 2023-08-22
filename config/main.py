@@ -19,15 +19,12 @@ elif enable_ptv2:
 else:
     from config.sft_config import *
 
-
+if global_args['quantization_config'] is not None:
+    global_args['quantization_config'].load_in_4bit = load_in_bit == 4
+    global_args['quantization_config'].load_in_8bit = load_in_bit == 8
 
 if enable_lora:
     enable_ptv2 = False
-    global_args['load_in_4bit'] = load_in_bit == 4
-    global_args['load_in_8bit'] = load_in_bit == 8
-
-    if global_args['load_in_4bit']:
-        global_args['quantization_config'] = None
 
     #检查lora adalora是否开启
     if 'lora' not in train_info_args and 'adalora' not in train_info_args:
@@ -38,15 +35,14 @@ if enable_lora:
     train_info_args.pop('prompt', None)
 elif enable_ptv2:
     enable_lora = False
-    global_args['load_in_4bit'] = False
-    global_args['load_in_8bit'] = False
+    if global_args['quantization_config'] is not None:
+        global_args['quantization_config'].load_in_4bit = False
+        global_args['quantization_config'].load_in_8bit = False
     train_info_args.pop('lora', None)
     train_info_args.pop('adalora', None)
 else:
     enable_ptv2 = False
     enable_lora = False
-    # global_args['load_in_4bit'] = False
-    # global_args['load_in_8bit'] = False
     train_info_args.pop('lora',None)
     train_info_args.pop('adalora', None)
     train_info_args.pop('prompt', None)

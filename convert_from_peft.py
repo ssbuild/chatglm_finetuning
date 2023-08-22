@@ -8,7 +8,7 @@ from deep_training.data_helper import ModelArguments
 from transformers import HfArgumentParser
 from data_utils import train_info_args, NN_DataHelper, global_args
 from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer, setup_model_profile, ChatGLMConfig, \
-    LoraArguments,LoraModel
+    EffiArguments,LoraModel
 
 # 加载 peft 权重
 if __name__ == '__main__':

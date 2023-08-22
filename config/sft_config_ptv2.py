@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/5/16 10:11
 import json
-from config.constant_map import train_info_models
-
-# 可切换量化模型 ptv2 训练
-train_model_config = train_info_models['chatglm']
-# train_model_config = train_info_models['chatglm-6b-int4']
-# train_model_config = train_info_models['chatglm-6b-int8']
+from config.constant_map import train_model_config, train_target_modules_maps
 
 
 # 全局变量
 
 global_args = {
-    "load_in_8bit": False, # qlora int8
-    "load_in_4bit": False, # qlora int4
+
 
     # load_in_4bit 量化配置
     "quantization_config": None,
