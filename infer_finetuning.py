@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
 import torch
-from deep_training.data_helper import ModelArguments, TrainingArguments, DataArguments
+from deep_training.data_helper import ModelArguments
 from transformers import HfArgumentParser
 from data_utils import train_info_args, NN_DataHelper, get_deepspeed_config
-from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer,ChatGLMTokenizer,setup_model_profile, ChatGLMConfig,EffiArguments
+from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer,ChatGLMTokenizer,setup_model_profile, ChatGLMConfig,PetlArguments
 
 deep_config = get_deepspeed_config()
 
