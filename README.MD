@@ -148,7 +148,10 @@ a answer   must
 - [t5_rlhf](https://github.com/ssbuild/t5_rlhf)
 - [rwkv_finetuning](https://github.com/ssbuild/rwkv_finetuning)
 - [baichuan_finetuning](https://github.com/ssbuild/baichuan_finetuning)
-
+- [baichuan2_finetuning](https://github.com/ssbuild/baichuan_finetuning)
+- [xverse_finetuning](https://github.com/ssbuild/xverse_finetuning)
+- [aigc_serving](https://github.com/ssbuild/aigc_serving)
+- [aigc_evals](https://github.com/ssbuild/aigc_evals)
 
 ## 
     纯粹而干净的代码

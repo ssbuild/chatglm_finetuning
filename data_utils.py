@@ -49,8 +49,7 @@ class NN_DataHelper(DataHelper):
     # 切分词
     def on_data_process(self, data: typing.Any, mode: str):
         self.index += 1
-        prompt = data[0]
-        answer = data[1]
+
 
         tokenizer: ChatGLMTokenizer
         config: ChatGLMConfig
@@ -61,17 +60,15 @@ class NN_DataHelper(DataHelper):
         if not hasattr(self, 'sptoken'):
             self.sptoken = tokenizer.encode(text="")[-2:]
 
-        a_ids = tokenizer.encode(text=prompt, add_special_tokens=False)
-        b_ids = tokenizer.encode(text=answer, add_special_tokens=False)
-
+        examples = data
 
         strategy = data_conf['strategy']
         if strategy == DataStrategy.truncation:
-            ds = TokenTruncation.process(tokenizer,config,a_ids, b_ids, max_seq_length, self.sptoken ,**data_conf[strategy])
+            ds = TokenTruncation.process(tokenizer,config,examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken ,**data_conf[strategy])
         elif strategy == DataStrategy.singlesliding:
-            ds = TokenSingleSliding.process(tokenizer,config, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
+            ds = TokenSingleSliding.process(tokenizer,config, examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken, **data_conf[strategy])
         elif strategy == DataStrategy.doublesliding:
-            ds = TokenDoubleSliding.process(tokenizer,config, a_ids, b_ids, max_seq_length, self.sptoken, **data_conf[strategy])
+            ds = TokenDoubleSliding.process(tokenizer,config, examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken, **data_conf[strategy])
         else:
             raise ValueError('Invlid strategy',strategy)
 
@@ -82,9 +79,7 @@ class NN_DataHelper(DataHelper):
             print(ds[0])
         return ds
 
-
-
-    def _get_paragraph(self,lines):
+    def _get_paragraph(self, lines):
         D = []
         for line_id, line in enumerate(lines):
             jd = json.loads(line)
@@ -95,26 +90,20 @@ class NN_DataHelper(DataHelper):
                 print(paragraph)
 
             prefix = jd.get('p', '')
-            # 兼容支持 answer string
             paragraph = [(preprocess(session['q']),
                           preprocess('\n'.join(session['a'])) if isinstance(session['a'], list) else preprocess(
                               session['a']))
                          for session in paragraph]
-            for sid, (q, a) in enumerate(paragraph):
+            sub = []
+            # 自行做模板
+            for (q, a) in paragraph:
                 assert len(a), ValueError('answer cannot empty')
-                if sid == 0:
-                    D.append((prefix + q, a))
-                else:
-                    prompt_text = ''
-                    for j in range(sid + 1):
-                        if j == sid:
-                            prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
-                        else:
-                            prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
-                    D.append((prefix + prompt_text, a))
+                sub.append((q, a))
+            D.append((prefix, copy.deepcopy(sub)))
+            sub.clear()
         return D
 
-    def _get_messages(self,lines):
+    def _get_messages(self, lines):
         D = []
         for line_id, line in enumerate(lines):
             jd = json.loads(line)
@@ -126,7 +115,7 @@ class NN_DataHelper(DataHelper):
 
             paragraph = []
             prefix = ''
-            pair = [None,None]
+            pair = [None, None]
             for m in conversations:
                 if m["from"] == 'user':
                     pair[0] = preprocess(m["value"])
@@ -136,22 +125,17 @@ class NN_DataHelper(DataHelper):
                     prefix = preprocess(m["value"])
                 if pair[0] is not None and pair[1] is not None:
                     paragraph.append(tuple(pair))
-                    pair[0],pair[1] = None,None
+                    pair[0], pair[1] = None, None
 
-
-            for sid, (q, a) in enumerate(paragraph):
+            sub = []
+            # 自行做模板
+            for (q, a) in paragraph:
                 assert len(a), ValueError('answer cannot empty')
-                if sid == 0:
-                    D.append((prefix + q, a))
-                else:
-                    prompt_text = ''
-                    for j in range(sid + 1):
-                        if j == sid:
-                            prompt_text += "[Round {}]\n问：{}\n答：".format(sid, paragraph[j][0])
-                        else:
-                            prompt_text += "[Round {}]\n问：{}\n答：{}".format(j, paragraph[j][0], paragraph[j][1])
-                    D.append((prefix + prompt_text, a))
+                sub.append((q, a))
+            D.append((prefix, copy.deepcopy(sub)))
+            sub.clear()
         return D
+
     # 读取文件
     def on_get_corpus(self, files: typing.List, mode: str):
         D = []
