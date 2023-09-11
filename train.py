@@ -92,8 +92,8 @@ if __name__ == '__main__':
                             torch_dtype=torch.float16,
                             new_num_tokens=len(tokenizer),  # 可能扩充词 , 还有一些隐藏token, 如果不需要可自行注释)
                             )
-    #ptv2 移除device_map
-    if trainer.world_size <= 1 or config.pre_seq_len:
+    # ptv2 移除device_map
+    if config.pre_seq_len or global_args["quantization_config"] is None:
         transformer_args.pop("device_map")
 
     pl_model = MyTransformer(**transformer_args)
