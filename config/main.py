@@ -35,9 +35,7 @@ if enable_lora:
     train_info_args.pop('prompt', None)
 elif enable_ptv2:
     enable_lora = False
-    if global_args['quantization_config'] is not None:
-        global_args['quantization_config'].load_in_4bit = False
-        global_args['quantization_config'].load_in_8bit = False
+    global_args['quantization_config'] = None
     train_info_args.pop('lora', None)
     train_info_args.pop('adalora', None)
 else:
