@@ -84,14 +84,19 @@ if __name__ == '__main__':
         precision= precision , #  #可以自行尝试  "32": "32-true", "16": "16-mixed", "bf16": "bf16-mixed"
     )
 
+    transformer_args = dict(config=config,
+                            model_args=model_args, training_args=training_args, lora_args=lora_args,
+                            num_layers_freeze=global_args["num_layers_freeze"],#
+                            quantization_config=global_args["quantization_config"],
+                            device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto",
+                            torch_dtype=torch.float16,
+                            new_num_tokens=len(tokenizer),  # 可能扩充词 , 还有一些隐藏token, 如果不需要可自行注释)
+                            )
+    #ptv2 移除device_map
+    if trainer.world_size <= 1 or config.pre_seq_len:
+        transformer_args.pop("device_map")
 
-    pl_model = MyTransformer(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
-                             num_layers_freeze=global_args["num_layers_freeze"],#
-                             quantization_config=global_args["quantization_config"],
-                             device_map={"": trainer.local_rank} if trainer.world_size > 1 else "auto",
-                             torch_dtype=torch.float16,
-                             new_num_tokens=len(tokenizer),  # 可能扩充词 , 还有一些隐藏token, 如果不需要可自行注释
-                             )
+    pl_model = MyTransformer(**transformer_args)
 
     config.save_pretrained(output_weight_dir)
 
