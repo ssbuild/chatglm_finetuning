@@ -39,12 +39,25 @@ if __name__ == '__main__':
 
     dataHelper.make_dataset_all()
 
-    deepspeed_config = get_deepspeed_config()
+    is_bf16_supported = torch.cuda.is_bf16_supported()
+    # 精度 根据实际情况做调整
+    if config.quantization_bit != 0 and not config.pre_seq_len:
+        precision = '32'
+    elif is_bf16_supported:
+        precision = 'bf16'
+    else:
+        precision = '16'
+
+    if global_args["quantization_config"] is not None and global_args["quantization_config"].load_in_8bit:
+        precision = "32"
+
+    deepspeed_config = get_deepspeed_config(precision)
     strategy = 'ddp' if torch.cuda.device_count() > 1 else 'auto'
     if deepspeed_config is not None and len(deepspeed_config):
         strategy = DeepSpeedStrategy(config=deepspeed_config, )
 
-    is_bf16_supported = torch.cuda.is_bf16_supported()
+
+
     checkpoint_callback = ModelCheckpointEx(
         # monitor='loss',
         dirpath=output_weight_dir,
@@ -58,16 +71,7 @@ if __name__ == '__main__':
         # monitor="step"，mode = "max", save_top_k = 10 按步存储最后10个模型
     )
 
-    # 精度 根据实际情况做调整
-    if config.quantization_bit != 0 and not config.pre_seq_len:
-        precision = '32'
-    elif is_bf16_supported:
-        precision = 'bf16'
-    else:
-        precision = '16'
 
-    if global_args["quantization_config"] is not None and global_args["quantization_config"].load_in_8bit:
-        precision = "32"
 
     trainer = Trainer(
         callbacks=[checkpoint_callback,LearningRateMonitor(logging_interval='step')],
