@@ -1,5 +1,6 @@
 # @Time    : 2023/3/25 18:36
 # @Author  : tk
+import copy
 import random
 import typing
 from enum import Enum
@@ -10,8 +11,8 @@ from aigc_zoo.model_zoo.chatglm.llm_model import ChatGLMTokenizer
 
 class DataStrategy(Enum):
     truncation = 1
-    singlesliding = 2
-    doublesliding = 3
+    sliding = 2
+
 
 
 
@@ -97,50 +98,55 @@ class TokenIdsMaker:
         }
         return d
     @classmethod
-    def process_tunction(cls, tokenizer: ChatGLMTokenizer,config, examples, max_seq_length, sptoken: typing.List,ensure_answer_min_length=1):
-        assert ensure_answer_min_length > 0
+    def tunction(cls, tokenizer: ChatGLMTokenizer,config, examples, max_seq_length, sptoken: typing.List):
+
         ds = []
         prefix, examples = examples
         for sid, (q, a) in enumerate(examples):
             a_ids = tokenizer.encode(text=build_template(q,prefix=prefix, history=examples[:sid]), add_special_tokens=False)
-            b_ids = tokenizer.encode(text=a, add_special_tokens=False) + [config.eos_token_id]
-
-            a_max_len = max_seq_length - len(sptoken) - ensure_answer_min_length - 1
-            assert a_max_len > 0
-            input_ids_qa = a_ids[-a_max_len:] + sptoken + b_ids + [config.eos_token_id]
-            pos = 0
-            while pos < len(input_ids_qa):
-                if sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
-                    val = input_ids_qa[pos:pos + max_seq_length][-1]
-                    if val == sptoken[-1]:
-                        input_ids = input_ids_qa[pos + 1:pos + max_seq_length + 1]
-                        pos += max_seq_length + 1
-                    elif val == sptoken[0]:
-                        input_ids = input_ids_qa[pos + 2:pos + max_seq_length + 2]
-                        pos += max_seq_length + 2
-                    else:
-                        input_ids = input_ids_qa[pos:pos + max_seq_length]
-                        pos += max_seq_length
+            b_ids = tokenizer.encode(text=a, add_special_tokens=False)
+            while len(a_ids) + len(b_ids) > max_seq_length - len(sptoken) - 1:
+                if len(b_ids) > len(a_ids):
+                    b_ids.pop(-1)
                 else:
-                    input_ids = sptoken + input_ids_qa[pos:pos + max_seq_length - 2]
-                    pos += max_seq_length - 2
-                ds.append(cls.final(input_ids, sptoken, max_seq_length, tokenizer))
+                    a_ids.pop(0)
+            b_ids += [config.eos_token_id]
+            input_ids = a_ids + sptoken + b_ids
+            ds.append(cls.final(input_ids, sptoken, max_seq_length, tokenizer))
         return ds
 
 
     @classmethod
-    def process_single_slidding(cls, tokenizer: ChatGLMTokenizer,config, examples, max_seq_length, sptoken: typing.List, sliding_size):
+    def slidding(cls, tokenizer: ChatGLMTokenizer,config, examples, max_seq_length, sptoken: typing.List,
+                 sliding_size=None,
+                 src_max_length=-1,
+                 dst_max_length=-1,p=1):
+
+        if sliding_size is None or sliding_size < 0:
+            sliding_size = max_seq_length - len(sptoken)
+
+        assert sliding_size <= max_seq_length - len(sptoken)
+
         ds = []
         prefix, examples = examples
         for sid, (q, a) in enumerate(examples):
             a_ids = tokenizer.encode(text=build_template(q, prefix=prefix,history=examples[:sid]), add_special_tokens=False)
             b_ids = tokenizer.encode(text=a, add_special_tokens=False) + [config.eos_token_id]
 
-            input_ids_qa = a_ids + sptoken + b_ids + [config.eos_token_id]
+            if src_max_length and src_max_length > 0:
+                a_ids = a_ids[:src_max_length]
+            if dst_max_length and dst_max_length > 0:
+                b_ids = b_ids[:dst_max_length]
+
+            b_ids += [config.eos_token_id]
+
+            input_ids_qa = a_ids + sptoken + b_ids
             a_length = len(a_ids)
             pos = 0
 
             assert sliding_size < max_seq_length - 2
+
+
             while pos < len(input_ids_qa):
                 if pos + max_seq_length <= a_length:
                     input_ids = input_ids_qa[pos:pos + max_seq_length - 2]
@@ -150,61 +156,17 @@ class TokenIdsMaker:
                         p = random.randint(0, max_seq_length - 2)
                         input_ids = input_ids[0:p] + sptoken + input_ids[p:]
 
-                    pos += sliding_size
                 elif sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
                     val = input_ids_qa[pos:pos + max_seq_length][-1]
                     if val == sptoken[-1]:
                         input_ids = input_ids_qa[pos + 1:pos + max_seq_length + 1]
-                        pos += max_seq_length + 1
+
                     elif val == sptoken[0]:
                         input_ids = input_ids_qa[pos + 2:pos + max_seq_length + 2]
-                        pos += max_seq_length + 2
                     else:
                         input_ids = input_ids_qa[pos:pos + max_seq_length]
-                        pos += max_seq_length
                 else:
                     input_ids = sptoken + input_ids_qa[pos:pos + max_seq_length - 2]
-                    pos += max_seq_length - 2
+                pos += sliding_size
                 ds.append(cls.final(input_ids, sptoken, max_seq_length, tokenizer))
             return ds
-
-    @classmethod
-    def process_double_slidding(cls, tokenizer: ChatGLMTokenizer, config, examples, max_seq_length, sptoken: typing.List, sliding_size,
-                p=1):
-        ds = []
-        prefix, examples = examples
-        for sid, (q, a) in enumerate(examples):
-            a_ids = tokenizer.encode(text=build_template(q, prefix=prefix,history=examples[:sid]), add_special_tokens=False)
-            b_ids = tokenizer.encode(text=a, add_special_tokens=False) + [config.eos_token_id]
-
-            input_ids_qa = a_ids + sptoken + b_ids + [config.eos_token_id]
-            a_length = len(a_ids)
-            pos = 0
-
-            assert sliding_size < max_seq_length - 2
-            while pos < len(input_ids_qa):
-                if pos + max_seq_length <= a_length:
-                    input_ids = input_ids_qa[pos:pos + max_seq_length - 2]
-                    if p > 0:
-                        input_ids = input_ids[0:-p] + sptoken + input_ids[-p:]
-                    else:
-                        p = random.randint(0, max_seq_length - 2)
-                        input_ids = input_ids[0:p] + sptoken + input_ids[p:]
-                    pos += sliding_size
-                elif sptoken[0] in input_ids_qa[pos:pos + max_seq_length]:
-                    val = input_ids_qa[pos:pos + max_seq_length][-1]
-                    if val == sptoken[-1]:
-                        input_ids = input_ids_qa[pos + 1:pos + max_seq_length + 1]
-                        pos += max_seq_length + 1
-                    elif val == sptoken[0]:
-                        input_ids = input_ids_qa[pos + 2:pos + max_seq_length + 2]
-                        pos += max_seq_length + 2
-                    else:
-                        input_ids = input_ids_qa[pos:pos + max_seq_length]
-                        pos += sliding_size
-                else:
-                    input_ids = sptoken + input_ids_qa[pos:pos + max_seq_length - 2]
-                    pos += sliding_size
-
-                ds.append(cls.final(input_ids, sptoken, max_seq_length, tokenizer))
-        return ds

@@ -18,15 +18,12 @@ from config import *
 data_conf = {
    'strategy': DataStrategy.truncation, # 数据策略选项
     DataStrategy.truncation: {
-        'ensure_answer_min_length': 5,
     },
-    DataStrategy.singlesliding: {
+    DataStrategy.sliding: {
         'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #prompt滑动窗口大小
         'p':-1, # p < 0 , 随机选举prompt
-    },
-    DataStrategy.doublesliding: {
-        'sliding_size': train_info_args['max_seq_length'] // 3 * 2, #双滑滑动窗口大小
-        'p':-1,# p < 0 , 随机选举prompt
+        "src_max_length": train_info_args['max_seq_length'] - 10,
+        "dst_max_length": None,
     },
 }
 
@@ -64,11 +61,9 @@ class NN_DataHelper(DataHelper):
 
         strategy = data_conf['strategy']
         if strategy == DataStrategy.truncation:
-            ds = TokenIdsMaker.process_tunction(tokenizer,config,examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken ,**data_conf[strategy])
-        elif strategy == DataStrategy.singlesliding:
-            ds = TokenIdsMaker.process_single_slidding(tokenizer,config, examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken, **data_conf[strategy])
-        elif strategy == DataStrategy.doublesliding:
-            ds = TokenIdsMaker.process_double_slidding(tokenizer,config, examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken, **data_conf[strategy])
+            ds = TokenIdsMaker.tunction(tokenizer,config,examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken ,**data_conf[strategy])
+        elif strategy == DataStrategy.sliding:
+            ds = TokenIdsMaker.slidding(tokenizer,config, examples=examples, max_seq_length=max_seq_length, sptoken=self.sptoken, **data_conf[strategy])
         else:
             raise ValueError('Invlid strategy',strategy)
 
