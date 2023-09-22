@@ -112,6 +112,7 @@ class TokenIdsMaker:
                     a_ids.pop(0)
             b_ids += [config.eos_token_id]
             input_ids = a_ids + sptoken + b_ids
+            assert len(input_ids) <= max_seq_length
             ds.append(cls.final(input_ids, sptoken, max_seq_length, tokenizer))
         return ds
 
@@ -143,10 +144,6 @@ class TokenIdsMaker:
             input_ids_qa = a_ids + sptoken + b_ids
             a_length = len(a_ids)
             pos = 0
-
-            assert sliding_size < max_seq_length - 2
-
-
             while pos < len(input_ids_qa):
                 if pos + max_seq_length <= a_length:
                     input_ids = input_ids_qa[pos:pos + max_seq_length - 2]
