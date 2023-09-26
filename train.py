@@ -22,12 +22,12 @@ if __name__ == '__main__':
     output_weight_dir = './best_ckpt'
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
-    config_kwargs = {"pre_seq_len": global_args["pre_seq_len"],
-                     "prefix_projection": global_args["pre_seq_len"]}
-    if global_args["num_layers"] > 0:
-        config_kwargs["num_layers"] = global_args["num_layers"]
+    config_kwargs = {}
+    if global_args[ "config_merge" ]:
+        config_kwargs.update(global_args[ "config_merge" ])
     tokenizer, config, _, _ = dataHelper.load_tokenizer_and_config(tokenizer_class_name=ChatGLMTokenizer,
-                                                                   config_class_name=ChatGLMConfig,config_kwargs=config_kwargs)
+                                                                   config_class_name=ChatGLMConfig,
+                                                                   config_kwargs=config_kwargs)
     assert tokenizer.eos_token_id == 130005
 
 

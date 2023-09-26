@@ -2,7 +2,7 @@
 - [deep_training](https://github.com/ssbuild/deep_training)
 
 ```text
-    dev 分支加一些新功能和想法 如果求稳定，请使用 stable分支
+    09-26 support transformers trainer
     08-16 解除 chatglm-6b-int4 全参训练限制， 推理可选使用 Rope NtkScale , 不训练扩展推理长度
     08-02 增加 muti lora infer 例子, 手动升级 aigc_zoo , pip install -U git+https://github.com/ssbuild/aigc_zoo.git --force-reinstall --no-deps 
     07-18 微调经验分享见: https://github.com/ssbuild/aigc_zoo#训练经验分享
@@ -20,7 +20,7 @@
     04-02 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
     03-28 支持加载chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
     03-27 fix eos
-    03-26 增加三种数据策略
+    03-26 完善数据策略
 ```
    
 
