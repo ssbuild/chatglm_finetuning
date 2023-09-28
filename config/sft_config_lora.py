@@ -3,36 +3,53 @@
 
 import json
 import os
-import torch
-from transformers import BitsAndBytesConfig
-from config.constant_map import train_model_config, train_target_modules_maps
+from config.constant_map import (train_model_config,
+                                TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING,
+                                TRANSFORMERS_MODELS_TO_ADALORA_TARGET_MODULES_MAPPING,
+                                TRANSFORMERS_MODELS_TO_IA3_TARGET_MODULES_MAPPING,
+                                TRANSFORMERS_MODELS_TO_IA3_FEEDFORWARD_MODULES_MAPPING)
 
 
+# 默认禁用lora 相关模块 , lora 和 adalora 只能同时启用一个
 lora_info_args = {
     'with_lora': True,  # 是否启用lora模块
+    'lora_type': 'lora',
     'r': 8,
-    'target_modules': train_target_modules_maps[train_model_config['model_type']],
-    'target_dtype': None,
+    'target_modules': TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING[train_model_config['model_type']],
     'lora_alpha': 32,
     'lora_dropout': 0.1,
+    'fan_in_fan_out': False,
     'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
-    'modules_to_save' : None, # "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+    'modules_to_save' : None, # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
     'layers_to_transform': None,
     'layers_pattern': None,
+    'rank_pattern': {
+        # "The mapping from layer names or regexp expression to ranks which are different from the default rank specified by `r`. "
+        # "For example, `{model.decoder.layers.0.encoder_attn.k_proj: 8`}"
+    },
+    'alpha_pattern': {
+        # "The mapping from layer names or regexp expression to alphas which are different from the default alpha specified by `lora_alpha`. "
+        # "For example, `{model.decoder.layers.0.encoder_attn.k_proj: 32`}"
+    },
+
 }
 
 adalora_info_args = {
     'with_lora': False,  # 是否启用adalora模块
+    'lora_type': 'adalora',
     'r': 8,
-    'target_modules': train_target_modules_maps[train_model_config['model_type']],
-    'target_dtype': None, #
+    'target_modules': TRANSFORMERS_MODELS_TO_ADALORA_TARGET_MODULES_MAPPING[train_model_config['model_type']],
     'lora_alpha': 32,
     'lora_dropout': 0.1,
+    'fan_in_fan_out': False,
     'bias': 'none',  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
-    'modules_to_save' : None, # "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+    'modules_to_save' : None, # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
     'layers_to_transform': None,
     'layers_pattern': None,
-
+    'alpha_pattern': {
+        # "The mapping from layer names or regexp expression to alphas which are different from the default alpha specified by `lora_alpha`. "
+        # "For example, `{model.decoder.layers.0.encoder_attn.k_proj: 32`}"
+    },
 
     'target_r':8, # Target Lora matrix dimension.
     'init_r': 12, #Intial Lora matrix dimension.
@@ -45,6 +62,19 @@ adalora_info_args = {
     'total_step': None, #The total training steps.
     'rank_pattern': None, #The saved rank pattern.
 }
+
+
+ia3_info_args = {
+    'with_lora': False,  # 是否启用lora模块
+    'target_modules': TRANSFORMERS_MODELS_TO_IA3_TARGET_MODULES_MAPPING[train_model_config['model_type']],
+    'feedforward_modules': TRANSFORMERS_MODELS_TO_IA3_FEEDFORWARD_MODULES_MAPPING[train_model_config['model_type']],
+    'fan_in_fan_out': False,
+    'modules_to_save' : None, # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+    'init_ia3_weights': True,
+}
+
+
+
 
 train_info_args = {
     'devices': 1,
@@ -103,8 +133,9 @@ train_info_args = {
 
     ##############  lora模块
     #注意lora,adalora 和 ptuning-v2 禁止同时使用
-   'lora': {**lora_info_args},
-   'adalora': {**adalora_info_args},
+    'lora': lora_info_args,
+    'adalora': adalora_info_args,
+    'ia3': ia3_info_args,
 }
 
 
@@ -167,6 +198,7 @@ train_info_args_hf = {
     ##############  lora模块
     'lora': lora_info_args,
     'adalora': adalora_info_args,
+    'ia3': ia3_info_args,
 
 }
 

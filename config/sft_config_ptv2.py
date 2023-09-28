@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/5/16 10:11
 import json
-from config.constant_map import train_model_config, train_target_modules_maps
+from config.constant_map import train_model_config
 
 
 train_info_args = {
