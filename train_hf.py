@@ -28,8 +28,6 @@ assert global_args["trainer_backend"] == "hf"
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.33.2")
 
-require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/language-modeling/requirements.txt")
-
 logger = logging.getLogger(__name__)
 
 # Setup logging
@@ -161,7 +159,7 @@ def main():
             dataHelper.train_files,
             with_load_memory=data_args.data_backend == 'record',
             collate_fn=dataHelper.collate_fn,
-            batch_size=training_args.train_batch_size,
+            batch_size=training_args.per_device_train_batch_size,
             drop_last=training_args.dataloader_drop_last,  # 多卡建议扔掉
             num_processes=world_size, process_index=process_index,
             num_workers = training_args.dataloader_num_workers,
