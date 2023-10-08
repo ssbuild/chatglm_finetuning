@@ -2,6 +2,7 @@
 - [deep_training](https://github.com/ssbuild/deep_training)
 
 ```text
+    10-07 support colossalai trainer
     09-26 support transformers trainer
     08-16 解除 chatglm-6b-int4 全参训练限制， 推理可选使用 Rope NtkScale , 不训练扩展推理长度
     08-02 增加 muti lora infer 例子, 手动升级 aigc_zoo , pip install -U git+https://github.com/ssbuild/aigc_zoo.git --force-reinstall --no-deps 
@@ -120,13 +121,23 @@ a answer   must
 
 ## training
 ```text
-    制作数据
+    #制作数据
     python data_utils.py
     注: num_process_worker 为多进程制作数据 ， 如果数据量较大 ， 适当调大至cpu数量
     dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False, shuffle=True,mode='train',num_process_worker=0)
     
-    训练
+    #pl 训练
     python train.py
+    
+    #hf 训练
+    python -m torch.distributed.launch --nproc_per_node=1 train_hf.py
+    
+    # 多机多卡
+    python -m torch.distributed.launch --nproc_per_node=1 --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT train_hf.py
+
+   
+    # colossalai 训练 
+    colossalai run --nproc_per_node 1 --num_nodes 1 train_cl.py
 ```
 
 ## 训练参数
