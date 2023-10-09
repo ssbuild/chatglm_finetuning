@@ -42,7 +42,7 @@ def main():
     training_args: TrainingArgumentsAC
     parser = HfArgumentParser((ModelArguments, TrainingArgumentsAC, DataArguments, PetlArguments),
                               conflict_handler='resolve')
-    model_args, training_args, data_args, lora_args, prompt_args = parser.parse_dict(train_info_args,allow_extra_keys=True,)
+    model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args,allow_extra_keys=True,)
     lora_args = lora_args.config
 
     if training_args.should_log:
@@ -127,7 +127,6 @@ def main():
     world_size,local_rank,process_index = training_args.world_size,training_args.local_rank,training_args.process_index
 
     transformer_args = dict(config=config, model_args=model_args, training_args=training_args, lora_args=lora_args,
-                            prompt_args=prompt_args,
                             quantization_config=global_args["quantization_config"],
                             device_map={"": local_rank} if world_size > 1 else "auto",
                             torch_dtype=torch.float16,

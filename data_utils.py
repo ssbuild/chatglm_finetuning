@@ -8,7 +8,7 @@ import typing
 import numpy as np
 import torch
 from deep_training.data_helper import DataHelper, ModelArguments, TrainingArguments, DataArguments, TrainingArgumentsHF, \
-    TrainingArgumentsCL
+    TrainingArgumentsCL, TrainingArgumentsAC
 from fastdatasets.record import load_dataset as Loader, RECORD, WriterObject, gfile
 from tqdm import tqdm
 from transformers import HfArgumentParser
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     else:
         parser = HfArgumentParser((ModelArguments, TrainingArgumentsAC, DataArguments, PetlArguments),
                                   conflict_handler='resolve')
-        model_args, training_args, data_args, lora_args, prompt_args = parser.parse_dict(train_info_args,
+        model_args, training_args, data_args, lora_args = parser.parse_dict(train_info_args,
                                                                                          allow_extra_keys=True, )
 
     dataHelper = NN_DataHelper(model_args, training_args, data_args)
