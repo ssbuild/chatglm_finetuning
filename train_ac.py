@@ -149,10 +149,10 @@ def main():
         pl_model.get_llm_model().transformer.prefix_encoder.float()
     else:
         if config.quantization_bit != 0:
-            pl_model = pl_model.half() if not is_bf16_supported else pl_model.bfloat16()
+            pl_model = pl_model.half()
         else:
             # Finetune
-            pl_model = pl_model.float() if not is_bf16_supported else pl_model.bfloat16()
+            pl_model = pl_model.float()
 
     train_datasets = None
     if training_args.do_train:
