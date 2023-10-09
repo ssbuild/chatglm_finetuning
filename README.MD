@@ -2,6 +2,7 @@
 - [deep_training](https://github.com/ssbuild/deep_training)
 
 ```text
+    10-09 support accelerator trainer
     10-07 support colossalai trainer
     09-26 support transformers trainer
     08-16 解除 chatglm-6b-int4 全参训练限制， 推理可选使用 Rope NtkScale , 不训练扩展推理长度
@@ -130,12 +131,13 @@ a answer   must
     python train.py
     
     #hf 训练
-    python -m torch.distributed.launch --nproc_per_node=1 train_hf.py
+    torchrun --nproc_per_node=1 train_hf.py
     
     # 多机多卡
-    python -m torch.distributed.launch --nproc_per_node=1 --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT train_hf.py
+    torchrun --nproc_per_node=1 --node_rank $NODE_RANK --master_addr $MASTER_ADDR --master_port $MASTER_PORT train_hf.py
 
-   
+    # ac 训练  参照 hf训练
+    
     # colossalai 训练 
     colossalai run --nproc_per_node 1 --num_nodes 1 train_cl.py
 ```

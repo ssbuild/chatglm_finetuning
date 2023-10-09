@@ -10,7 +10,7 @@ from transformers import BitsAndBytesConfig
 global_args = {
     # 训练配置
     **dict(
-        trainer_backend ='pl', # one of pl , hf , cl
+        trainer_backend ='pl', # one of pl , hf , cl , ac
         enable_deepspeed = False,
         enable_ptv2 = False,
         enable_lora = True,
@@ -45,18 +45,20 @@ global_args["config_merge"].update({"pre_seq_len": global_args["pre_seq_len"],
 
 
 if global_args["enable_lora"]:
-    from config.sft_config_lora import train_info_args,train_info_args_hf,train_info_args_colossalai,train_model_config
+    from config.sft_config_lora import train_info_args,train_info_args_hf,train_info_args_colossalai,train_info_args_ac,train_model_config
 elif global_args["enable_ptv2"]:
-    from config.sft_config_ptv2 import train_info_args,train_info_args_hf,train_info_args_colossalai,train_model_config
+    from config.sft_config_ptv2 import train_info_args,train_info_args_hf,train_info_args_colossalai,train_info_args_ac,train_model_config
 else:
-    from config.sft_config import train_info_args,train_info_args_hf,train_info_args_colossalai,train_model_config
+    from config.sft_config import train_info_args,train_info_args_hf,train_info_args_colossalai,train_info_args_ac,train_model_config
 
-assert global_args["trainer_backend"] in ["pl","hf","cl"]
+assert global_args["trainer_backend"] in ["pl","hf","cl","ac"]
 
 if global_args["trainer_backend"] == "hf":
     train_info_args = train_info_args_hf
 elif global_args["trainer_backend"] == "cl":
     train_info_args = train_info_args_colossalai
+elif global_args["trainer_backend"] == "ac":
+    train_info_args = train_info_args_ac
 
 
 
