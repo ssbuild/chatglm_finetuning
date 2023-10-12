@@ -13,10 +13,10 @@ __all__ = [
     "TRANSFORMERS_MODELS_TO_ADALORA_TARGET_MODULES_MAPPING",
     "TRANSFORMERS_MODELS_TO_IA3_TARGET_MODULES_MAPPING",
     "TRANSFORMERS_MODELS_TO_IA3_FEEDFORWARD_MODULES_MAPPING",
-    "train_model_config"
+    "MODELS_MAP"
 ]
 
-train_info_models = {
+MODELS_MAP = {
     'chatglm': {
         'model_type': 'chatglm',
         'model_name_or_path': '/data/nlp/pre_models/torch/chatglm/chatglm-6b',
@@ -44,5 +44,3 @@ train_info_models = {
 # TRANSFORMERS_MODELS_TO_ADALORA_TARGET_MODULES_MAPPING
 # TRANSFORMERS_MODELS_TO_IA3_TARGET_MODULES_MAPPING
 # TRANSFORMERS_MODELS_TO_IA3_FEEDFORWARD_MODULES_MAPPING
-
-train_model_config = train_info_models['chatglm']

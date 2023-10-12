@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/3/9 15:29
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
+
 import torch
 from deep_training.data_helper import ModelArguments
 from transformers import HfArgumentParser

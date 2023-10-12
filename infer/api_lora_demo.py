@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2023/4/4 14:46
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
 from fastapi import FastAPI, Request
 import uvicorn, json, datetime
@@ -7,11 +10,10 @@ import torch
 
 from deep_training.data_helper import ModelArguments, DataArguments
 from deep_training.nlp.models.chatglm import setup_model_profile, ChatGLMConfig
-from deep_training.nlp.models.lora.v2 import PetlArguments
 from transformers import HfArgumentParser
 
 from data_utils import train_info_args, NN_DataHelper,global_args
-from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer
+from aigc_zoo.model_zoo.chatglm.llm_model import MyTransformer, ChatGLMTokenizer,PetlArguments
 
 DEVICE = "cuda"
 DEVICE_ID = "0"

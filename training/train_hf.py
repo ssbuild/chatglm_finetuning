@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # @Author  : ssbuild
 # @Time    : 2023/9/25 12:29
-
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
 import logging
 import math
-import os
-import sys
 import datasets
 import torch
 import transformers
@@ -76,14 +76,16 @@ def main():
         dataHelper.make_dataset_all()
 
     is_bf16_supported = torch.cuda.is_bf16_supported()
-    # 精度 根据实际情况做调整
-    if is_bf16_supported:
-        precision = 'bf16'
-    else:
-        precision = '16'
+    precision = global_args[ "precision" ]
+    if precision == "auto":
+        # 精度 根据实际情况做调整
+        if is_bf16_supported:
+            precision = 'bf16'
+        else:
+            precision = '16'
 
-    if global_args["quantization_config"] is not None and global_args["quantization_config"].load_in_8bit:
-        precision = "32"
+        if global_args["quantization_config"] is not None and global_args["quantization_config"].load_in_8bit:
+            precision = "32"
 
 
     if str(precision) == '16':

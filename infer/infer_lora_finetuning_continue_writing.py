@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2023/3/9 15:29
+# @Author  : ssbuild
+# @Time    : 2023/9/4 9:22
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
+
 import os
 import torch
 from deep_training.data_helper import ModelArguments
@@ -54,11 +59,8 @@ if __name__ == '__main__':
             "晚上睡不着应该怎么办",
         ]
         for input in text_list:
-            response, history = model.chat(tokenizer, input, history=[], max_length=2048,
+            response, history = model.generate_for_continue_writing(tokenizer, input, history=[], max_length=2048,
                                            eos_token_id=config.eos_token_id,
                                            do_sample=True, top_p=0.7, temperature=0.95, )
             print("input", input)
             print("response", response)
-
-
-

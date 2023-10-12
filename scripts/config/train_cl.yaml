@@ -1,0 +1,159 @@
+global_args:
+  trainer_backend: pl
+  enable_deepspeed: false
+  enable_ptv2: false
+  enable_lora: true
+  load_in_bit: 0
+  config_merge: {}
+  # 模型权重 ， 对应 config.constant_map.py
+  model_name: chatglm
+
+  # one of auto 16 bf16 32
+  precision: auto
+  quantization_config:
+    load_in_8bit: false
+    load_in_4bit: false
+    llm_int8_threshold: 6.0
+    llm_int8_has_fp16_weight: false
+    bnb_4bit_compute_dtype: float16  # one of float16  bfloat16 float32
+    bnb_4bit_use_double_quant: true
+    bnb_4bit_quant_type: nf4
+
+# one of record lmdb arrow_stream arrow_file,parquet, 超大数据集可以使用 lmdb , 注 lmdb 存储空间比record大
+data_backend: parquet
+
+
+# 目前仅ddp 支持lora
+# one of ddp,gemini,zero2,zero2_cpu,3d
+strategy: ddp
+
+output_dir: ./outputs_cl
+overwrite_output_dir: true
+num_train_epochs: 20
+max_steps: -1
+save_safetensors: false
+save_strategy: steps
+save_steps: 1000
+save_total_limit: 10
+seed: 42
+fp16: true
+do_train: true
+train_file:
+- ../data/finetune_train_examples.json
+do_eval: false
+do_predict: false
+per_device_train_batch_size: 2
+per_device_eval_batch_size: 2
+gradient_accumulation_steps: 1
+evaluation_strategy: 'no'
+eval_steps: 100
+
+# 优化器，如果策略使用 gemini , 则 optim one of adam_hybrid_cl,adam_cpu_cl,adam_fused_cl
+# 如果策略使用非 gemini ,则 optim one of follow
+# one of adam_hybrid_cl,adam_cpu_cl,adam_fused_cl,lamb,adamw_hf,adamw,adamw_torch,adamw_torch_fused,adamw_torch_xla,adamw_apex_fused,
+# adafactor,adamw_anyprecision,sgd,adagrad,adamw_bnb_8bit,adamw_8bit,lion,lion_8bit,lion_32bit,
+# paged_adamw_32bit,paged_adamw_8bit,paged_lion_32bit,paged_lion_8bit,
+# lamb_fused_dp adagrad_cpu_dp adam_cpu_dp adam_fused_dp
+
+optim: adam_hybrid_cl
+
+# one of linear,cosine,cosine_with_restarts,polynomial,constant_with_warmup,inverse_sqrt,reduce_lr_on_plateau
+lr_scheduler_type: cosine
+torch_compile: false
+learning_rate: 2.0e-05
+adam_beta1: 0.9
+adam_beta2: 0.999
+adam_epsilon: 1.0e-08
+max_grad_norm: 1.0
+weight_decay: 0.0
+warmup_ratio: 0.03
+logging_strategy: steps
+logging_steps: 10
+tf32: false
+gradient_checkpointing: false
+max_seq_length: 512
+max_target_length: 100
+
+do_lower_case: null
+use_fast_tokenizer: false
+dataloader_drop_last: true
+dataloader_pin_memory: true
+dataloader_num_workers: 0
+log_level: info
+
+##############  lora模块
+
+lora:
+  with_lora: true # 是否启用模块
+  lora_type: lora
+  r: 8
+  lora_alpha: 32
+  lora_dropout: 0.1
+  fan_in_fan_out: false
+  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+  bias: none
+  # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+  modules_to_save: null
+  layers_to_transform: null
+  layers_pattern: null
+
+  # "The mapping from layer names or regexp expression to ranks which are different from the default rank specified by `r`. "
+  # "For example, `{model.decoder.layers.0.encoder_attn.k_proj: 8`}"
+  rank_pattern: {}
+
+  # "The mapping from layer names or regexp expression to alphas which are different from the default alpha specified by `lora_alpha`. "
+  # "For example, `{model.decoder.layers.0.encoder_attn.k_proj: 32`}"
+
+  alpha_pattern: {}
+adalora:
+  with_lora: false # 是否启用模块
+  lora_type: adalora
+  r: 8
+  lora_alpha: 32
+  lora_dropout: 0.1
+  fan_in_fan_out: false
+  # Bias type for Lora. Can be 'none', 'all' or 'lora_only'"
+  bias: none
+  # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+  modules_to_save: null
+  layers_to_transform: null
+  layers_pattern: null
+  alpha_pattern: {}
+
+  # Target Lora matrix dimension.
+  target_r: 8
+  #Intial Lora matrix dimension.
+  init_r: 12
+  #The steps of initial warmup.
+  tinit: 0
+  #The steps of final warmup
+  tfinal: 0
+  #Step interval of rank allocation.
+  deltaT: 1
+  #Hyperparameter of EMA.
+  beta1: 0.85
+  #Hyperparameter of EMA.
+  beta2: 0.85
+  #The orthogonal regularization coefficient.
+  orth_reg_weight: 0.5
+
+  #The total training steps.
+  total_step: null
+
+   #The saved rank pattern.
+  rank_pattern: null
+
+ia3:
+  with_lora: false # 是否启用模块
+  fan_in_fan_out: false
+  # "help": "List of modules apart from LoRA layers to be set as trainable and saved in the final checkpoint. "
+  modules_to_save: null
+  init_ia3_weights: true
+
+##############  ptv2模块
+prompt:
+  with_prompt: true
+  prompt_type: prefix_tuning
+  task_type: causal_lm
+  prefix_projection: false
+  num_virtual_tokens: 32
