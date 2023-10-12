@@ -50,6 +50,11 @@ if global_args["quantization_config"]:
 
     global_args["quantization_config"] = BitsAndBytesConfig(**global_args["quantization_config"])
 
+if not global_args["enable_ptv2"]:
+    global_args["pre_seq_len"] = None
+
+global_args["config_merge"].update({"pre_seq_len": global_args["pre_seq_len"],
+                                    "prefix_projection": global_args["prefix_projection"]})
 
 
 def merge_from_env(global_args):
@@ -111,8 +116,8 @@ def patch_args(train_info_args):
         if "gradient_checkpointing" in train_info_args:
             train_info_args[ "gradient_checkpointing" ] = False
 
-        assert "prompt" in train_info_args
-        train_info_args["prompt"]["with_prompt"] = True
+        # assert "prompt" in train_info_args
+        # train_info_args["prompt"]["with_prompt"] = True
     else:
         train_info_args.pop('lora',None)
         train_info_args.pop('adalora', None)
