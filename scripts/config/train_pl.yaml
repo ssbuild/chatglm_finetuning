@@ -5,6 +5,7 @@ global_args:
   enable_lora: true
   load_in_bit: 0
   config_merge: {}
+  num_layers_freeze: -1
   # 模型权重 ， 对应 config.constant_map.py
   model_name: chatglm
 
