@@ -12,13 +12,24 @@ export enable_lora=false
 export load_in_bit=0
 
 
-mode="train"
+
+
+usage() { echo "Usage: $0 [-m <train|dataset>]" 1>&2; exit 1; }
+
+
 while getopts m: opt
 do
 	case "${opt}" in
 		m) mode=${OPTARG};;
+    *)
+      usage
+      ;;
 	esac
 done
+
+if [ "${mode}" != "dataset" ]  && [ "${mode}" != "train" ] ; then
+    usage
+fi
 
 if [[ "${mode}" == "dataset" ]] ; then
     python ../data_utils.py

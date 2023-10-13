@@ -20,8 +20,7 @@
     04-10 增加一直冻结前N层微调方式，根据需要修改models.py 变量 global_num_layers_freeze
     04-07 官方精简了词表和权重，配置已同步，建议重新下载权重信息 deep_training 最低要求 0.1.1
     04-02 增加p-tuning-v2训练, 建议训练前删除缓存数据 rm -rf output
-    03-28 支持加载chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
-    03-27 fix eos
+    03-27 fix eos and support chatglm-6b-int4权重 (修改 对应配置文件quantization_bit 4 or 8)
     03-26 完善数据策略
 ```
    
@@ -134,13 +133,13 @@ a answer   must
     dataHelper.make_dataset_with_args(data_args.train_file,mixed_data=False, shuffle=True,mode='train',num_process_worker=0)
     
     # 全参数训练 
-        bash train_full.sh
+        bash train_full.sh -m train
         
     # lora adalora ia3 
-        bash train_lora.sh
+        bash train_lora.sh -m train
         
     # ptv2
-        bash train_ptv2.sh
+        bash train_ptv2.sh -m train
 ```
 
 ## 训练参数
