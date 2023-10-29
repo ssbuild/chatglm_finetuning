@@ -155,6 +155,7 @@ a answer   must
 - [chatmoss_finetuning](https://github.com/ssbuild/chatmoss_finetuning)
 - [chatglm_finetuning](https://github.com/ssbuild/chatglm_finetuning)
 - [chatglm2_finetuning](https://github.com/ssbuild/chatglm2_finetuning)
+- [chatglm3_finetuning](https://github.com/ssbuild/chatglm3_finetuning)
 - [t5_finetuning](https://github.com/ssbuild/t5_finetuning)
 - [llm_finetuning](https://github.com/ssbuild/llm_finetuning)
 - [llm_rlhf](https://github.com/ssbuild/llm_rlhf)
