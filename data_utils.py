@@ -213,6 +213,12 @@ class NN_DataHelper(DataHelper):
     @cache
     def load_dataset_files(self):
         data_args = self.data_args
+        if not data_args.convert_file:
+            return {
+                "train_files": self.train_files,
+                "eval_files": self.eval_files,
+                "test_files": self.test_files,
+            }
         filename = os.path.join(data_args.output_dir, 'intermediate_file_index.json')
         assert os.path.exists(filename), 'make you dataset firstly'
         with open(filename, mode='r', encoding='utf-8') as f:
