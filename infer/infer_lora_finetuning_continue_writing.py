@@ -24,7 +24,7 @@ if __name__ == '__main__':
     tokenizer, _, _, _ = dataHelper.load_tokenizer_and_config(
         tokenizer_class_name=ChatGLMTokenizer, config_class_name=ChatGLMConfig)
 
-    ckpt_dir = './best_ckpt/last'
+    ckpt_dir = '../scripts/best_ckpt/last'
     config = ChatGLMConfig.from_pretrained(ckpt_dir)
     config.initializer_weight = False
     lora_args = PetlArguments.from_pretrained(ckpt_dir)

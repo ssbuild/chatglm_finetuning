@@ -26,7 +26,8 @@ data_backend: parquet
 convert_onnx: false
 do_train: true
 train_file:
-- ../data/finetune_train_examples.json
+- ../data/*.json
+
 max_epochs: 20
 max_steps: -1
 
