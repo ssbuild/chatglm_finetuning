@@ -2,11 +2,11 @@
 # @Time    : 2023/2/24 12:50
 
 
+
 import json
 
 
-x1 = {
-    "id": 0, "paragraph": [
+x1 = [
     {
         "q": "从南京到上海的路线",
         "a": [
@@ -16,10 +16,10 @@ x1 = {
             "3. 上海到南京，可以换乘上海地铁2号线，从南京站换乘地铁2线，再从南京南站换乘地铁1路，然后到达上海站"
         ]
     }
-    ]
-}
+]
 
-x2 = {"id": 0, "paragraph": [
+
+x2 = [
 
     {
         "q": "写一个诗歌，关于冬天",
@@ -37,10 +37,10 @@ x2 = {"id": 0, "paragraph": [
              "把快乐和温暖带回家。"
         ]
     }
-    ]
-}
+]
 
-x3 = {"id": 0, "paragraph": [
+
+x3 = [
 
     {
         "q": "晚上睡不着应该怎么办",
@@ -57,17 +57,53 @@ x3 = {"id": 0, "paragraph": [
             "如果这些方法无法帮助你入睡,你可以考虑咨询医生或睡眠专家,寻求进一步的建议。"
         ]
     }
-    ]
-}
+]
+
 
 
 
 x = [x1,x2,x3]
 
-with open('./finetune_train_examples.json',mode='w',encoding='utf-8',newline='\n') as f:
+with open('./finetune_train_paragraph.json',mode='w',encoding='utf-8',newline='\n') as f:
     index = 0
-    for i in range(100):
+    for i in range(50):
         for j in range(len(x)):
             index += 1
-            x[j]['id'] = index
-            f.write(json.dumps(x[j],ensure_ascii=False) + '\n' )
+
+            conversations = {
+                "id": index,
+                "paragraph": x[j]
+            }
+            f.write(json.dumps(conversations,ensure_ascii=False) + '\n' )
+
+
+
+with open('./finetune_train_conversations.json',mode='w',encoding='utf-8',newline='\n') as f:
+    index = 0
+    for i in range(50):
+        for j in range(len(x)):
+            index += 1
+
+            conversation = []
+            for item in x[j]:
+                role = item.get("role","user")
+                if role == "system":
+                    conversation.append( {
+                        "from":  item.get("role","user"),
+                        "value": item["q"]
+                    })
+                else:
+                    conversation.append({
+                        "from": item.get("role", "user"),
+                        "value": item["q"]
+                    })
+                    conversation.append({
+                        "from": "assistant",
+                        "value": item["a"]
+                    })
+
+            conversations = {
+                "id": index,
+                "conversations": conversation
+            }
+            f.write(json.dumps(conversations,ensure_ascii=False) + '\n' )

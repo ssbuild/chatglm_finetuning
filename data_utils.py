@@ -82,72 +82,71 @@ class NN_DataHelper(DataHelper):
         return ds
 
     def _get_paragraph(self, lines):
-        D = []
+        D = [ ]
         for line_id, line in enumerate(lines):
             jd = json.loads(line)
             if not jd:
                 continue
-            paragraph = jd['paragraph']
+            paragraph = jd[ 'paragraph' ]
             if line_id < 10:
                 print(paragraph)
 
-            prefix = jd.get('p', '')
-            paragraph = [(preprocess(session['q']),
-                          preprocess('\n'.join(session['a'])) if isinstance(session['a'], list) else preprocess(
-                              session['a']))
-                         for session in paragraph]
-            sub = []
+            paragraph = [ (session.get("role", ""), preprocess(session[ 'q' ]),
+                           preprocess('\n'.join(session[ 'a' ])) if isinstance(session[ 'a' ], list) else preprocess(
+                               session[ 'a' ]))
+                          for session in paragraph ]
+            sub = [ ]
             # 自行做模板
-            for (q, a) in paragraph:
-                assert len(a), ValueError('answer cannot empty')
-                sub.append((q, a))
-            D.append((prefix, copy.deepcopy(sub)))
+            for (role, q, a) in paragraph:
+                # 不是system prompt  answer 必须存在
+                if role != "system":
+                    assert len(a), ValueError('answer cannot empty')
+                sub.append((role, q, a))
+            D.append(copy.deepcopy(sub))
             sub.clear()
         return D
 
     def _get_messages(self, lines):
-        D = []
+        D = [ ]
         for line_id, line in enumerate(lines):
             jd = json.loads(line)
             if not jd:
                 continue
-            conversations = jd['conversations']
+            conversations = jd[ 'conversations' ]
             if line_id < 10:
                 print(conversations)
 
-            paragraph = []
-            prefix = ''
-            pair = [None, None]
-            for m in conversations:
-                if m["from"] == 'user':
-                    pair[0] = preprocess(m["value"])
-                elif m["from"] == 'assistant':
-                    pair[1] = preprocess(m["value"])
-                elif m["from"] == 'system':
-                    prefix = preprocess(m["value"])
-                if pair[0] is not None and pair[1] is not None:
-                    paragraph.append(tuple(pair))
-                    pair[0], pair[1] = None, None
-
-            sub = []
-            # 自行做模板
-            for (q, a) in paragraph:
+            cid = 0
+            sub = [ ]
+            while cid < len(conversations):
+                m = conversations[ cid ]
+                cid += 1
+                role = m[ "from" ]
+                q = preprocess(m[ "value" ])
+                if role == "system":
+                    a = ""
+                    sub.append((role, q, a))
+                    continue
+                assert role in [ 'user', 'observation', 'function' ]
+                m = conversations[ cid ]
+                cid += 1
+                assert m[ "from" ] == "assistant"
+                a = preprocess(m[ "value" ])
                 assert len(a), ValueError('answer cannot empty')
-                sub.append((q, a))
-            D.append((prefix, copy.deepcopy(sub)))
-            sub.clear()
+                sub.append((role, q, a))
+            D.append(sub)
         return D
+        # 读取文件
 
-    # 读取文件
     def on_get_corpus(self, files: typing.List, mode: str):
-        D = []
-        files = sum([glob.glob(file) for file in files], [])
+        D = [ ]
+        files = sum([ glob.glob(file) for file in files ], [ ])
         for file in files:
             with open(file, mode='r', encoding='utf-8', newline='\n') as f:
                 lines = f.readlines()
             is_new = False
             if len(lines) > 0:
-                is_new = 'conversations' in json.loads(lines[0])
+                is_new = 'conversations' in json.loads(lines[ 0 ])
             if is_new:
                 D.extend(self._get_messages(lines))
             else:

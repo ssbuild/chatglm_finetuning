@@ -11,7 +11,7 @@ export enable_ptv2=true
 export enable_lora=false
 export load_in_bit=0
 
-# export CUDA_VISIBLE_DEVICES=1,2,3,4
+# export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 usage() { echo "Usage: $0 [-m <train|dataset>]" 1>&2; exit 1; }
 

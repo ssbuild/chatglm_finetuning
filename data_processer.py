@@ -101,9 +101,14 @@ class TokenIdsMaker:
     def tunction(cls, tokenizer: ChatGLMTokenizer,config, examples, max_seq_length, sptoken: typing.List):
 
         ds = []
-        prefix, examples = examples
-        for sid, (q, a) in enumerate(examples):
-            a_ids = tokenizer.encode(text=build_template(q,prefix=prefix, history=examples[:sid]), add_special_tokens=False)
+        prefix = None
+        history = [ ]
+        for sid, (q_role, q, a) in enumerate(examples):
+            if q_role == "system":
+                prefix = q
+                continue
+            history += [ (q, a) ]
+            a_ids = tokenizer.encode(text=build_template(q,prefix=prefix, history=history[:-1]), add_special_tokens=False)
             b_ids = tokenizer.encode(text=a, add_special_tokens=False)
             while len(a_ids) + len(b_ids) > max_seq_length - len(sptoken) - 1:
                 if len(b_ids) > len(a_ids):
@@ -129,9 +134,14 @@ class TokenIdsMaker:
         assert sliding_size <= max_seq_length - len(sptoken)
 
         ds = []
-        prefix, examples = examples
-        for sid, (q, a) in enumerate(examples):
-            a_ids = tokenizer.encode(text=build_template(q, prefix=prefix,history=examples[:sid]), add_special_tokens=False)
+        prefix = None
+        history = [ ]
+        for sid, (q_role, q, a) in enumerate(examples):
+            if q_role == "system":
+                prefix = q
+                continue
+            history += [ (q, a) ]
+            a_ids = tokenizer.encode(text=build_template(q, prefix=prefix,history=history[:-1]), add_special_tokens=False)
             b_ids = tokenizer.encode(text=a, add_special_tokens=False) + [config.eos_token_id]
 
             if src_max_length and src_max_length > 0:
