@@ -7,12 +7,10 @@ import torch
 import yaml
 from transformers import BitsAndBytesConfig
 from transformers.utils import strtobool
-
 from deep_training.zoo.constants.define import (TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING,
                                        TRANSFORMERS_MODELS_TO_ADALORA_TARGET_MODULES_MAPPING,
                                        TRANSFORMERS_MODELS_TO_IA3_TARGET_MODULES_MAPPING,
                                        TRANSFORMERS_MODELS_TO_IA3_FEEDFORWARD_MODULES_MAPPING)
-
 
 
 # 按需修改
@@ -20,6 +18,7 @@ from deep_training.zoo.constants.define import (TRANSFORMERS_MODELS_TO_LORA_TARG
 # TRANSFORMERS_MODELS_TO_ADALORA_TARGET_MODULES_MAPPING
 # TRANSFORMERS_MODELS_TO_IA3_TARGET_MODULES_MAPPING
 # TRANSFORMERS_MODELS_TO_IA3_FEEDFORWARD_MODULES_MAPPING
+
 
 
 from deep_training.utils.wrapper import load_yaml
@@ -35,8 +34,23 @@ global_args = config_args.pop("global_args")
 global_models_mapper = config_args.pop("global_models_mapper")
 colossalai_strategy = config_args.pop("colossalai_strategy", {})
 train_model_config = global_models_mapper[global_args["model_name"]]
+assert global_args["trainer_backend"] in ["pl","hf","cl","ac"]
 
+# ensure str
+global_args["precision"] = str(global_args["precision"])
 
+if global_args["quantization_config"]:
+    #精度
+    if global_args["precision"] == "auto":
+        global_args["quantization_config"]["bnb_4bit_compute_dtype"] ="bfloat16" if torch.cuda.is_bf16_supported() else "float16"
+
+    global_args["quantization_config"] = BitsAndBytesConfig(**global_args["quantization_config"])
+
+if not global_args["enable_ptv2"]:
+    global_args["pre_seq_len"] = None
+
+global_args["config_merge"].update({"pre_seq_len": global_args["pre_seq_len"],
+                                    "prefix_projection": global_args["prefix_projection"]})
 
 
 def merge_from_env(global_args):
@@ -56,28 +70,7 @@ def merge_from_env(global_args):
 
 merge_from_env(global_args)
 
-
-if not global_args["enable_ptv2"]:
-    global_args["pre_seq_len"] = None
-
-global_args["config_merge"].update({"pre_seq_len": global_args["pre_seq_len"],
-                                    "prefix_projection": global_args["prefix_projection"]})
-
-
 def patch_args(config_args):
-    assert global_args["trainer_backend"] in ["pl", "hf", "cl", "ac"]
-
-    # ensure str
-    global_args["precision"] = str(global_args["precision"])
-
-    if global_args["quantization_config"]:
-        # 精度
-        if global_args["precision"] == "auto":
-            global_args["quantization_config"][
-                "bnb_4bit_compute_dtype"] = "bfloat16" if torch.cuda.is_bf16_supported() else "float16"
-
-        global_args["quantization_config"] = BitsAndBytesConfig(**global_args["quantization_config"])
-
     assert global_args["enable_lora"] + global_args["enable_ptv2"] <= 1 , ValueError("lora ptv2 cannot open at same time")
 
     #更新模型配置

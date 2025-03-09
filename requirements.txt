@@ -1,7 +1,8 @@
+SwissArmyTransformer>=0.4.4
 transformers>=4.30
 deepspeed
 bitsandbytes>=0.39
 accelerate>=0.20
 tiktoken
-# aigc-zoo>=0.1.11,<=0.1.12
+# aigc-zoo>=0.1.11,<0.1.12
 git+https://github.com/ssbuild/deep_training#egg=deep_training

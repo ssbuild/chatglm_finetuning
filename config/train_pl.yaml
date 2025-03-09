@@ -38,7 +38,7 @@ max_steps: -1
 # 'scheduler_type': 'CAL',
 # 'scheduler': {'rewarm_epoch_num': 2,'verbose': True},
 
-optimizer: lion
+optimizer: adamw_torch
 scheduler_type: CAWR
 scheduler:
   T_mult: 1
@@ -66,5 +66,3 @@ use_fast_tokenizer: false
 dataloader_drop_last: true
 dataloader_pin_memory: true
 dataloader_num_workers: 0
-
-

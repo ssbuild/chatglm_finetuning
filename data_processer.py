@@ -3,15 +3,19 @@
 import copy
 import json
 import random
+import re
 import typing
 from enum import Enum
 import numpy as np
-from deep_training.zoo.model_zoo.glm4.llm_model import ChatGLM4Tokenizer
+import requests
+
+from deep_training.zoo.model_zoo.glm4v.llm_model import ChatGLM4Tokenizer
 
 
 class DataStrategy(Enum):
     truncation = 1
-    siding = 2
+
+
 
 
 class TokenIdsMaker:
@@ -21,11 +25,13 @@ class TokenIdsMaker:
         self.pad_token_id = tokenizer.pad_token_id
         self.eos_token_id = tokenizer.eos_token_id
 
+
     def build_single_message(self, role, metadata, message, tokenize=True):
         assert role in ["system", "user", "assistant", "observation"], role
         if tokenize:
-            role_tokens = [self.tokenizer.convert_tokens_to_ids(f"<|{role}|>")] + self.tokenizer.tokenizer.encode(f"{metadata}\n",
-                                                                                              disallowed_special=())
+            role_tokens = [self.tokenizer.convert_tokens_to_ids(f"<|{role}|>")] + self.tokenizer.tokenizer.encode(
+                f"{metadata}\n",
+                disallowed_special=())
             message_tokens = self.tokenizer.tokenizer.encode(message, disallowed_special=())
             tokens = role_tokens + message_tokens
             return tokens
@@ -33,7 +39,7 @@ class TokenIdsMaker:
             return str(f"<|{role}|>{metadata}\n{message}")
 
     @classmethod
-    def final(cls, input_ids: typing.List, labels, max_seq_length, tokenizer):
+    def final(cls, input_ids: typing.List, labels, max_seq_length, tokenizer, input_image: typing.Optional[str]):
         input_ids = np.asarray(input_ids, dtype=np.int32)
         labels = np.asarray(labels, dtype=np.int32)
         seqlen = np.asarray(len(input_ids), dtype=np.int32)
@@ -44,11 +50,15 @@ class TokenIdsMaker:
             input_ids = np.pad(input_ids, (0, pad_len), 'constant', constant_values=(pad_val, pad_val))
             labels = np.pad(labels, (0, pad_len), 'constant', constant_values=(-100, -100))
 
+        if input_image is None:
+            input_image = ''
         d = {
             'input_ids': input_ids,
             'labels': labels,
             'seqlen': seqlen,
+            'img': np.asarray(bytes(input_image,encoding='utf-8'))
         }
+
         return d
 
     def build_chat_input(self, query, history=None, role="user"):
@@ -71,11 +81,9 @@ class TokenIdsMaker:
             history.append({"role": "assistant", "content": content})
         return content, history
 
-    
     def get_prefix_tokens(self, tokenizer):
         prefix_tokens = [tokenizer.convert_tokens_to_ids("[gMASK]"), tokenizer.convert_tokens_to_ids("<sop>")]
         return prefix_tokens
-    
 
     def get_tools_content(self, prompt, tools):
         content = prompt or "你是一个名为 GLM-4 的人工智能助手。你是基于智谱AI训练的语言模型 GLM-4 模型开发的，你的任务是针对用户的问题和要求提供适当的答复和支持。"
@@ -94,14 +102,14 @@ class TokenIdsMaker:
                 raise NotImplementedError(f"Unknown tool type {tool['type']}")
         return content
 
-
     def trunction(self, tokenizer: ChatGLM4Tokenizer, config, examples, max_seq_length, sup=True):
         bos_ids = self.get_prefix_tokens(tokenizer)
         assert isinstance(bos_ids, list) and len(bos_ids) == 2
         ds = []
         history = []
+        input_image = None
         if examples[0][0] == "system":
-            role,q,tools = examples.pop(0)
+            role, q, tools, input_image = examples.pop(0)
             sys_prompt = {
                 "role": "system",
                 "content": q,
@@ -118,7 +126,9 @@ class TokenIdsMaker:
 
         history += [sys_prompt]
 
-        for sid, (q_role, q, a) in enumerate(examples):
+        for sid, (q_role, q, a, img) in enumerate(examples):
+            if img is not None:
+                input_image = img
             if q_role != "observation":
                 q_role = "user"
             history += [{
@@ -142,47 +152,7 @@ class TokenIdsMaker:
             input_ids = bos_ids + input_ids
             labels = bos_ids + labels
             assert len(input_ids) <= max_seq_length
-            ds.append(self.final(input_ids, labels, max_seq_length, tokenizer))
+            ds.append(self.final(input_ids, labels, max_seq_length, tokenizer, input_image))
 
         return ds
 
-    # def slidding(cls, tokenizer: ChatGLM4Tokenizer,config, messages,
-    #              max_seq_length,
-    #              sliding_size = None,
-    #              src_max_length=-1,
-    #              dst_max_length=-1,
-    #              sup=True):
-    #
-    #
-    #     if sliding_size is None or sliding_size < 0:
-    #         sliding_size = max_seq_length - 1
-    #
-    #     assert sliding_size <= max_seq_length - 1
-    #
-    #     ds = []
-    #
-    #     for sid, (q, a) in enumerate(messages):
-    #         a_ids = tokenizer.encode(text=build_template(q,prefix=prefix, history=examples[:sid]), add_special_tokens=False)
-    #         b_ids = tokenizer.encode(text=a, add_special_tokens=False)
-    #         if src_max_length and src_max_length > 0:
-    #             a_ids = a_ids[:src_max_length]
-    #         if dst_max_length and dst_max_length > 0:
-    #             b_ids = b_ids[:dst_max_length]
-    #
-    #         b_ids += [config.eos_token_id]
-    #         input_ids_qa = a_ids + b_ids
-    #         labels_all = copy.deepcopy(input_ids_qa) if not sup else [-100] * len(a_ids) + b_ids
-    #
-    #         pos = 0
-    #         while pos < len(input_ids_qa):
-    #             input_ids = input_ids_qa[pos:pos + max_seq_length - len(sptoken)]
-    #             labels = labels_all[pos:pos + max_seq_length - len(sptoken)]
-    #
-    #             pos += sliding_size
-    #             if np.all(np.asarray(labels) == -100):
-    #                 continue
-    #
-    #             input_ids = sptoken + input_ids
-    #             labels = sptoken + labels if not sup else [-100] * len(sptoken) + labels
-    #             ds.append(cls.final(input_ids,labels,max_seq_length,tokenizer))
-    #     return ds
